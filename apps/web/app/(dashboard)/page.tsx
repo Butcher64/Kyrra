@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import { ProtectedStatusBadge } from '@/components/dashboard/ProtectedStatusBadge'
 import { HeroStat } from '@/components/dashboard/HeroStat.client'
