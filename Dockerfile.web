@@ -2,6 +2,15 @@ FROM node:20-alpine AS build
 RUN corepack enable && corepack prepare pnpm@10 --activate
 WORKDIR /app
 
+# Build-time args for Next.js NEXT_PUBLIC_* variables (inlined at build)
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_APP_URL
+
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+
 COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm turbo build --filter=@kyrra/web...
@@ -15,6 +24,7 @@ COPY --from=build /app/apps/web/public ./apps/web/public
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 EXPOSE 3000
 
 CMD ["node", "apps/web/server.js"]
