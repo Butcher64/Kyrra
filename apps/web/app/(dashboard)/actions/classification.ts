@@ -1,0 +1,43 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { reclassifyParamsSchema } from '@kyrra/shared'
+import { ERROR_CODES } from '@kyrra/shared'
+import type { ActionResult } from '@kyrra/shared'
+
+export async function reclassifyEmail(params: unknown): Promise<ActionResult> {
+  const parsed = reclassifyParamsSchema.safeParse(params)
+  if (!parsed.success) {
+    return { data: null, error: { code: ERROR_CODES.VALIDATION, message: parsed.error.message } }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { data: null, error: { code: ERROR_CODES.UNAUTHORIZED, message: 'Not authenticated' } }
+  }
+
+  // Insert reclassification as new classification (append-only — ADR-003)
+  const { error } = await supabase.from('email_classifications').insert({
+    user_id: user.id,
+    gmail_message_id: parsed.data.gmail_message_id,
+    classification_result: 'A_VOIR', // Reclassified = user says it's not prospecting
+    confidence_score: 1.0, // User decision = 100% confidence
+    summary: 'Reclassifié par l\'utilisateur',
+    source: 'fingerprint', // Manual reclassification logged as fingerprint source
+    idempotency_key: parsed.data.idempotency_key,
+  })
+
+  if (error) {
+    if (error.code === '23505') { // Unique violation — already reclassified
+      return { data: null, error: null } // Idempotent — treat as success
+    }
+    return { data: null, error: { code: ERROR_CODES.INTERNAL, message: error.message } }
+  }
+
+  // Auto-whitelist sender (FR28) — hash will be computed by worker
+  // TODO: Extract sender from gmail_message_id and add to whitelist_entries
+
+  return { data: null, error: null }
+}
