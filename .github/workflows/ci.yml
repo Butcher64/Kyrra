@@ -1,0 +1,142 @@
+name: Kyrra CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  # ── Job 1: Test, Lint, Type Check, PII Scan ──
+  test-lint:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint all packages
+        run: pnpm run lint
+
+      - name: Type check all packages
+        run: pnpm run check-types
+
+      - name: Scan for PII in log statements
+        run: |
+          # Block any log/console call with email-like fields
+          # Architecture requirement: zero email content in any log
+          if grep -rn --include="*.ts" --include="*.tsx" \
+            -E "(console\.|logger\.|ClassificationLogger\.)[^;]*(subject|body|snippet|from_address|to_address|content)" \
+            apps/ packages/ 2>/dev/null; then
+            echo "❌ PII detected in log statements"
+            exit 1
+          else
+            echo "✅ No PII in log statements"
+          fi
+
+  # ── Job 2: Migrate Database ──
+  migrate-db:
+    name: Migrate Database
+    needs: [test-lint]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Push migrations
+        run: supabase db push --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Generate TypeScript types
+        run: |
+          supabase gen types typescript \
+            --project-id ${{ secrets.SUPABASE_PROJECT_REF }} \
+            > packages/shared/src/types/database.ts
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Verify ENUM sync (types match committed version)
+        run: |
+          if ! git diff --exit-code packages/shared/src/types/database.ts; then
+            echo "❌ database.ts out of sync with migrations"
+            echo "Run: supabase gen types typescript > packages/shared/src/types/database.ts"
+            exit 1
+          fi
+
+  # ── Job 3: Build Worker (deploys FIRST — expand-contract) ──
+  build-worker:
+    name: Build Worker
+    needs: [migrate-db]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build worker
+        run: pnpm turbo build --filter=@kyrra/worker...
+
+      # Railway deployment via Railway GitHub integration (auto on main)
+
+  # ── Job 4: Build Web (waits for worker — expand-contract enforced) ──
+  build-web:
+    name: Build Web
+    needs: [build-worker]  # P4: web waits for worker (expand-contract)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build web
+        run: pnpm turbo build --filter=@kyrra/web...
+
+      - name: Guard SERVICE_ROLE_KEY in apps/web
+        run: |
+          if grep -r "SERVICE_ROLE_KEY" apps/web/ --include="*.ts" --include="*.tsx" --include="*.js" 2>/dev/null; then
+            echo "❌ SERVICE_ROLE_KEY found in apps/web — architecture violation"
+            exit 1
+          else
+            echo "✅ No SERVICE_ROLE_KEY in apps/web"
+          fi
+
+      # Vercel deployment via Vercel GitHub integration (auto on main)
