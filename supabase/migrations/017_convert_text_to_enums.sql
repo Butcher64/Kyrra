@@ -1,4 +1,4 @@
--- 015_convert_text_to_enums.sql
+-- 017_convert_text_to_enums.sql
 -- Convert TEXT + CHECK columns to PostgreSQL native ENUMs (Enforcement Rule F7)
 -- This ensures supabase gen types produces TypeScript union types, not string
 

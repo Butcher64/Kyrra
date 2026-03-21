@@ -5,6 +5,12 @@ import { reclassifyParamsSchema } from '@kyrra/shared'
 import { ERROR_CODES } from '@kyrra/shared'
 import type { ActionResult } from '@kyrra/shared'
 
+/**
+ * Reclassify an email — user says "this is not prospecting"
+ * 1. Insert new classification (append-only — ADR-003)
+ * 2. Queue reclassification_request for worker (Gmail label update <10s)
+ * 3. Auto-whitelist handled separately by caller (addToWhitelist)
+ */
 export async function reclassifyEmail(params: unknown): Promise<ActionResult> {
   const parsed = reclassifyParamsSchema.safeParse(params)
   if (!parsed.success) {
@@ -36,8 +42,12 @@ export async function reclassifyEmail(params: unknown): Promise<ActionResult> {
     return { data: null, error: { code: ERROR_CODES.INTERNAL, message: error.message } }
   }
 
-  // Auto-whitelist sender (FR28) — hash will be computed by worker
-  // TODO: Extract sender from gmail_message_id and add to whitelist_entries
+  // Queue reclassification for worker (Gmail label update <10s — FR43)
+  await supabase.from('reclassification_requests').insert({
+    user_id: user.id,
+    email_id: parsed.data.gmail_message_id,
+    source: 'dashboard',
+  })
 
   return { data: null, error: null }
 }

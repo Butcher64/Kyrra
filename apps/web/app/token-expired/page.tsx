@@ -1,29 +1,24 @@
+import { Button } from '@/components/ui/button'
+
+/**
+ * Token expired page — MI-10 fallback
+ * Neutral message + "Ouvrir le dashboard" CTA
+ * Shown when recap token is expired (>7 days) or already used
+ */
 export default function TokenExpiredPage() {
   return (
-    <main style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      gap: '1rem',
-    }}>
-      <p style={{ fontSize: '1rem', color: '#6b7280' }}>
-        Ce lien a expiré (7 jours) ou a déjà été utilisé.
-      </p>
-      <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>
-        Reclassifiez depuis le tableau de bord.
-      </p>
-      <a href="/" style={{
-        marginTop: '1rem',
-        padding: '0.75rem 2rem',
-        background: '#2563eb',
-        color: 'white',
-        borderRadius: '8px',
-        textDecoration: 'none',
-      }}>
-        Ouvrir le tableau de bord →
-      </a>
+    <main className="flex justify-center items-center min-h-screen px-6">
+      <div className="w-full max-w-[320px] text-center flex flex-col items-center gap-4">
+        <p className="text-[15px] text-(--muted-foreground)">
+          Ce lien a expiré ou a déjà été utilisé.
+        </p>
+        <p className="text-[12px] text-(--muted-foreground)">
+          Reclassifiez directement depuis le tableau de bord.
+        </p>
+        <Button asChild className="mt-2">
+          <a href="/">Ouvrir le tableau de bord &rarr;</a>
+        </Button>
+      </div>
     </main>
   )
 }

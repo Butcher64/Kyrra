@@ -1,6 +1,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { Button } from '@/components/ui/button'
 
 export default async function ConnectGmailPage() {
   const supabase = await createClient()
@@ -10,78 +11,49 @@ export default async function ConnectGmailPage() {
     redirect('/login')
   }
 
-  // TODO: Check if user already has an active Gmail integration
-  // If so, redirect to dashboard
-
   return (
-    <main style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      padding: '2rem',
-      maxWidth: '480px',
-      margin: '0 auto',
-    }}>
-      <div style={{
-        width: '48px',
-        height: '48px',
-        borderRadius: '50%',
-        background: '#f0fdf4',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.5rem',
-        marginBottom: '2rem',
-      }}>
-        🔒
+    <main className="flex flex-col items-center justify-center min-h-screen px-8 max-w-[480px] mx-auto">
+      {/* Icon */}
+      <div className="size-12 rounded-full bg-[oklch(0.627_0.194_149.214/0.12)] flex items-center justify-center text-2xl mb-8">
+        <span aria-hidden="true">&#x1F512;</span>
       </div>
 
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 500, marginBottom: '0.5rem' }}>
+      <h1 className="text-2xl font-medium mb-2 text-(--foreground)">
         Avant de connecter votre Gmail
       </h1>
 
-      <div style={{ marginTop: '2rem', width: '100%' }}>
-        <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#16a34a', marginBottom: '0.75rem' }}>
-          Ce que Kyrra fait ✓
+      {/* What Kyrra does */}
+      <div className="mt-8 w-full">
+        <h2 className="text-sm font-semibold text-[var(--color-protected)] mb-3">
+          Ce que Kyrra fait &#x2713;
         </h2>
-        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <li style={{ fontSize: '0.875rem', color: '#374151' }}>✓ Ajouter des labels à vos emails</li>
-          <li style={{ fontSize: '0.875rem', color: '#374151' }}>✓ Lire les en-têtes pour classifier</li>
+        <ul className="flex flex-col gap-2 list-none p-0">
+          <li className="text-sm text-(--card-foreground)">&#x2713; Ajouter des labels à vos emails</li>
+          <li className="text-sm text-(--card-foreground)">&#x2713; Lire les en-têtes pour classifier</li>
         </ul>
       </div>
 
-      <div style={{ marginTop: '1.5rem', width: '100%' }}>
-        <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#dc2626', marginBottom: '0.75rem' }}>
-          Ce que Kyrra ne fait JAMAIS ✗
+      {/* What Kyrra NEVER does — amber, not red (Nordic Calm: zero red in UI) */}
+      <div className="mt-6 w-full">
+        <h2 className="text-sm font-semibold text-[var(--color-attention)] mb-3">
+          Ce que Kyrra ne fait JAMAIS &#x2717;
         </h2>
-        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <li style={{ fontSize: '0.875rem', color: '#374151' }}>✗ Lire le contenu complet de vos emails</li>
-          <li style={{ fontSize: '0.875rem', color: '#374151' }}>✗ Supprimer un email</li>
-          <li style={{ fontSize: '0.875rem', color: '#374151' }}>✗ Envoyer depuis votre compte</li>
+        <ul className="flex flex-col gap-2 list-none p-0">
+          <li className="text-sm text-(--card-foreground)">&#x2717; Lire le contenu complet de vos emails</li>
+          <li className="text-sm text-(--card-foreground)">&#x2717; Supprimer un email</li>
+          <li className="text-sm text-(--card-foreground)">&#x2717; Envoyer depuis votre compte</li>
         </ul>
       </div>
 
-      <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '1.5rem', textAlign: 'center' }}>
-        🔄 Un clic pour tout annuler. Votre boîte revient exactement comme avant.
+      <p className="text-xs text-(--muted-foreground) mt-6 text-center">
+        Un clic pour tout annuler. Votre boîte revient exactement comme avant.
       </p>
 
-      <a
-        href="/auth/callback/google"
-        style={{
-          marginTop: '2rem',
-          padding: '0.75rem 2rem',
-          background: '#2563eb',
-          color: 'white',
-          borderRadius: '8px',
-          fontSize: '1rem',
-          textDecoration: 'none',
-          display: 'inline-block',
-        }}
-      >
-        Connecter Gmail →
-      </a>
+      <Button asChild size="lg" className="mt-8 bg-[var(--color-a-voir)] text-white hover:opacity-80">
+        <a href="/auth/callback/google">
+          Connecter Gmail &rarr;
+        </a>
+      </Button>
     </main>
   )
 }

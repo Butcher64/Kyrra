@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/browser'
+import { Button } from '@/components/ui/button'
 
 type ScanStatus = {
   status: 'pending' | 'scanning' | 'completed' | 'failed'
@@ -30,7 +31,7 @@ export default function OnboardingProgressPage() {
       }
     }, 3000)
 
-    // Show "close safely" message after 15 seconds
+    // Show "close safely" message after 15 seconds (MI-3)
     const closeTimer = setTimeout(() => setShowCloseMessage(true), 15000)
 
     return () => {
@@ -45,77 +46,52 @@ export default function OnboardingProgressPage() {
     : 0
 
   return (
-    <main style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      padding: '2rem',
-      maxWidth: '480px',
-      margin: '0 auto',
-      gap: '1.5rem',
-    }}>
+    <main className="flex flex-col items-center justify-center min-h-screen px-8 max-w-[480px] mx-auto gap-6">
       {!isComplete ? (
         <>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 500 }}>
+          <h1 className="text-xl font-medium text-(--foreground)">
             Analyse en cours...
           </h1>
 
-          {/* Progress bar */}
-          <div style={{
-            width: '100%',
-            height: '4px',
-            background: '#f3f4f6',
-            borderRadius: '2px',
-            overflow: 'hidden',
-          }}>
-            <div style={{
-              height: '100%',
-              width: `${Math.max(progress, 5)}%`,
-              background: '#2563eb',
-              borderRadius: '2px',
-              transition: 'width 0.5s ease',
-            }} />
+          {/* Progress bar — MI-3 */}
+          <div className="w-full h-1 bg-(--muted) rounded-sm overflow-hidden">
+            <div
+              className="h-full bg-[var(--color-a-voir)] rounded-sm transition-[width] duration-500 ease-out"
+              style={{ width: `${Math.max(progress, 5)}%` }}
+            />
           </div>
 
-          {/* Real-time counters */}
-          <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>
+          {/* Real-time counters — slot machine style (MI-3) */}
+          <div className="flex gap-8 mt-4">
+            <div className="text-center">
+              <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">
                 {scan?.emails_processed ?? 0}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+              <div className="text-xs text-(--muted-foreground)">
                 emails analysés
               </div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>
+            <div className="text-center">
+              <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">
                 {scan?.contacts_found ?? 0}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+              <div className="text-xs text-(--muted-foreground)">
                 contacts identifiés
               </div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>
+            <div className="text-center">
+              <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">
                 {scan?.prospecting_found ?? 0}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+              <div className="text-xs text-(--muted-foreground)">
                 prospections détectées
               </div>
             </div>
           </div>
 
-          {/* Close safely message (appears at T+15s) */}
+          {/* Close safely message (appears at T+15s — MI-3) */}
           {showCloseMessage && (
-            <p style={{
-              fontSize: '0.75rem',
-              color: '#9ca3af',
-              textAlign: 'center',
-              marginTop: '1rem',
-              opacity: 0.8,
-            }}>
+            <p className="text-xs text-(--muted-foreground) text-center mt-4 opacity-80">
               Fermez sans souci. Le scan continue en arrière-plan.
               <br />
               Vous recevrez un email quand c&apos;est prêt.
@@ -124,30 +100,21 @@ export default function OnboardingProgressPage() {
         </>
       ) : (
         <>
-          {/* Scan complete — "wow moment" */}
-          <div style={{ fontSize: '2rem' }}>✓</div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 500 }}>
+          {/* Scan complete — "wow moment" (MI-3) */}
+          <span className="text-3xl text-[var(--color-protected)]">&#x2713;</span>
+          <h1 className="text-xl font-medium text-(--foreground)">
             Scan terminé
           </h1>
-          <p style={{ fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>
+          <p className="text-sm text-(--muted-foreground) text-center">
             {scan.total_sent} emails analysés. {scan.prospecting_found} étaient du bruit.
             <br />
             {scan.contacts_found} contacts whitelistés automatiquement.
           </p>
-          <a
-            href="/"
-            style={{
-              marginTop: '1rem',
-              padding: '0.75rem 2rem',
-              background: '#2563eb',
-              color: 'white',
-              borderRadius: '8px',
-              fontSize: '1rem',
-              textDecoration: 'none',
-            }}
-          >
-            Voir votre tableau de bord →
-          </a>
+          <Button asChild size="lg" className="mt-4 bg-[var(--color-a-voir)] text-white hover:opacity-80">
+            <a href="/">
+              Voir votre tableau de bord &rarr;
+            </a>
+          </Button>
         </>
       )}
     </main>

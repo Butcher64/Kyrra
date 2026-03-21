@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ProtectedStatusBadge } from '@/components/dashboard/ProtectedStatusBadge'
 import { HeroStat } from '@/components/dashboard/HeroStat.client'
 import { StatCard } from '@/components/dashboard/StatCard'
-import { ClassificationCard } from '@/components/dashboard/ClassificationCard'
+import { AlertEmailCard } from '@/components/dashboard/AlertEmailCard.client'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -57,11 +57,11 @@ export default async function DashboardPage() {
           <StatCard value="94%" label="Trust" />
         </div>
 
-        {/* Alert email cards */}
+        {/* Alert email cards — with reclassification (MI-1) */}
         {alerts && alerts.length > 0 && (
           <div className="mt-8">
             {alerts.map((alert) => (
-              <ClassificationCard
+              <AlertEmailCard
                 key={alert.gmail_message_id}
                 summary={alert.summary ?? 'Email nécessitant votre attention'}
                 gmailMessageId={alert.gmail_message_id}

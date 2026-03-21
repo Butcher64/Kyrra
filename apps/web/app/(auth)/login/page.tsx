@@ -1,6 +1,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { Button } from '@/components/ui/button'
 
 export default async function LoginPage() {
   const supabase = await createClient()
@@ -11,24 +12,17 @@ export default async function LoginPage() {
   }
 
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '2rem' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 300 }}>Kyrra</h1>
-      <p style={{ color: '#6b7280' }}>Faites taire le bruit. Gardez l&apos;essentiel.</p>
+    <main className="flex flex-col items-center justify-center min-h-screen gap-8">
+      <h1 className="font-(family-name:--font-outfit) text-[2rem] font-light tracking-[-0.02em] text-(--foreground)">
+        Kyrra
+      </h1>
+      <p className="text-(--muted-foreground) text-sm">
+        Faites taire le bruit. Gardez l&apos;essentiel.
+      </p>
       <form action="/auth/callback" method="GET">
-        <button
-          type="submit"
-          style={{
-            padding: '0.75rem 2rem',
-            background: '#2563eb',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-          }}
-        >
+        <Button type="submit" size="lg" className="bg-[var(--color-a-voir)] text-white hover:opacity-80">
           Se connecter avec Google
-        </button>
+        </Button>
       </form>
     </main>
   )

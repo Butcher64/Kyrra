@@ -1,10 +1,12 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { Card, CardContent } from '@/components/ui/card'
 
 /**
  * Admin Dashboard — Founders only (ADMIN_USER_IDS middleware check)
  * Displays: system-wide stats, LLM costs, reclassification rates, circuit breaker status
+ * UX spec: COMPACT spacing (12px tables, 8px cells) — functional, not premium
  *
  * Source: [architecture.md — FR76-FR80, admin access model]
  */
@@ -40,41 +42,44 @@ export default async function AdminPage() {
     .single()
 
   return (
-    <main style={{
-      padding: '32px',
-      maxWidth: '1200px',
-      margin: '0 auto',
-      fontFamily: 'system-ui, sans-serif',
-    }}>
-      <h1 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '2rem' }}>
+    <main className="p-8 max-w-[1200px] mx-auto">
+      <h1 className="text-xl font-semibold mb-8 text-(--foreground)">
         Kyrra Admin
       </h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '2rem' }}>
-        <div style={{ padding: '16px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 600 }}>{totalUsers ?? 0}</div>
-          <div style={{ fontSize: '12px', color: '#6b7280' }}>Active Users</div>
-        </div>
-        <div style={{ padding: '16px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 600 }}>{totalClassifications ?? 0}</div>
-          <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Classifications</div>
-        </div>
-        <div style={{ padding: '16px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 600 }}>
-            {latestMetrics?.bypass_rate ? `${Math.round(latestMetrics.bypass_rate * 100)}%` : 'N/A'}
-          </div>
-          <div style={{ fontSize: '12px', color: '#6b7280' }}>LLM Bypass Rate</div>
-        </div>
-        <div style={{ padding: '16px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 600 }}>
-            {latestMetrics?.total_cost_eur ? `€${latestMetrics.total_cost_eur}` : '€0'}
-          </div>
-          <div style={{ fontSize: '12px', color: '#6b7280' }}>LLM Cost (hour)</div>
-        </div>
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        <Card>
+          <CardContent>
+            <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">{totalUsers ?? 0}</div>
+            <div className="text-xs text-(--muted-foreground)">Active Users</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">{totalClassifications ?? 0}</div>
+            <div className="text-xs text-(--muted-foreground)">Total Classifications</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">
+              {latestMetrics?.bypass_rate ? `${Math.round(latestMetrics.bypass_rate * 100)}%` : 'N/A'}
+            </div>
+            <div className="text-xs text-(--muted-foreground)">LLM Bypass Rate</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">
+              {latestMetrics?.total_cost_eur ? `\u20AC${latestMetrics.total_cost_eur}` : '\u20AC0'}
+            </div>
+            <div className="text-xs text-(--muted-foreground)">LLM Cost (hour)</div>
+          </CardContent>
+        </Card>
       </div>
 
-      <a href="/" style={{ fontSize: '12px', color: '#3b82f6', textDecoration: 'none' }}>
-        ← Retour au tableau de bord
+      <a href="/" className="text-xs text-[var(--color-a-voir)] no-underline transition-opacity duration-150 hover:opacity-70">
+        &larr; Retour au tableau de bord
       </a>
     </main>
   )

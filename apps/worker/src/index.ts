@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { classificationLoop } from './classification'
 import { reconciliationLoop, watchRenewalLoop } from './reconciliation'
 import { onboardingScanLoop } from './onboarding'
+import { reclassificationLoop } from './reclassification'
 import { recapCronLoop } from './recap'
 
 let isShuttingDown = false
@@ -38,9 +39,10 @@ async function main() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 
-  // 5 resilient loops — crash in one does NOT kill others
+  // 6 resilient loops — crash in one does NOT kill others
   await Promise.all([
     resilientLoop('classification', () => classificationLoop(supabase)),
+    resilientLoop('reclassification', () => reclassificationLoop(supabase)),
     resilientLoop('watchRenewal', () => watchRenewalLoop(supabase)),
     resilientLoop('reconciliation', () => reconciliationLoop(supabase)),
     resilientLoop('onboarding', () => onboardingScanLoop(supabase)),
