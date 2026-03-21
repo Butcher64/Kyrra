@@ -1,8 +1,8 @@
 # CLAUDE.md - Kyrra Project Memory
 
 > **Auto-update** : Mettre a jour ce fichier apres chaque decision majeure.
-> **Derniere MAJ** : 2026-03-20
-> **Phase actuelle** : Implementation (Phase 4 — 44/44 stories done, all 8 epics complete)
+> **Derniere MAJ** : 2026-03-21
+> **Phase actuelle** : Beta Prep (scaffold done, 7 new Beta epics with 18 stories for production-ready MVP-0)
 
 ---
 
@@ -95,6 +95,27 @@ Fichiers cles :
 | 2026-03-12 | Dual-engine classification (fingerprint + LLM) | Optimisation couts + latence |
 | 2026-03-12 | 3 labels gradues + 3 modes exposition | Simplifie vs 4 categories initiales |
 | 2026-03-12 | Gmail = source de verite, Supabase = replica | Reconciliation adaptive polling |
+| 2026-03-21 | Grand Brainstorming Beta Readiness (6 agents) | Completion reelle ~40%, 3 blockers critiques, 7 Beta epics crees |
+| 2026-03-21 | Beta Epics B0-B6 (18 stories) | Auth fixes, pipeline prod-ready, dashboard fonctionnel, trust loop, recap, tests, RGPD |
+| 2026-03-21 | Scope cuts MVP-0 | Stripe, detailed mode, referral tracking differes — beta gratuite |
+
+---
+
+## Beta Sprint Plan (2026-03-21)
+
+**Objectif** : MVP-0 Beta testable par 10-30 utilisateurs en 3 semaines.
+
+**Sprint 1 (1 semaine)** : Epic B0 + B1 + B2 — Auth fixes + pipeline prod-ready + dashboard fonctionnel
+**Sprint 2 (1 semaine)** : Epic B3 + B4 + B5 — Trust loop + Recap complet + tests critiques
+**Sprint 3 (1 semaine)** : Epic B6 — RGPD + clean uninstall + smoke test → BETA LANCEE
+
+**3 Blockers critiques identifies** :
+1. Whitelist jamais consultee dans classification (classification.ts:66)
+2. User role/exposure mode hardcodes (classification.ts:87-88)
+3. Settings page = coquille vide (zero widget interactif)
+
+**Document de reference** : `planning-artifacts/epics-beta.md`
+**Brainstorm complet** : `planning-artifacts/brainstorm-beta-readiness-2026-03-21.md`
 
 ---
 

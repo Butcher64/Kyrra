@@ -1,117 +1,88 @@
-# generated: 2026-03-20
+# generated: 2026-03-21
 # project: Kyrra
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: ./implementation-artifacts
 #
-# STATUS DEFINITIONS:
-# ==================
-# Epic Status:
-#   - backlog: Epic not yet started
-#   - in-progress: Epic actively being worked on
-#   - done: All stories in epic completed
+# STATUS UPDATE 2026-03-21:
+# Post-brainstorm reality check — original 44 stories were scaffold, not production-ready.
+# New Beta epics (B0-B6) track the work needed for a real MVP-0 Beta.
+# Original epics kept as "scaffold-done" for reference.
 #
-# Epic Status Transitions:
-#   - backlog → in-progress: Automatically when first story is created (via create-story)
-#   - in-progress → done: Manually when all stories reach 'done' status
-#
-# Story Status:
-#   - backlog: Story only exists in epic file
-#   - ready-for-dev: Story file created in stories folder
-#   - in-progress: Developer actively working on implementation
-#   - review: Ready for code review (via Dev's code-review workflow)
-#   - done: Story completed
-#
-# Retrospective Status:
-#   - optional: Can be completed but not required
-#   - done: Retrospective has been completed
-#
-# WORKFLOW NOTES:
-# ===============
-# - Epic transitions to 'in-progress' automatically when first story is created
-# - Stories can be worked in parallel if team capacity allows
-# - SM typically creates next story after previous one is 'done' to incorporate learnings
-# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# BETA SPRINT STATUS (NEW — active work):
+# Epic Status: backlog → in-progress → done
+# Story Status: backlog → ready-for-dev → in-progress → review → done
 
-generated: 2026-03-20
+generated: 2026-03-21
 project: Kyrra
 project_key: NOKEY
 tracking_system: file-system
 story_location: ./implementation-artifacts
 
 development_status:
-  # ── Epic 0: Project Foundation ──
-  epic-0: done
-  0-1-monorepo-initialization: done
-  0-2-supabase-project-database-schema: done
-  0-3-shared-packages-foundation: done
-  0-4-ci-cd-pipeline: done
-  0-5-deploy-infrastructure: done
-  epic-0-retrospective: optional
+  # ══════════════════════════════════════════
+  # BETA SPRINTS (ACTIVE — real work to do)
+  # ══════════════════════════════════════════
 
-  # ── Epic 1: Gmail Connection & Onboarding ──
-  epic-1: done
-  1-1-authentication: done
-  1-2-pre-oauth-reassurance-gmail-pkce-connection: done
-  1-3-onboarding-scan-whitelist-generation: done
-  1-4-onboarding-progress-page: done
-  1-5-resume-interrupted-onboarding: done
-  epic-1-retrospective: optional
+  # ── Epic B0: Auth & Security Fixes ──
+  epic-b0: backlog
+  b0-1-fix-ci-branch-add-test-step: backlog
+  b0-2-fix-pkce-oauth-token-encryption: backlog
+  b0-3-fix-delete-account-sanitize-idempotency: backlog
+  b0-4-fix-login-flow-connect-gmail: backlog
+  epic-b0-retrospective: optional
 
-  # ── Epic 2: Email Classification Pipeline ──
-  epic-2: done
-  2-1-fingerprinting-engine: done
-  2-2-llm-classification: done
-  2-3-classification-safety-rules: done
-  2-4-pii-stripping-content-sanitization: done
-  2-5-gmail-pubsub-webhook-queue-processing: done
-  2-6-gmail-label-application: done
-  2-7-reconciliation-polling-watch-renewal: done
-  2-8-degraded-mode-token-revocation: done
-  epic-2-retrospective: optional
+  # ── Epic B1: Pipeline Production-Ready ──
+  epic-b1: backlog
+  b1-1-whitelist-check-in-classification: backlog
+  b1-2-dynamic-user-settings-in-classification: backlog
+  b1-3-fix-idempotency-sanitize-llm-usage-counter: backlog
+  epic-b1-retrospective: optional
 
-  # ── Epic 3: Dashboard ──
-  epic-3: done
-  3-1-dashboard-simple-mode: done
-  3-2-alert-email-cards-filtered-link: done
-  3-3-dashboard-detailed-mode: done
-  3-4-exposure-mode-switch: done
-  3-5-classification-details-confidence-scores: done
-  3-6-settings-page: done
-  3-7-in-app-notifications-degraded-mode-display: done
-  epic-3-retrospective: optional
+  # ── Epic B2: Dashboard Fonctionnel ──
+  epic-b2: backlog
+  b2-1-settings-page-interactive: backlog
+  b2-2-navigation-gear-icon-empty-states: backlog
+  b2-3-trust-score-real-recap-table-fix: backlog
+  epic-b2-retrospective: optional
 
-  # ── Epic 4: Trust & Reclassification ──
-  epic-4: done
-  4-1-one-click-reclassification: done
-  4-2-feedback-modal: done
-  4-3-gmail-reclassification-detection-learn-banner: done
-  4-4-in-email-token-reclassification: done
-  4-5-classification-improvement-tracking: done
-  epic-4-retrospective: optional
+  # ── Epic B3: Trust & Feedback Loop ──
+  epic-b3: backlog
+  b3-1-feedback-sheet-connected-backend: backlog
+  b3-2-gmail-reclassification-detection-learn-banner: backlog
+  epic-b3-retrospective: optional
 
-  # ── Epic 5: Kyrra Recap ──
-  epic-5: done
-  5-1-recap-email-generation-template: done
-  5-2-recap-delivery-deliverability: done
-  5-3-monthly-value-stats-cumulative-tracking: done
-  5-4-recap-preferences-mode-switch: done
-  5-5-win-back-re-engagement-notifications: done
-  epic-5-retrospective: optional
+  # ── Epic B4: Recap Complet ──
+  epic-b4: backlog
+  b4-1-fix-recap-data-queries-preferences: backlog
+  b4-2-1h-post-signup-email: backlog
+  epic-b4-retrospective: optional
 
-  # ── Epic 6: Subscription & Growth ──
-  epic-6: done
-  6-1-subscription-tiers-feature-gating: done
-  6-2-progressive-degradation-post-trial: done
-  6-3-stripe-billing-integration: done
-  6-4-referral-mechanism: done
-  epic-6-retrospective: optional
+  # ── Epic B5: Tests & Observabilite ──
+  epic-b5: backlog
+  b5-1-critical-unit-tests: backlog
+  b5-2-monitoring-alerts-founders: backlog
+  epic-b5-retrospective: optional
 
-  # ── Epic 7: Privacy, Compliance & Administration ──
-  epic-7: done
-  7-1-rgpd-consent-privacy-controls: done
-  7-2-account-management-clean-uninstall: done
-  7-3-third-party-data-requests: done
-  7-4-admin-dashboard: done
-  7-5-public-status-page-debug-mode: done
-  epic-7-retrospective: optional
+  # ── Epic B6: RGPD & Beta Launch ──
+  epic-b6: backlog
+  b6-1-rgpd-consent-minimal: backlog
+  b6-2-clean-uninstall-flow: backlog
+  b6-3-cgu-privacy-policy-pages: backlog
+  b6-4-smoke-test-e2e: backlog
+  epic-b6-retrospective: optional
+
+  # ══════════════════════════════════════════
+  # ORIGINAL SCAFFOLD EPICS (reference only)
+  # Status: scaffold-done (code exists but incomplete)
+  # ══════════════════════════════════════════
+
+  # ── Epic 0-7: Original scaffold (all scaffold-done) ──
+  epic-0: scaffold-done
+  epic-1: scaffold-done
+  epic-2: scaffold-done
+  epic-3: scaffold-done
+  epic-4: scaffold-done
+  epic-5: scaffold-done
+  epic-6: scaffold-done
+  epic-7: scaffold-done
