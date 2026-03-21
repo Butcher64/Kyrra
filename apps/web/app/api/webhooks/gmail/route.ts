@@ -118,14 +118,14 @@ async function verifyGoogleJWT(token: string): Promise<Record<string, unknown> |
     )
 
     // Verify signature
-    const signatureData = base64UrlDecode(signatureB64!)
-    const signedData = new TextEncoder().encode(`${headerB64}.${payloadB64}`)
+    const signatureBytes = base64UrlDecode(signatureB64!)
+    const signedBytes = new TextEncoder().encode(`${headerB64}.${payloadB64}`)
 
     const valid = await crypto.subtle.verify(
       'RSASSA-PKCS1-v1_5',
       cryptoKey,
-      signatureData,
-      signedData,
+      signatureBytes.buffer as ArrayBuffer,
+      signedBytes.buffer as ArrayBuffer,
     )
 
     return valid ? payload : null
