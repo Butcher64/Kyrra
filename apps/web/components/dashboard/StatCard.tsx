@@ -1,42 +1,28 @@
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+
 interface StatCardProps {
   value: string | number
   label: string
-  accent?: boolean // blue for "À voir"
+  accent?: boolean
 }
 
 export function StatCard({ value, label, accent }: StatCardProps) {
   return (
-    <div
-      style={{
-        flex: 1,
-        padding: '14px 16px',
-        border: '1px solid #e5e5e3',
-        borderRadius: '10px',
-        transition: 'border-color 0.2s ease',
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "'Outfit', sans-serif",
-          fontSize: '20px',
-          fontWeight: 500,
-          color: accent ? '#3b82f6' : 'var(--foreground, #1a1a18)',
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          fontSize: '11px',
-          color: '#9ca3af',
-          marginTop: '2px',
-          textTransform: 'uppercase' as const,
-          letterSpacing: '0.06em',
-          fontWeight: 500,
-        }}
-      >
-        {label}
-      </div>
-    </div>
+    <Card className="flex-1">
+      <CardContent>
+        <div
+          className={cn(
+            'font-(family-name:--font-outfit) text-xl font-medium',
+            accent ? 'text-[var(--color-a-voir)]' : 'text-(--foreground)',
+          )}
+        >
+          {value}
+        </div>
+        <div className="mt-0.5 text-[11px] text-(--muted-foreground) uppercase tracking-[0.06em] font-medium">
+          {label}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

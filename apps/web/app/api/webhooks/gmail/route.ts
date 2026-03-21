@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 /**
  * Gmail Pub/Sub Webhook Handler
  * Receives push notifications when new emails arrive
- * Inserts metadata-only queue items (never email content)
+ * Uses SECURITY DEFINER function to insert queue items (zero SERVICE_ROLE_KEY)
  *
  * Security: Google JWT verification mandatory (FR11)
  * Rate limit: 100 req/min (NFR-SEC-11)
@@ -12,14 +12,11 @@ import { createClient } from '@supabase/supabase-js'
  * Source: [architecture.md — API & Communication Patterns]
  */
 
-// Use service role for webhook processing (server-side only, never exposed to client)
-function getServiceClient() {
-  // This is the ONE exception where SERVICE_ROLE_KEY is used in apps/web
-  // It's a server-side Route Handler, never bundled to client
-  // The CI grep guard should exclude api/webhooks/ directory
+// ANON_KEY only — queue insertion via SECURITY DEFINER function (migration 015)
+function getAnonClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   )
 }
 
@@ -46,33 +43,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }
 
-    const supabase = getServiceClient()
+    const supabase = getAnonClient()
 
-    // Find user by Gmail email in integrations
-    const { data: integration } = await supabase
-      .from('user_integrations')
-      .select('user_id')
-      .eq('email', emailAddress)
-      .eq('provider', 'gmail')
-      .eq('status', 'active')
-      .single()
+    // Use SECURITY DEFINER function — validates integration + inserts queue item
+    // Zero SERVICE_ROLE_KEY in apps/web (architecture constraint F1)
+    const { data, error } = await supabase.rpc('enqueue_gmail_notification', {
+      p_email_address: emailAddress,
+      p_history_id: historyId,
+    })
 
-    if (!integration) {
+    if (error) {
+      console.error('Gmail webhook RPC error:', error.message)
+      return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    }
+
+    if (!data) {
       // Unknown email — ignore silently
       return NextResponse.json({ status: 'ignored' })
     }
 
-    // Insert queue item (metadata only — never email content)
-    await supabase.from('email_queue_items').insert({
-      user_id: integration.user_id,
-      gmail_message_id: `history-${historyId}`, // Will be resolved by worker
-      gmail_history_id: historyId,
-      status: 'pending',
-    })
-
     return NextResponse.json({ status: 'queued' })
   } catch (error) {
-    console.error('Gmail webhook error:', error)
+    console.error('Gmail webhook error:', (error as Error).message)
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
 }

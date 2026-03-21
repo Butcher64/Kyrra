@@ -5,6 +5,8 @@
  * Source: [architecture.md — Epic 5, ux-design-specification.md — Recap structure]
  */
 
+import { ClassificationLogger } from './lib/classification-logger'
+
 /**
  * Recap cron loop — generates and sends daily Recaps
  * Runs after classification data is available (typically 7:00 AM user local time)
@@ -35,9 +37,9 @@ export async function cleanupExpiredTokens(supabase: any): Promise<void> {
     .lt('expires_at', new Date().toISOString())
 
   if (count && count > 0) {
-    console.log(JSON.stringify({
+    ClassificationLogger.log({
       event: 'recap_tokens_cleanup',
       deleted_count: count,
-    }))
+    })
   }
 }

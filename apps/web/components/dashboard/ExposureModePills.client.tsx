@@ -1,13 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'motion/react'
+import { cn } from '@/lib/utils'
+import { transitions } from '@/lib/motion'
 
 type Mode = 'strict' | 'normal' | 'permissive'
 
-const MODES: { id: Mode; label: string; description: string; icon: string }[] = [
-  { id: 'strict', label: 'Strict', description: 'Contacts connus uniquement', icon: '🔒' },
-  { id: 'normal', label: 'Normal', description: 'Filtrage intelligent, équilibré', icon: '⚖️' },
-  { id: 'permissive', label: 'Permissif', description: 'Plus d\'opportunités visibles', icon: '🔓' },
+const MODES: { id: Mode; label: string; description: string }[] = [
+  { id: 'strict', label: 'Strict', description: 'Contacts connus uniquement' },
+  { id: 'normal', label: 'Normal', description: 'Filtrage intelligent, équilibré' },
+  { id: 'permissive', label: 'Permissif', description: 'Plus d\'opportunités visibles' },
 ]
 
 interface ExposureModePillsProps {
@@ -30,41 +33,41 @@ export function ExposureModePills({ currentMode, onModeChange }: ExposureModePil
 
   return (
     <div role="radiogroup" aria-label="Mode d'exposition">
-      <div style={{ display: 'flex', gap: '4px', background: '#f3f4f6', borderRadius: '100px', padding: '3px' }}>
+      <div className="flex gap-1 bg-(--muted) rounded-full p-[3px]">
         {MODES.map((mode) => (
           <button
             key={mode.id}
             role="radio"
             aria-checked={selected === mode.id}
             onClick={() => handleSelect(mode.id)}
-            style={{
-              flex: 1,
-              padding: '8px 12px',
-              border: 'none',
-              borderRadius: '100px',
-              fontSize: '12px',
-              fontWeight: 500,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              background: selected === mode.id ? '#ffffff' : 'transparent',
-              color: selected === mode.id ? '#1a1a18' : '#9ca3af',
-              boxShadow: selected === mode.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-            }}
+            className={cn(
+              'relative flex-1 py-2 px-3 border-none rounded-full text-xs font-medium cursor-pointer transition-colors duration-150',
+              selected === mode.id
+                ? 'text-(--foreground)'
+                : 'text-(--muted-foreground) bg-transparent',
+            )}
           >
-            {mode.label}
+            {selected === mode.id && (
+              <motion.span
+                layoutId="mode-pill"
+                className="absolute inset-0 bg-(--card) rounded-full shadow-[0_1px_3px_oklch(0_0_0/0.08)]"
+                transition={transitions.spring}
+              />
+            )}
+            <span className="relative z-10">{mode.label}</span>
           </button>
         ))}
       </div>
       {showDescription && (
-        <p style={{
-          fontSize: '11px',
-          color: '#6b7280',
-          textAlign: 'center',
-          marginTop: '8px',
-          transition: 'opacity 0.3s',
-        }}>
-          {selectedMode.icon} {selectedMode.description}
-        </p>
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={transitions.fast}
+          className="text-[11px] text-(--muted-foreground) text-center mt-2"
+        >
+          {selectedMode.description}
+        </motion.p>
       )}
     </div>
   )

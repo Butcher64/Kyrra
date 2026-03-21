@@ -1,3 +1,9 @@
+'use client'
+
+import { motion, AnimatePresence } from 'motion/react'
+import { cn } from '@/lib/utils'
+import { transitions } from '@/lib/motion'
+
 type Status = 'protected' | 'alert' | 'degraded' | 'paused'
 
 interface ProtectedStatusBadgeProps {
@@ -5,11 +11,11 @@ interface ProtectedStatusBadgeProps {
   alertCount?: number
 }
 
-const statusConfig: Record<Status, { dotColor: string; text: string }> = {
-  protected: { dotColor: '#22c55e', text: 'Votre boîte est protégée' },
-  alert: { dotColor: '#f59e0b', text: '' }, // Dynamic text
-  degraded: { dotColor: '#f59e0b', text: 'Mode simplifié actif' },
-  paused: { dotColor: '#9ca3af', text: 'Classification en pause' },
+const statusConfig: Record<Status, { dotClass: string; text: string }> = {
+  protected: { dotClass: 'bg-[var(--color-protected)] animate-[pulse-dot_3s_ease-in-out_infinite]', text: 'Votre boîte est protégée' },
+  alert: { dotClass: 'bg-[var(--color-attention)]', text: '' },
+  degraded: { dotClass: 'bg-[var(--color-attention)]', text: 'Mode simplifié actif' },
+  paused: { dotClass: 'bg-(--muted-foreground)', text: 'Classification en pause' },
 }
 
 export function ProtectedStatusBadge({ status, alertCount }: ProtectedStatusBadgeProps) {
@@ -19,34 +25,22 @@ export function ProtectedStatusBadge({ status, alertCount }: ProtectedStatusBadg
     : config.text
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontSize: '13px',
-        color: '#6b7280',
-      }}
-    >
-      <span
-        style={{
-          width: '7px',
-          height: '7px',
-          borderRadius: '50%',
-          backgroundColor: config.dotColor,
-          flexShrink: 0,
-          animation: status === 'protected' ? 'pulse 3s ease-in-out infinite' : undefined,
-        }}
-      />
-      {text}
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
-      `}</style>
-    </div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={status}
+        role="status"
+        aria-live="polite"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={transitions.fast}
+        className="flex items-center gap-2 text-[13px] text-(--muted-foreground)"
+      >
+        <span
+          className={cn('size-[7px] rounded-full shrink-0', config.dotClass)}
+        />
+        {text}
+      </motion.div>
+    </AnimatePresence>
   )
 }

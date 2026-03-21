@@ -3,6 +3,8 @@ import { claimNextJob, completeJob, failJob } from './lib/queue-consumer'
 import { fingerprintEmail, type EmailHeaders } from './lib/fingerprinting'
 import { classifyWithLLM, type EmailContent } from './lib/llm-gateway'
 import { stripPIIFromSummary, sanitizeForLLM } from './lib/pii-stripper'
+import { getValidAccessToken, fetchEmail, ensureLabels, applyLabel, GmailAuthError } from './lib/gmail'
+import { ClassificationLogger } from './lib/classification-logger'
 import type { ClassificationResult } from '@kyrra/shared'
 
 /**
@@ -37,12 +39,21 @@ export async function classificationLoop(supabase: any): Promise<void> {
       return
     }
 
-    // TODO: Fetch email from Gmail API (in-memory only, never persisted)
-    // For now, use placeholder data (Gmail API integration will be completed with gmail.ts)
+    // Get valid access token (proactive refresh 1h before expiry)
+    const accessToken = await getValidAccessToken(supabase, integration)
+    if (!accessToken) {
+      // Token revoked (invalid_grant) — pipeline paused by getValidAccessToken
+      await failJob(supabase, job.id, 'TOKEN_REVOKED', job.retry_count)
+      return
+    }
+
+    // Fetch email from Gmail API (in-memory only, never persisted)
+    const gmailEmail = await fetchEmail(accessToken, job.gmail_message_id)
+
     const emailHeaders: EmailHeaders = {
-      from: 'placeholder@example.com',
-      subject: 'Placeholder subject',
-      headers: {},
+      from: gmailEmail.from,
+      subject: gmailEmail.subject,
+      headers: gmailEmail.headers,
     }
 
     // Check system whitelist (PM6 — skip @kyrra.io emails)
@@ -71,8 +82,8 @@ export async function classificationLoop(supabase: any): Promise<void> {
         const llmResult = await classifyWithLLM({
           from: emailHeaders.from,
           subject: emailHeaders.subject,
-          headers: '', // TODO: truncated content
-          tail: '',
+          headers: gmailEmail.bodyPreview,
+          tail: gmailEmail.bodyTail,
           userRole: 'CEO', // TODO: from user profile
           exposureMode: 'normal', // TODO: from user settings
         }, supabase)
@@ -99,10 +110,10 @@ export async function classificationLoop(supabase: any): Promise<void> {
       const llmResult = await classifyWithLLM({
         from: emailHeaders.from,
         subject: emailHeaders.subject,
-        headers: '', // TODO: truncated content
-        tail: '',
-        userRole: 'CEO',
-        exposureMode: 'normal',
+        headers: gmailEmail.bodyPreview,
+        tail: gmailEmail.bodyTail,
+        userRole: 'CEO', // TODO: from user profile
+        exposureMode: 'normal', // TODO: from user settings
       }, supabase)
 
       if (llmResult) {
@@ -134,7 +145,14 @@ export async function classificationLoop(supabase: any): Promise<void> {
       idempotency_key: `${job.gmail_message_id}-${Date.now()}`,
     })
 
-    // TODO: Apply Gmail label (Story 2.6)
+    // Apply Gmail label (Story 2.6)
+    try {
+      const labelMap = await ensureLabels(accessToken)
+      await applyLabel(accessToken, job.gmail_message_id, finalResult, labelMap)
+    } catch (labelError) {
+      // Label failure is non-fatal — classification is saved, label will be reconciled
+      console.error('Label application failed (will reconcile):', (labelError as Error).message)
+    }
 
     // Update pipeline health
     await supabase
@@ -147,16 +165,26 @@ export async function classificationLoop(supabase: any): Promise<void> {
 
     await completeJob(supabase, job.id)
 
-    // ClassificationLogger — whitelist only fields
-    console.log(JSON.stringify({
+    // ClassificationLogger — whitelist only fields (Enforcement Rule 3)
+    ClassificationLogger.log({
       event: 'classification_complete',
       email_id: job.gmail_message_id,
       classification_result: finalResult,
       confidence_score: confidence,
       processing_time_ms: processingTimeMs,
       source,
-    }))
+    })
   } catch (error) {
+    if (error instanceof GmailAuthError) {
+      // Token expired mid-request — mark integration as revoked
+      await supabase
+        .from('user_integrations')
+        .update({ status: 'revoked', updated_at: new Date().toISOString() })
+        .eq('user_id', job.user_id)
+        .eq('provider', 'gmail')
+      await failJob(supabase, job.id, 'TOKEN_REVOKED', job.retry_count)
+      return
+    }
     console.error('Classification error:', error)
     await failJob(supabase, job.id, (error as Error).message, job.retry_count)
   }

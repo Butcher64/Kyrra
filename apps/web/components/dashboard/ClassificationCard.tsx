@@ -1,3 +1,5 @@
+import { Badge } from '@/components/ui/badge'
+
 interface ClassificationCardProps {
   summary: string
   gmailMessageId: string
@@ -14,52 +16,20 @@ export function ClassificationCard({ summary, gmailMessageId, confidenceScore }:
       rel="noopener noreferrer"
       role="article"
       aria-label={`Email: ${summary}`}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        padding: '14px 0',
-        borderBottom: '1px solid #f0f0ee',
-        gap: '12px',
-        cursor: 'pointer',
-        textDecoration: 'none',
-        transition: 'opacity 0.15s',
-      }}
-      onMouseOver={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0.7' }}
-      onMouseOut={(e) => { (e.currentTarget as HTMLElement).style.opacity = '1' }}
+      className="flex items-center py-3.5 border-b border-(--border) gap-3 no-underline transition-opacity duration-150 hover:opacity-70"
     >
-      <span
-        style={{
-          fontSize: '10px',
-          padding: '3px 8px',
-          borderRadius: '100px',
-          background: '#dbeafe',
-          color: '#2563eb',
-          fontWeight: 600,
-          textTransform: 'uppercase' as const,
-          letterSpacing: '0.04em',
-          flexShrink: 0,
-        }}
-      >
+      <Badge variant="a-voir" className="shrink-0">
         À voir
-      </span>
-      <span
-        style={{
-          fontSize: '13px',
-          color: '#374151',
-          flex: 1,
-          whiteSpace: 'nowrap' as const,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}
-      >
+      </Badge>
+      <span className="text-[13px] text-(--card-foreground) flex-1 truncate">
         {summary}
       </span>
       {confidenceScore !== undefined && confidenceScore < 0.75 && (
-        <span style={{ fontSize: '11px', color: '#9ca3af', flexShrink: 0 }}>
+        <span className="text-[11px] text-(--muted-foreground) shrink-0">
           {Math.round(confidenceScore * 100)}%
         </span>
       )}
-      <span style={{ color: '#d1d5db', fontSize: '13px', flexShrink: 0 }}>→</span>
+      <span className="text-(--border) text-[13px] shrink-0">&rarr;</span>
     </a>
   )
 }

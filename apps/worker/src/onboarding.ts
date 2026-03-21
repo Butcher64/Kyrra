@@ -1,4 +1,5 @@
 import { extractRecipients, buildWhitelistEntries, type ScanProgress } from './lib/whitelist-scan'
+import { getValidAccessToken, listSentMessages, GmailAuthError } from './lib/gmail'
 
 /**
  * Onboarding scan loop — checks for pending scans and processes them
@@ -50,12 +51,19 @@ export async function onboardingScanLoop(supabase: any): Promise<void> {
       return
     }
 
-    // TODO: Implement actual Gmail API sent history fetch
-    // For now, mark as completed with zero results (Gmail API integration in Epic 2)
-    // The actual Gmail API call will use:
-    //   GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=in:sent&maxResults=500
-    //   with access_token from integration
-    //   Rate limited to 20 calls/sec
+    // Get valid access token
+    const accessToken = await getValidAccessToken(supabase, integration)
+    if (!accessToken) {
+      await supabase
+        .from('onboarding_scans')
+        .update({ status: 'failed', updated_at: new Date().toISOString() })
+        .eq('id', scan.id)
+      return
+    }
+
+    // Scan sent history from last 6 months
+    const sixMonthsAgo = new Date()
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
 
     const progress: ScanProgress = {
       total_sent: 0,
@@ -63,6 +71,44 @@ export async function onboardingScanLoop(supabase: any): Promise<void> {
       contacts_found: 0,
       prospecting_found: 0,
     }
+
+    const allRecipients: string[] = []
+
+    const totalProcessed = await listSentMessages(
+      accessToken,
+      sixMonthsAgo,
+      async (batch) => {
+        const recipients = extractRecipients(batch)
+        allRecipients.push(...recipients)
+
+        progress.emails_processed += batch.length
+        progress.total_sent += batch.length
+
+        // Update progress in real-time (for /onboarding-progress page polling)
+        await supabase
+          .from('onboarding_scans')
+          .update({
+            emails_processed: progress.emails_processed,
+            total_sent: progress.total_sent,
+            contacts_found: new Set(allRecipients).size,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', scan.id)
+      },
+    )
+
+    // Deduplicate and build whitelist entries
+    const uniqueRecipients = [...new Set(allRecipients)]
+    const whitelistEntries = buildWhitelistEntries(scan.user_id, uniqueRecipients)
+
+    // Upsert whitelist entries (ignore duplicates)
+    if (whitelistEntries.length > 0) {
+      await supabase
+        .from('whitelist_entries')
+        .upsert(whitelistEntries, { onConflict: 'user_id,address_hash' })
+    }
+
+    progress.contacts_found = uniqueRecipients.length
 
     // Update final progress
     await supabase
@@ -75,9 +121,16 @@ export async function onboardingScanLoop(supabase: any): Promise<void> {
       })
       .eq('id', scan.id)
 
-    console.log(`Onboarding scan completed for user ${scan.user_id}`)
+    console.log(`Onboarding scan completed for user ${scan.user_id}: ${uniqueRecipients.length} contacts`)
   } catch (error) {
-    console.error(`Onboarding scan failed for user ${scan.user_id}:`, error)
+    if (error instanceof GmailAuthError) {
+      await supabase
+        .from('user_integrations')
+        .update({ status: 'revoked', updated_at: new Date().toISOString() })
+        .eq('user_id', scan.user_id)
+        .eq('provider', 'gmail')
+    }
+    console.error(`Onboarding scan failed for user ${scan.user_id}:`, (error as Error).message)
     await supabase
       .from('onboarding_scans')
       .update({ status: 'failed', updated_at: new Date().toISOString() })
