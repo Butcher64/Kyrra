@@ -47,28 +47,28 @@ development_status:
   epic-b2-retrospective: optional
 
   # ── Epic B3: Trust & Feedback Loop ──
-  epic-b3: backlog
-  b3-1-feedback-sheet-connected-backend: backlog
-  b3-2-gmail-reclassification-detection-learn-banner: backlog
+  epic-b3: done
+  b3-1-feedback-sheet-connected-backend: done
+  b3-2-gmail-reclassification-detection-learn-banner: done
   epic-b3-retrospective: optional
 
   # ── Epic B4: Recap Complet ──
-  epic-b4: backlog
-  b4-1-fix-recap-data-queries-preferences: backlog
-  b4-2-1h-post-signup-email: backlog
+  epic-b4: done
+  b4-1-fix-recap-data-queries-preferences: done
+  b4-2-1h-post-signup-email: done
   epic-b4-retrospective: optional
 
   # ── Epic B5: Tests & Observabilite ──
-  epic-b5: backlog
-  b5-1-critical-unit-tests: backlog
-  b5-2-monitoring-alerts-founders: backlog
+  epic-b5: done
+  b5-1-critical-unit-tests: done
+  b5-2-monitoring-alerts-founders: done
   epic-b5-retrospective: optional
 
   # ── Epic B6: RGPD & Beta Launch ──
-  epic-b6: backlog
+  epic-b6: in-progress
   b6-1-rgpd-consent-minimal: backlog
-  b6-2-clean-uninstall-flow: backlog
-  b6-3-cgu-privacy-policy-pages: backlog
+  b6-2-clean-uninstall-flow: done
+  b6-3-cgu-privacy-policy-pages: done
   b6-4-smoke-test-e2e: backlog
   epic-b6-retrospective: optional
 

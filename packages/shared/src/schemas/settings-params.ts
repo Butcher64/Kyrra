@@ -13,3 +13,10 @@ export const updateNotificationsSchema = z.object({
 })
 
 export type UpdateNotificationsParams = z.infer<typeof updateNotificationsSchema>
+
+export const saveConsentSchema = z.object({
+  consent_given: z.literal(true),
+  recap_consent: z.boolean(),
+})
+
+export type SaveConsentParams = z.infer<typeof saveConsentSchema>

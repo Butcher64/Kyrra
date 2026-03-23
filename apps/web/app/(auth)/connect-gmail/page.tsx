@@ -1,7 +1,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
+import { ConsentForm } from './ConsentForm.client'
 
 export default async function ConnectGmailPage() {
   const supabase = await createClient()
@@ -49,11 +49,8 @@ export default async function ConnectGmailPage() {
         Un clic pour tout annuler. Votre boîte revient exactement comme avant.
       </p>
 
-      <Button asChild size="lg" className="mt-8 bg-[var(--color-a-voir)] text-white hover:opacity-80">
-        <a href="/auth/callback/google">
-          Connecter Gmail &rarr;
-        </a>
-      </Button>
+      {/* RGPD consent + connect button */}
+      <ConsentForm />
     </main>
   )
 }
