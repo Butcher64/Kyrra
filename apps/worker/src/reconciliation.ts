@@ -10,6 +10,7 @@ import {
   getValidAccessToken,
   renewWatch,
   getHistory,
+  ensureLabels,
   GmailAuthError,
   type GmailHistoryRecord,
 } from './lib/gmail'
@@ -176,8 +177,22 @@ async function reconcileUser(
     return
   }
 
+  // Build Kyrra label ID sets for detecting label removals
+  let kyrraLabelIds: Set<string> | null = null
+  let kyrraLabelIdToName = new Map<string, string>()
+  try {
+    const labelMap = await ensureLabels(accessToken)
+    kyrraLabelIds = new Set(Object.values(labelMap))
+    for (const [name, id] of Object.entries(labelMap)) {
+      kyrraLabelIdToName.set(id, name)
+    }
+  } catch {
+    // Label resolution failed — skip label change detection this cycle
+  }
+
   // Find new messages from history
   const newMessageIds = new Set<string>()
+  const labelChangeSignals: Array<{ user_id: string; gmail_message_id: string; old_label: string }> = []
   let latestHistoryId = integration.watch_history_id
 
   for (const record of historyRecords) {
@@ -190,10 +205,20 @@ async function reconcileUser(
       }
     }
     // Track label changes for implicit reclassification detection (FR14)
-    if (record.labelsRemoved) {
+    if (record.labelsRemoved && kyrraLabelIds) {
+      const labelIds = kyrraLabelIds // narrow for closure
       for (const removed of record.labelsRemoved) {
-        // User removed a Kyrra label — implicit reclassification signal
-        // Will be handled in reclassification flow (Story 4.3)
+        const removedKyrraLabels = removed.labelIds.filter((id) => labelIds.has(id))
+        const firstRemovedLabel = removedKyrraLabels[0]
+        if (firstRemovedLabel) {
+          // User removed a Kyrra label in Gmail — insert signal for dashboard banner
+          const oldLabel = kyrraLabelIdToName.get(firstRemovedLabel) ?? 'unknown'
+          labelChangeSignals.push({
+            user_id: integration.user_id,
+            gmail_message_id: removed.message.id,
+            old_label: oldLabel,
+          })
+        }
       }
     }
     // Track the latest history ID
@@ -241,6 +266,17 @@ async function reconcileUser(
         count: missingMessages.length,
       })
     }
+  }
+
+  // Insert label change signals for dashboard learn banner (B3.2)
+  if (labelChangeSignals.length > 0) {
+    await supabase.from('label_change_signals').insert(labelChangeSignals)
+
+    ClassificationLogger.log({
+      event: 'label_change_detected',
+      user_id: integration.user_id,
+      count: labelChangeSignals.length,
+    })
   }
 
   // Update the stored history ID for next poll

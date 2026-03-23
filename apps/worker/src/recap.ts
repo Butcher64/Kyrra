@@ -5,6 +5,7 @@
  * Source: [architecture.md — Epic 5, ux-design-specification.md — Recap structure]
  */
 
+import { randomBytes } from 'node:crypto'
 import { ClassificationLogger } from './lib/classification-logger'
 import {
   generateRecapEmailHtml,
@@ -114,6 +115,21 @@ async function generateAndSendRecap(
     .order('created_at', { ascending: false })
     .limit(5)
 
+  // Generate recap tokens for each "À voir" email (FR85)
+  const aVoirList = aVoirEmails ?? []
+  const tokenMap = new Map<string, string>() // gmail_message_id → token URL
+
+  for (const email of aVoirList) {
+    const token = randomBytes(32).toString('hex')
+    await supabase.from('recap_tokens').insert({
+      user_id: user.id,
+      token,
+      email_id: email.gmail_message_id,
+      recap_date: today,
+    })
+    tokenMap.set(email.gmail_message_id, `${APP_URL}/api/token/${token}`)
+  }
+
   // Fetch cumulative stats
   const { count: totalFiltered } = await supabase
     .from('email_classifications')
@@ -130,15 +146,48 @@ async function generateAndSendRecap(
   // Value estimate: ~15 EUR/hour saved (CEO time value)
   const estimatedValue = totalTimeSavedHours * 15
 
+  // Monthly stats — if today is the 1st, include last month's stats (FR52)
+  const now = new Date()
+  let monthlyStats: RecapEmailData['monthlyStats']
+  if (now.getDate() === 1) {
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastMonthLabel = `${FRENCH_MONTHS[lastMonthStart.getMonth()]} ${lastMonthStart.getFullYear()}`
+
+    const { count: monthFiltered } = await supabase
+      .from('email_classifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('created_at', lastMonthStart.toISOString())
+      .lt('created_at', lastMonthEnd.toISOString())
+
+    const { count: monthAVoir } = await supabase
+      .from('email_classifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('classification_result', 'A_VOIR')
+      .gte('created_at', lastMonthStart.toISOString())
+      .lt('created_at', lastMonthEnd.toISOString())
+
+    const mFiltered = monthFiltered ?? 0
+    monthlyStats = {
+      monthLabel: lastMonthLabel,
+      totalFiltered: mFiltered,
+      totalAVoir: monthAVoir ?? 0,
+      timeSavedHours: Math.round((mFiltered * MINUTES_PER_EMAIL) / 60),
+    }
+  }
+
   const recapData: RecapEmailData = {
     userName: user.display_name || user.email.split('@')[0] || 'Utilisateur',
     date: dateFormatted,
     filteredCount: filtered,
     timeSavedMinutes: Math.round(filtered * MINUTES_PER_EMAIL),
-    aVoirEmails: (aVoirEmails ?? []).map((e: any) => ({
+    aVoirEmails: aVoirList.map((e: any) => ({
       summary: e.summary ?? 'Email nécessitant votre attention',
       gmailMessageId: e.gmail_message_id,
       confidenceScore: e.confidence_score,
+      reclassifyTokenUrl: tokenMap.get(e.gmail_message_id),
     })),
     cumulativeStats: {
       totalFiltered: totalFilteredCount,
@@ -146,13 +195,14 @@ async function generateAndSendRecap(
       estimatedValue,
       daysSinceSignup,
     },
+    monthlyStats,
     referralUrl: `${APP_URL}/referral`,
     settingsUrl: `${APP_URL}/settings`,
     unsubscribeUrl: `${APP_URL}/settings#recap`,
   }
 
   const htmlBody = generateRecapEmailHtml(recapData)
-  const subject = generateRecapSubject(filtered, (aVoirEmails ?? []).length)
+  const subject = generateRecapSubject(filtered, aVoirList.length)
 
   // Send via Postmark
   await sendViaPostmark(user.email, subject, htmlBody)
@@ -161,15 +211,17 @@ async function generateAndSendRecap(
     event: 'recap_sent',
     user_id: user.id,
     filtered_count: filtered,
-    a_voir_count: (aVoirEmails ?? []).length,
+    a_voir_count: aVoirList.length,
+    tokens_created: aVoirList.length,
   })
 }
 
 /**
  * Send email via Postmark API
  * Uses direct fetch — no extra dependency needed
+ * Exported for reuse by onboarding email (B4.2)
  */
-async function sendViaPostmark(
+export async function sendViaPostmark(
   to: string,
   subject: string,
   htmlBody: string,
@@ -204,16 +256,17 @@ async function sendViaPostmark(
   }
 }
 
+const FRENCH_MONTHS = [
+  'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+  'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
+]
+
 /**
  * Format date in French for Recap header
  */
 function formatFrenchDate(date: Date): string {
   const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
-  const months = [
-    'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
-  ]
-  return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`
+  return `${days[date.getDay()]} ${date.getDate()} ${FRENCH_MONTHS[date.getMonth()]}`
 }
 
 /**

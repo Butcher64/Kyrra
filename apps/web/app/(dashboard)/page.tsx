@@ -6,6 +6,7 @@ import { ProtectedStatusBadge } from '@/components/dashboard/ProtectedStatusBadg
 import { HeroStat } from '@/components/dashboard/HeroStat.client'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { AlertEmailCard } from '@/components/dashboard/AlertEmailCard.client'
+import { HelpKyrraLearnBanner } from '@/components/dashboard/HelpKyrraLearnBanner.client'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -58,6 +59,18 @@ export default async function DashboardPage() {
     .gte('created_at', sevenDaysAgo)
     .not('reclassified_to', 'is', null)
 
+  // Fetch unacknowledged label change signals for learn banner (B3.2)
+  const { data: labelSignals } = await supabase
+    .from('label_change_signals')
+    .select('gmail_message_id')
+    .eq('user_id', user!.id)
+    .eq('acknowledged', false)
+    .order('detected_at', { ascending: false })
+    .limit(1)
+
+  const labelSignalCount = labelSignals?.length ?? 0
+  const firstSignalMessageId = labelSignals?.[0]?.gmail_message_id ?? null
+
   const total7d = totalClassified7d ?? 0
   const reclass7d = reclassified7d ?? 0
   const trustScore = total7d > 0
@@ -90,6 +103,11 @@ export default async function DashboardPage() {
 
         {/* Status badge — MI-6 */}
         <ProtectedStatusBadge status={status} alertCount={alertCount} />
+
+        {/* Learn banner — B3.2 label change detection */}
+        <div className="mt-6">
+          <HelpKyrraLearnBanner signalCount={labelSignalCount} gmailMessageId={firstSignalMessageId} />
+        </div>
 
         {/* Hero stat — NumberTicker roll-up */}
         <div className="mt-10">

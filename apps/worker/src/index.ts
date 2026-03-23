@@ -4,6 +4,8 @@ import { reconciliationLoop, watchRenewalLoop } from './reconciliation'
 import { onboardingScanLoop } from './onboarding'
 import { reclassificationLoop } from './reclassification'
 import { recapCronLoop } from './recap'
+import { monitoringLoop } from './monitoring'
+import { startHealthServer, markWorkerStarted } from './health'
 
 let isShuttingDown = false
 
@@ -39,7 +41,11 @@ async function main() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 
-  // 6 resilient loops — crash in one does NOT kill others
+  // Start healthcheck HTTP server
+  startHealthServer()
+  markWorkerStarted()
+
+  // 7 resilient loops — crash in one does NOT kill others
   await Promise.all([
     resilientLoop('classification', () => classificationLoop(supabase)),
     resilientLoop('reclassification', () => reclassificationLoop(supabase)),
@@ -47,6 +53,7 @@ async function main() {
     resilientLoop('reconciliation', () => reconciliationLoop(supabase)),
     resilientLoop('onboarding', () => onboardingScanLoop(supabase)),
     resilientLoop('recap', () => recapCronLoop(supabase)),
+    resilientLoop('monitoring', () => monitoringLoop(supabase)),
   ])
 
   console.log('Worker shut down complete.')

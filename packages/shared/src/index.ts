@@ -23,6 +23,8 @@ export { whitelistParamsSchema, removeWhitelistParamsSchema } from './schemas/wh
 export type { WhitelistParams, RemoveWhitelistParams } from './schemas/whitelist-params'
 export { updateExposureModeSchema, updateNotificationsSchema } from './schemas/settings-params'
 export type { UpdateExposureModeParams, UpdateNotificationsParams } from './schemas/settings-params'
+export { feedbackParamsSchema } from './schemas/feedback-params'
+export type { FeedbackParams } from './schemas/feedback-params'
 
 // Rules
 export { applyClassificationSafetyRules, applyClassificationSafetyRulesWithNotification } from './rules'

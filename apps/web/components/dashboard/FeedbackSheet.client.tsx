@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { transitions } from '@/lib/motion'
+import { submitFeedback } from '@/app/(dashboard)/actions/feedback'
 
 /**
  * FR46 — Feedback Sheet (post-reclassification)
@@ -37,6 +38,7 @@ export function FeedbackSheet() {
   const [open, setOpen] = useState(false)
   const [gmailMessageId, setGmailMessageId] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -52,14 +54,33 @@ export function FeedbackSheet() {
   }, [])
 
   function handleSelect(reason: FeedbackReason) {
-    // TODO: Send feedback to server action when implemented
-    setSubmitted(true)
-    toast({
-      title: 'Merci pour votre retour.',
-      description: 'Kyrra s\'améliore grâce à vous.',
-      type: 'success',
+    if (!gmailMessageId || isPending) return
+
+    startTransition(async () => {
+      const result = await submitFeedback({
+        gmail_message_id: gmailMessageId,
+        reason,
+      })
+
+      if (result.error) {
+        toast({
+          title: 'Erreur',
+          description: 'Impossible d\'envoyer votre retour. Réessayez.',
+          type: 'attention',
+        })
+        return
+      }
+
+      setSubmitted(true)
+      toast({
+        title: 'Merci pour votre retour.',
+        description: reason === 'whitelist_sender'
+          ? 'L\'expéditeur sera whitelisté.'
+          : 'Kyrra s\'améliore grâce à vous.',
+        type: 'success',
+      })
+      setTimeout(() => setOpen(false), 1500)
     })
-    setTimeout(() => setOpen(false), 1500)
   }
 
   return (
@@ -103,7 +124,8 @@ export function FeedbackSheet() {
                   <button
                     key={option.id}
                     onClick={() => handleSelect(option.id)}
-                    className="text-left p-3 rounded-lg border border-(--border) bg-transparent cursor-pointer transition-colors hover:bg-(--muted)"
+                    disabled={isPending}
+                    className="text-left p-3 rounded-lg border border-(--border) bg-transparent cursor-pointer transition-colors hover:bg-(--muted) disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="text-[13px] font-medium text-(--foreground)">{option.label}</div>
                     <div className="text-[11px] text-(--muted-foreground) mt-0.5">{option.description}</div>

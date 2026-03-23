@@ -1,5 +1,11 @@
 import { extractRecipients, buildWhitelistEntries, type ScanProgress } from './lib/whitelist-scan'
 import { getValidAccessToken, listSentMessages, GmailAuthError } from './lib/gmail'
+import { sendViaPostmark } from './recap'
+import {
+  generateOnboardingEmailHtml,
+  generateOnboardingSubject,
+  type OnboardingEmailData,
+} from './lib/onboarding-email-template'
 
 /**
  * Onboarding scan loop — checks for pending scans and processes them
@@ -122,6 +128,22 @@ export async function onboardingScanLoop(supabase: any): Promise<void> {
       .eq('id', scan.id)
 
     console.log(`Onboarding scan completed for user ${scan.user_id}: ${uniqueRecipients.length} contacts`)
+
+    // B4.2 — Send "Kyrra est actif" onboarding email after scan completion
+    try {
+      const onboardingData: OnboardingEmailData = {
+        userName: integration.email?.split('@')[0] ?? 'Utilisateur',
+        contactsFound: uniqueRecipients.length,
+        emailsProcessed: totalProcessed,
+      }
+      const htmlBody = generateOnboardingEmailHtml(onboardingData)
+      const subject = generateOnboardingSubject()
+      await sendViaPostmark(integration.email, subject, htmlBody)
+      console.log(`Onboarding email sent to ${integration.email}`)
+    } catch (emailError) {
+      // Non-fatal — scan is already completed, email is a bonus
+      console.error('Onboarding email send failed:', (emailError as Error).message)
+    }
   } catch (error) {
     if (error instanceof GmailAuthError) {
       await supabase

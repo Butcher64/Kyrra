@@ -24,12 +24,19 @@ export interface RecapEmailData {
     summary: string
     gmailMessageId: string
     confidenceScore?: number
+    reclassifyTokenUrl?: string // FR85 — in-email reclassification deep link
   }[]
   cumulativeStats: {
     totalFiltered: number
     totalTimeSavedHours: number
     estimatedValue: number // EUR
     daysSinceSignup: number
+  }
+  monthlyStats?: {
+    monthLabel: string // e.g. "février 2026"
+    totalFiltered: number
+    totalAVoir: number
+    timeSavedHours: number
   }
   referralUrl: string
   settingsUrl: string
@@ -62,6 +69,7 @@ export function generateRecapEmailHtml(data: RecapEmailData): string {
     timeSavedMinutes,
     aVoirEmails,
     cumulativeStats,
+    monthlyStats,
     referralUrl,
     settingsUrl,
     unsubscribeUrl,
@@ -79,6 +87,9 @@ export function generateRecapEmailHtml(data: RecapEmailData): string {
         const confidenceDisplay = email.confidenceScore !== undefined && email.confidenceScore < 0.75
           ? `<span style="font-size:11px;color:${COLORS.muted};">${Math.round(email.confidenceScore * 100)}%</span>`
           : ''
+        const reclassifyButton = email.reclassifyTokenUrl
+          ? `<a href="${escapeHtml(email.reclassifyTokenUrl)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:${COLORS.muted};text-decoration:underline;white-space:nowrap;">Reclassifier</a>`
+          : ''
         return `
                         <tr>
                           <td style="padding:12px 0;border-bottom:1px solid ${COLORS.border};">
@@ -93,6 +104,7 @@ export function generateRecapEmailHtml(data: RecapEmailData): string {
                                 </td>
                                 <td width="80" style="vertical-align:top;text-align:right;">
                                   <a href="${escapeHtml(gmailLink)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:${COLORS.aVoir};text-decoration:none;white-space:nowrap;">Voir&nbsp;&rarr;</a>
+                                  ${reclassifyButton ? `<br>${reclassifyButton}` : ''}
                                 </td>
                               </tr>
                             </table>
@@ -218,7 +230,28 @@ export function generateRecapEmailHtml(data: RecapEmailData): string {
           </tr>
           ` : ''}
 
-          <!-- SECTION 4: Cumulative stats -->
+          ${monthlyStats ? `
+          <!-- SECTION 4: Monthly stats (FR52 — 1st of month only) -->
+          <tr>
+            <td style="padding:32px 24px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${COLORS.border};background:${COLORS.protectedBg};border-radius:8px;" class="email-border">
+                <tr>
+                  <td style="padding:16px;">
+                    <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${COLORS.protected};">
+                      Bilan ${escapeHtml(monthlyStats.monthLabel)}
+                    </span>
+                    <br>
+                    <span style="font-size:13px;color:${COLORS.text};line-height:1.6;" class="email-text">
+                      ${monthlyStats.totalFiltered} filtr&#233;s &middot; ${monthlyStats.totalAVoir} &#224; voir &middot; ~${monthlyStats.timeSavedHours}h gagn&#233;es
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ''}
+
+          <!-- SECTION 5: Cumulative stats -->
           <tr>
             <td style="padding:32px 24px 0;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${COLORS.border};" class="email-border">

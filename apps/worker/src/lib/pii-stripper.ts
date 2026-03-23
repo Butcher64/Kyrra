@@ -31,6 +31,7 @@ const SENSITIVE_PATTERNS = [
 export function stripPIIFromSummary(summary: string): string {
   let cleaned = summary
   for (const pattern of PII_PATTERNS) {
+    pattern.lastIndex = 0 // Reset global regex state between calls
     cleaned = cleaned.replace(pattern, '[REDACTED]')
   }
   return cleaned
@@ -41,7 +42,10 @@ export function stripPIIFromSummary(summary: string): string {
  * Returns true if sensitive data is detected
  */
 export function detectSensitiveContent(content: string): boolean {
-  return SENSITIVE_PATTERNS.some((pattern) => pattern.test(content))
+  return SENSITIVE_PATTERNS.some((pattern) => {
+    pattern.lastIndex = 0 // Reset global regex state between calls
+    return pattern.test(content)
+  })
 }
 
 /**
@@ -51,6 +55,7 @@ export function detectSensitiveContent(content: string): boolean {
 export function sanitizeForLLM(content: string): string {
   let sanitized = content
   for (const pattern of SENSITIVE_PATTERNS) {
+    pattern.lastIndex = 0 // Reset global regex state between calls
     sanitized = sanitized.replace(pattern, '[SENSITIVE_REDACTED]')
   }
   return sanitized

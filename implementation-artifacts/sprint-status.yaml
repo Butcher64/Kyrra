@@ -25,25 +25,25 @@ development_status:
   # ══════════════════════════════════════════
 
   # ── Epic B0: Auth & Security Fixes ──
-  epic-b0: backlog
-  b0-1-fix-ci-branch-add-test-step: backlog
-  b0-2-fix-pkce-oauth-token-encryption: backlog
-  b0-3-fix-delete-account-sanitize-idempotency: backlog
-  b0-4-fix-login-flow-connect-gmail: backlog
+  epic-b0: done
+  b0-1-fix-ci-branch-add-test-step: done
+  b0-2-fix-pkce-oauth-token-encryption: done
+  b0-3-fix-delete-account-sanitize-idempotency: done
+  b0-4-fix-login-flow-connect-gmail: done
   epic-b0-retrospective: optional
 
   # ── Epic B1: Pipeline Production-Ready ──
-  epic-b1: backlog
-  b1-1-whitelist-check-in-classification: backlog
-  b1-2-dynamic-user-settings-in-classification: backlog
-  b1-3-fix-idempotency-sanitize-llm-usage-counter: backlog
+  epic-b1: done
+  b1-1-whitelist-check-in-classification: done
+  b1-2-dynamic-user-settings-in-classification: done
+  b1-3-fix-idempotency-sanitize-llm-usage-counter: done
   epic-b1-retrospective: optional
 
   # ── Epic B2: Dashboard Fonctionnel ──
-  epic-b2: backlog
-  b2-1-settings-page-interactive: backlog
-  b2-2-navigation-gear-icon-empty-states: backlog
-  b2-3-trust-score-real-recap-table-fix: backlog
+  epic-b2: done
+  b2-1-settings-page-interactive: done
+  b2-2-navigation-gear-icon-empty-states: done
+  b2-3-trust-score-real-recap-table-fix: done
   epic-b2-retrospective: optional
 
   # ── Epic B3: Trust & Feedback Loop ──

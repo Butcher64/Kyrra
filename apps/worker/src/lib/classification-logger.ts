@@ -29,6 +29,11 @@ const ALLOWED_FIELDS = new Set([
   'count',
   'deleted_count',
   'expires_at',
+  'filtered_count',
+  'a_voir_count',
+  'tokens_created',
+  'reason',
+  'error',
 ])
 
 export class ClassificationLoggerViolation extends Error {
