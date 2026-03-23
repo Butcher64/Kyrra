@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ExposureModePills } from './ExposureModePills.client'
+import { DeleteAccountDialog } from './DeleteAccountDialog.client'
 import { useToast } from '@/components/ui/toast'
 import { updateExposureMode, updateNotifications } from '@/app/(dashboard)/actions/settings'
 
@@ -104,9 +105,15 @@ export function SettingsForm({ currentMode, recapEnabled, userEmail }: SettingsF
         <h2 className="text-sm font-semibold mb-3 text-(--card-foreground)">
           Compte
         </h2>
-        <p className="text-xs text-(--muted-foreground)">
+        <p className="text-xs text-(--muted-foreground) mb-4">
           {userEmail}
         </p>
+        <div className="pt-4 border-t border-(--border)">
+          <p className="text-xs text-(--muted-foreground) mb-2">
+            Zone dangereuse
+          </p>
+          <DeleteAccountDialog />
+        </div>
       </section>
     </>
   )
