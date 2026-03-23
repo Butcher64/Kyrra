@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { encrypt } from '@/lib/crypto'
 
 // Gmail PKCE OAuth flow — SEPARATE from Supabase Auth login
 // This grants gmail.modify + gmail.readonly scopes for email processing
@@ -68,17 +69,15 @@ export async function GET(request: Request) {
     })
     const userInfo = await userInfoResponse.json()
 
-    // Store tokens in user_integrations
-    // Note: In production, tokens should be AES-256 encrypted before storage
-    // For MVP-0 development, storing directly (encryption added in hardening story)
+    // Store tokens encrypted (AES-256-GCM) in user_integrations
     const { error: insertError } = await supabase
       .from('user_integrations')
       .upsert({
         user_id: user.id,
         provider: 'gmail',
         email: userInfo.email,
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
+        access_token: encrypt(tokens.access_token),
+        refresh_token: encrypt(tokens.refresh_token),
         expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
         scopes: GMAIL_SCOPES.split(' '),
         status: 'active',

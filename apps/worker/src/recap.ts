@@ -26,17 +26,43 @@ const MINUTES_PER_EMAIL = 0.75
  */
 export async function recapCronLoop(supabase: any): Promise<void> {
   // NFR-PERF-12: all Recaps within 15 min
-  // 1. Get all active Pro/Trial users who should receive Recap today
-  const { data: users } = await supabase
-    .from('users')
-    .select('id, email, display_name, created_at')
-    .in('subscription_tier', ['pro', 'team', 'trial'])
+  // 1. Get all users who have recap_enabled in user_settings
+  //    Join with user_integrations for email (no `users` table — Supabase Auth stores identity)
+  const { data: settingsRows } = await supabase
+    .from('user_settings')
+    .select('user_id')
     .eq('recap_enabled', true)
 
-  if (!users || users.length === 0) {
+  if (!settingsRows || settingsRows.length === 0) {
     await new Promise((resolve) => setTimeout(resolve, 3_600_000))
     return
   }
+
+  // Fetch email + created_at from user_integrations for each user
+  const userIds = settingsRows.map((r: { user_id: string }) => r.user_id)
+  const { data: integrations } = await supabase
+    .from('user_integrations')
+    .select('user_id, email, created_at')
+    .in('user_id', userIds)
+    .eq('status', 'active')
+
+  if (!integrations || integrations.length === 0) {
+    await new Promise((resolve) => setTimeout(resolve, 3_600_000))
+    return
+  }
+
+  // Deduplicate by user_id (one recap per user)
+  const seenUsers = new Set<string>()
+  const users = integrations.filter((i: { user_id: string }) => {
+    if (seenUsers.has(i.user_id)) return false
+    seenUsers.add(i.user_id)
+    return true
+  }).map((i: { user_id: string; email: string; created_at: string }) => ({
+    id: i.user_id,
+    email: i.email,
+    display_name: i.email.split('@')[0] ?? 'Utilisateur',
+    created_at: i.created_at,
+  }))
 
   const today = new Date().toISOString().split('T')[0]!
   const dateFormatted = formatFrenchDate(new Date())

@@ -8,6 +8,12 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route),
   )
 
+  // Routes that don't require Gmail integration (but do require auth)
+  const noIntegrationRoutes = ['/connect-gmail', '/onboarding-progress']
+  const isNoIntegrationRoute = noIntegrationRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
+  )
+
   // If Supabase env vars are not set, skip auth (graceful degradation)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -48,6 +54,23 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
+    }
+
+    // If user is authenticated but not on a no-integration route, check Gmail integration
+    if (!isNoIntegrationRoute) {
+      const { data: integration } = await supabase
+        .from('user_integrations')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('provider', 'gmail')
+        .eq('status', 'active')
+        .maybeSingle()
+
+      if (!integration) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/connect-gmail'
+        return NextResponse.redirect(url)
+      }
     }
 
     return supabaseResponse

@@ -5,6 +5,7 @@ import { classifyWithLLM, type EmailContent } from './lib/llm-gateway'
 import { stripPIIFromSummary, sanitizeForLLM } from './lib/pii-stripper'
 import { getValidAccessToken, fetchEmail, ensureLabels, applyLabel, GmailAuthError } from './lib/gmail'
 import { ClassificationLogger } from './lib/classification-logger'
+import { checkWhitelist } from './lib/whitelist-check'
 import type { ClassificationResult } from '@kyrra/shared'
 
 /**
@@ -63,7 +64,59 @@ export async function classificationLoop(supabase: any): Promise<void> {
       return // Skip classification — Kyrra's own emails
     }
 
-    // TODO: Check user whitelist (SHA-256 hash comparison)
+    // Check user whitelist (SHA-256 hash comparison — B1.1)
+    const whitelistMatch = await checkWhitelist(supabase, job.user_id, senderEmail)
+    if (whitelistMatch === 'exact') {
+      // Exact address match — skip classification entirely
+      ClassificationLogger.log({
+        event: 'classification_skipped',
+        email_id: job.gmail_message_id,
+        reason: 'whitelist_exact_match',
+      })
+      await completeJob(supabase, job.id)
+      return
+    }
+
+    // Idempotency check: skip if already classified (B1.3)
+    const { data: existingClassification } = await supabase
+      .from('email_classifications')
+      .select('id')
+      .eq('user_id', job.user_id)
+      .eq('gmail_message_id', job.gmail_message_id)
+      .limit(1)
+      .maybeSingle()
+
+    if (existingClassification) {
+      await completeJob(supabase, job.id)
+      return
+    }
+
+    // Free plan usage counter (B1.3) — atomic increment with 30/day boundary
+    const { data: usageCount } = await supabase.rpc('increment_usage_counter', {
+      p_user_id: job.user_id,
+      p_date: new Date().toISOString().split('T')[0],
+    })
+
+    if (usageCount === null) {
+      // Daily limit reached — skip classification
+      ClassificationLogger.log({
+        event: 'classification_skipped',
+        email_id: job.gmail_message_id,
+        reason: 'daily_limit_reached',
+      })
+      await completeJob(supabase, job.id)
+      return
+    }
+
+    // Load user settings (B1.2 — dynamic role + exposure mode)
+    const { data: userSettings } = await supabase
+      .from('user_settings')
+      .select('user_role, exposure_mode')
+      .eq('user_id', job.user_id)
+      .maybeSingle()
+
+    const userRole: string = userSettings?.user_role ?? 'CEO'
+    const exposureMode: string = userSettings?.exposure_mode ?? 'normal'
 
     // Step 1: Fingerprinting
     const fpResult = fingerprintEmail(emailHeaders)
@@ -82,10 +135,10 @@ export async function classificationLoop(supabase: any): Promise<void> {
         const llmResult = await classifyWithLLM({
           from: emailHeaders.from,
           subject: emailHeaders.subject,
-          headers: gmailEmail.bodyPreview,
-          tail: gmailEmail.bodyTail,
-          userRole: 'CEO', // TODO: from user profile
-          exposureMode: 'normal', // TODO: from user settings
+          headers: sanitizeForLLM(gmailEmail.bodyPreview),
+          tail: sanitizeForLLM(gmailEmail.bodyTail),
+          userRole,
+          exposureMode,
         }, supabase)
 
         if (llmResult) {
@@ -110,10 +163,10 @@ export async function classificationLoop(supabase: any): Promise<void> {
       const llmResult = await classifyWithLLM({
         from: emailHeaders.from,
         subject: emailHeaders.subject,
-        headers: gmailEmail.bodyPreview,
-        tail: gmailEmail.bodyTail,
-        userRole: 'CEO', // TODO: from user profile
-        exposureMode: 'normal', // TODO: from user settings
+        headers: sanitizeForLLM(gmailEmail.bodyPreview),
+        tail: sanitizeForLLM(gmailEmail.bodyTail),
+        userRole,
+        exposureMode,
       }, supabase)
 
       if (llmResult) {
@@ -131,6 +184,21 @@ export async function classificationLoop(supabase: any): Promise<void> {
       }
     }
 
+    // Domain whitelist: never BLOQUE a whitelisted domain (B1.1)
+    if (whitelistMatch === 'domain' && finalResult === 'BLOQUE') {
+      finalResult = 'A_VOIR'
+    }
+
+    // Mode-specific confidence thresholds (B1.2)
+    // Strict: more aggressive at surfacing for review
+    // Permissive: only surface very low confidence
+    const aVoirThreshold = exposureMode === 'strict' ? 0.8
+      : exposureMode === 'permissive' ? 0.4
+      : 0.6
+    if (finalResult !== 'A_VOIR' && confidence < aVoirThreshold) {
+      finalResult = 'A_VOIR'
+    }
+
     const processingTimeMs = Date.now() - startTime
 
     // Save classification result (append-only — ADR-003)
@@ -142,7 +210,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
       summary,
       source,
       processing_time_ms: processingTimeMs,
-      idempotency_key: `${job.gmail_message_id}-${Date.now()}`,
+      idempotency_key: job.gmail_message_id,
     })
 
     // Apply Gmail label (Story 2.6)

@@ -1,4 +1,6 @@
 
+import Link from 'next/link'
+import { Settings } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ProtectedStatusBadge } from '@/components/dashboard/ProtectedStatusBadge'
 import { HeroStat } from '@/components/dashboard/HeroStat.client'
@@ -34,28 +36,81 @@ export default async function DashboardPage() {
     .eq('user_id', user!.id)
     .single()
 
+  // Fetch user settings for real exposure mode
+  const { data: settings } = await supabase
+    .from('user_settings')
+    .select('exposure_mode')
+    .eq('user_id', user!.id)
+    .single()
+
+  // Compute real trust score: (1 - reclassification_rate) * 100 over last 7 days
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
+  const { count: totalClassified7d } = await supabase
+    .from('email_classifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user!.id)
+    .gte('created_at', sevenDaysAgo)
+
+  const { count: reclassified7d } = await supabase
+    .from('email_classifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user!.id)
+    .gte('created_at', sevenDaysAgo)
+    .not('reclassified_to', 'is', null)
+
+  const total7d = totalClassified7d ?? 0
+  const reclass7d = reclassified7d ?? 0
+  const trustScore = total7d > 0
+    ? `${Math.round((1 - reclass7d / total7d) * 100)}%`
+    : '—'
+
+  const exposureMode = settings?.exposure_mode ?? 'normal'
+  const modeLabel = exposureMode === 'strict' ? 'Strict'
+    : exposureMode === 'permissive' ? 'Permissif'
+    : 'Normal'
+
   const alertCount = alerts?.length ?? 0
+  const filtered = filteredToday ?? 0
+  const hasClassifications = filtered > 0 || alertCount > 0
   const status = health?.mode === 'paused' ? 'paused' as const
     : alertCount > 0 ? 'alert' as const
     : 'protected' as const
 
   return (
     <main className="flex justify-center px-6 pt-16 pb-12 min-h-screen">
-      <div className="w-full max-w-[440px]">
+      <div className="relative w-full max-w-[440px]">
+        {/* Gear icon — navigate to settings */}
+        <Link
+          href="/settings"
+          aria-label="Paramètres"
+          className="absolute top-0 right-0 text-(--muted-foreground) transition-opacity duration-150 hover:opacity-60"
+        >
+          <Settings size={20} strokeWidth={1.5} />
+        </Link>
+
         {/* Status badge — MI-6 */}
         <ProtectedStatusBadge status={status} alertCount={alertCount} />
 
         {/* Hero stat — NumberTicker roll-up */}
         <div className="mt-10">
-          <HeroStat value={filteredToday ?? 0} label="distractions supprimées" />
+          <HeroStat value={filtered} label="distractions supprimées" />
         </div>
 
         {/* Stat cards */}
         <div className="flex gap-3 mt-10">
           <StatCard value={alertCount} label="À voir" accent />
-          <StatCard value="Normal" label="Mode" />
-          <StatCard value="94%" label="Trust" />
+          <StatCard value={modeLabel} label="Mode" />
+          <StatCard value={trustScore} label="Trust" />
         </div>
+
+        {/* Empty state: no classifications today */}
+        {!hasClassifications && (
+          <div className="mt-10 text-center">
+            <p className="text-sm text-(--muted-foreground)">
+              Kyrra surveille votre boîte. Le premier rapport arrive bientôt.
+            </p>
+          </div>
+        )}
 
         {/* Alert email cards — with reclassification (MI-1) */}
         {alerts && alerts.length > 0 && (
@@ -71,24 +126,40 @@ export default async function DashboardPage() {
           </div>
         )}
 
+        {/* Empty state: classifications exist but zero "À voir" */}
+        {hasClassifications && alertCount === 0 && (
+          <div className="mt-10 text-center">
+            <p className="text-sm text-(--muted-foreground)">
+              Rien à signaler. Votre boîte est calme.
+            </p>
+            <button className="mt-2 text-xs text-[var(--color-a-voir)] bg-transparent border-none cursor-pointer font-medium transition-opacity duration-150 hover:opacity-70">
+              Voir les tendances &rarr;
+            </button>
+          </div>
+        )}
+
         {/* Filtered link — Gmail is the destination (Principle 3) */}
-        <div className="mt-8 text-center">
-          <a
-            href="https://mail.google.com/mail/u/0/#label/Kyrra+%E2%80%94+Filtr%C3%A9"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-(--muted-foreground) no-underline transition-opacity duration-200 hover:opacity-70"
-          >
-            Voir les {filteredToday ?? 0} filtrés dans Gmail &rarr;
-          </a>
-        </div>
+        {filtered > 0 && (
+          <div className="mt-8 text-center">
+            <a
+              href="https://mail.google.com/mail/u/0/#label/Kyrra+%E2%80%94+Filtr%C3%A9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-(--muted-foreground) no-underline transition-opacity duration-200 hover:opacity-70"
+            >
+              Voir les {filtered} filtrés dans Gmail &rarr;
+            </a>
+          </div>
+        )}
 
         {/* Detail toggle — MI-4 */}
-        <div className="mt-3 text-center">
-          <button className="text-xs text-[var(--color-a-voir)] bg-transparent border-none cursor-pointer font-medium transition-opacity duration-150 hover:opacity-70">
-            Voir les détails
-          </button>
-        </div>
+        {hasClassifications && (
+          <div className="mt-3 text-center">
+            <button className="text-xs text-[var(--color-a-voir)] bg-transparent border-none cursor-pointer font-medium transition-opacity duration-150 hover:opacity-70">
+              Voir les détails
+            </button>
+          </div>
+        )}
       </div>
     </main>
   )

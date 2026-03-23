@@ -11,6 +11,8 @@
  * - Rate limit: 250 quota units/sec (user-level)
  */
 
+import { encrypt, decrypt } from './crypto'
+
 const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me'
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token'
 
@@ -115,10 +117,12 @@ export async function getValidAccessToken(
   const needsRefresh = expiresAt.getTime() - Date.now() < TOKEN_REFRESH_BUFFER_MS
 
   if (!needsRefresh) {
-    return integration.access_token
+    // Tokens are stored encrypted — decrypt before use
+    return decrypt(integration.access_token)
   }
 
-  const newTokens = await refreshAccessToken(integration.refresh_token)
+  // Decrypt refresh_token for the refresh call
+  const newTokens = await refreshAccessToken(decrypt(integration.refresh_token))
 
   if (!newTokens) {
     // invalid_grant — mark as revoked (PM9)
@@ -135,11 +139,12 @@ export async function getValidAccessToken(
     return null
   }
 
-  // Persist new tokens
+  // Persist new tokens (encrypted)
+  const encryptedAccessToken = encrypt(newTokens.access_token)
   await supabase
     .from('user_integrations')
     .update({
-      access_token: newTokens.access_token,
+      access_token: encryptedAccessToken,
       expires_at: newTokens.expires_at.toISOString(),
       updated_at: new Date().toISOString(),
     })
@@ -152,7 +157,7 @@ export async function getValidAccessToken(
     .eq('id', integration.id)
     .single()
 
-  if (!readBack || readBack.access_token !== newTokens.access_token) {
+  if (!readBack || readBack.access_token !== encryptedAccessToken) {
     throw new Error('Token refresh read-back assertion failed — DB write not persisted')
   }
 

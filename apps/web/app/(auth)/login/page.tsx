@@ -20,6 +20,7 @@ export default async function LoginPage() {
         Faites taire le bruit. Gardez l&apos;essentiel.
       </p>
       <form action="/auth/callback" method="GET">
+        <input type="hidden" name="next" value="/connect-gmail" />
         <Button type="submit" size="lg" className="bg-[var(--color-a-voir)] text-white hover:opacity-80">
           Se connecter avec Google
         </Button>
