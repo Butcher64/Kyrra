@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/browser'
-import { Button } from '@/components/ui/button'
 
 type ScanStatus = {
   status: 'pending' | 'scanning' | 'completed' | 'failed'
@@ -46,77 +45,103 @@ export default function OnboardingProgressPage() {
     : 0
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen px-8 max-w-[480px] mx-auto gap-6">
-      {!isComplete ? (
-        <>
-          <h1 className="text-xl font-medium text-(--foreground)">
-            Analyse en cours...
-          </h1>
+    <main className="flex items-center justify-center min-h-screen bg-brand-gradient relative overflow-hidden">
+      {/* Grid overlay */}
+      <div className="bg-grid absolute inset-0 opacity-10" />
 
-          {/* Progress bar — MI-3 */}
-          <div className="w-full h-1 bg-(--muted) rounded-sm overflow-hidden">
-            <div
-              className="h-full bg-[var(--color-a-voir)] rounded-sm transition-[width] duration-500 ease-out"
-              style={{ width: `${Math.max(progress, 5)}%` }}
-            />
-          </div>
+      {/* Glass card */}
+      <div className="relative z-10 w-full max-w-[500px] mx-4 glass rounded-2xl p-10 text-center">
+        {!isComplete ? (
+          <>
+            {/* Shield icon with pulse animation */}
+            <div className="mx-auto mb-8 size-16 rounded-full bg-white/10 flex items-center justify-center animate-pulse">
+              <svg className="size-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
 
-          {/* Real-time counters — slot machine style (MI-3) */}
-          <div className="flex gap-8 mt-4">
-            <div className="text-center">
-              <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">
-                {scan?.emails_processed ?? 0}
-              </div>
-              <div className="text-xs text-(--muted-foreground)">
-                emails analysés
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">
-                {scan?.contacts_found ?? 0}
-              </div>
-              <div className="text-xs text-(--muted-foreground)">
-                contacts identifiés
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="font-(family-name:--font-outfit) text-2xl font-semibold text-(--foreground)">
-                {scan?.prospecting_found ?? 0}
-              </div>
-              <div className="text-xs text-(--muted-foreground)">
-                prospections détectées
-              </div>
-            </div>
-          </div>
-
-          {/* Close safely message (appears at T+15s — MI-3) */}
-          {showCloseMessage && (
-            <p className="text-xs text-(--muted-foreground) text-center mt-4 opacity-80">
-              Fermez sans souci. Le scan continue en arrière-plan.
-              <br />
-              Vous recevrez un email quand c&apos;est prêt.
+            <h1 className="text-2xl font-outfit font-medium text-white mb-2">
+              Kyrra analyse votre boite...
+            </h1>
+            <p className="text-sm text-white/50 mb-8">
+              Construction de votre whitelist en cours
             </p>
-          )}
-        </>
-      ) : (
-        <>
-          {/* Scan complete — "wow moment" (MI-3) */}
-          <span className="text-3xl text-[var(--color-protected)]">&#x2713;</span>
-          <h1 className="text-xl font-medium text-(--foreground)">
-            Scan terminé
-          </h1>
-          <p className="text-sm text-(--muted-foreground) text-center">
-            {scan.total_sent} emails analysés. {scan.prospecting_found} étaient du bruit.
-            <br />
-            {scan.contacts_found} contacts whitelistés automatiquement.
-          </p>
-          <Button asChild size="lg" className="mt-4 bg-[var(--color-a-voir)] text-white hover:opacity-80">
-            <a href="/">
+
+            {/* Progress bar */}
+            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-8">
+              <div
+                className="h-full rounded-full transition-[width] duration-500 ease-out"
+                style={{
+                  width: `${Math.max(progress, 5)}%`,
+                  background: `linear-gradient(90deg, var(--color-brand-start), var(--color-brand-accent))`,
+                }}
+              />
+            </div>
+
+            {/* Real-time counters */}
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <div className="font-outfit text-3xl font-semibold text-white tabular-nums">
+                  {scan?.emails_processed ?? 0}
+                </div>
+                <div className="text-xs text-white/40 mt-1">
+                  emails analyses
+                </div>
+              </div>
+              <div>
+                <div className="font-outfit text-3xl font-semibold text-white tabular-nums">
+                  {scan?.contacts_found ?? 0}
+                </div>
+                <div className="text-xs text-white/40 mt-1">
+                  contacts
+                </div>
+              </div>
+              <div>
+                <div className="font-outfit text-3xl font-semibold text-white tabular-nums">
+                  {scan?.prospecting_found ?? 0}
+                </div>
+                <div className="text-xs text-white/40 mt-1">
+                  prospections
+                </div>
+              </div>
+            </div>
+
+            {/* Close safely message (appears at T+15s — MI-3) */}
+            {showCloseMessage && (
+              <p className="text-xs text-white/40 mt-8 leading-relaxed">
+                Fermez sans souci. Le scan continue en arriere-plan.
+                <br />
+                Vous recevrez un email quand c&apos;est pret.
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Scan complete — "wow moment" */}
+            <div className="mx-auto mb-6 size-16 rounded-full bg-[var(--color-protected)]/20 flex items-center justify-center">
+              <svg className="size-8 text-[var(--color-protected)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+
+            <h1 className="text-2xl font-outfit font-medium text-white mb-2">
+              Scan termine
+            </h1>
+            <p className="text-sm text-white/60 leading-relaxed mb-8">
+              {scan.total_sent} emails analyses. {scan.prospecting_found} etaient du bruit.
+              <br />
+              {scan.contacts_found} contacts whitelistes automatiquement.
+            </p>
+
+            <a
+              href="/dashboard"
+              className="inline-flex items-center justify-center h-11 px-8 rounded-lg bg-white text-[var(--color-brand-start)] font-medium text-sm hover:opacity-90 transition-opacity"
+            >
               Voir votre tableau de bord &rarr;
             </a>
-          </Button>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </main>
   )
 }

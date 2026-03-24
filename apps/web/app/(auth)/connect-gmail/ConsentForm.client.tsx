@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Button } from '@/components/ui/button'
 import { saveConsent } from './actions'
 
 function CheckIcon({ className }: { className?: string }) {
@@ -48,16 +47,16 @@ function Checkbox({
         onClick={() => onChange(!checked)}
         className={`
           mt-0.5 flex-shrink-0 size-5 rounded border-2 flex items-center justify-center
-          transition-colors duration-150
+          transition-all duration-200
           ${checked
-            ? 'bg-[var(--color-a-voir)] border-[var(--color-a-voir)] text-white'
+            ? 'bg-brand-gradient border-transparent text-white scale-105'
             : 'border-(--muted-foreground) bg-transparent group-hover:border-(--foreground)'
           }
         `}
       >
         {checked && <CheckIcon className="size-3" />}
       </button>
-      <span className="text-sm text-(--card-foreground) leading-relaxed select-none">
+      <span className="text-sm text-(--foreground) leading-relaxed select-none">
         {label}
       </span>
     </label>
@@ -81,7 +80,7 @@ export function ConsentForm() {
       })
 
       if (result.error) {
-        setError('Erreur lors de la sauvegarde du consentement. Veuillez réessayer.')
+        setError('Erreur lors de la sauvegarde du consentement. Veuillez reessayer.')
         return
       }
 
@@ -91,7 +90,7 @@ export function ConsentForm() {
   }
 
   return (
-    <div className="w-full mt-8">
+    <div className="w-full">
       {/* Consent checkboxes */}
       <div className="flex flex-col gap-4">
         <Checkbox
@@ -101,7 +100,7 @@ export function ConsentForm() {
           required
           label={
             <>
-              J&apos;autorise Kyrra à classifier mes emails par intelligence artificielle{' '}
+              J&apos;autorise Kyrra a classifier mes emails par intelligence artificielle{' '}
               <span className="text-[var(--color-bloque)]">*</span>
             </>
           }
@@ -118,11 +117,11 @@ export function ConsentForm() {
       <p className="text-xs text-(--muted-foreground) mt-4">
         En continuant, vous acceptez nos{' '}
         <a href="/legal/cgu" className="underline underline-offset-2 hover:text-(--foreground) transition-colors">
-          Conditions Générales
+          Conditions Generales
         </a>{' '}
         et notre{' '}
         <a href="/legal/privacy" className="underline underline-offset-2 hover:text-(--foreground) transition-colors">
-          Politique de confidentialité
+          Politique de confidentialite
         </a>.
       </p>
 
@@ -132,14 +131,18 @@ export function ConsentForm() {
       )}
 
       {/* Connect button */}
-      <Button
-        size="lg"
-        className="mt-6 w-full bg-[var(--color-a-voir)] text-white hover:opacity-80 disabled:opacity-40"
+      <button
+        className={`
+          mt-6 w-full h-11 rounded-lg bg-brand-gradient text-white font-medium text-sm
+          flex items-center justify-center gap-2 glow-brand
+          transition-opacity cursor-pointer
+          ${(!classifyConsent || isPending) ? 'opacity-40 pointer-events-none' : 'hover:opacity-90'}
+        `}
         disabled={!classifyConsent || isPending}
         onClick={handleConnect}
       >
         {isPending ? 'Connexion...' : 'Connecter Gmail \u2192'}
-      </Button>
+      </button>
     </div>
   )
 }

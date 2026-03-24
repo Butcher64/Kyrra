@@ -8,6 +8,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: 'bg-(--primary) text-(--primary-foreground) rounded-lg',
+        brand: 'bg-brand-gradient text-white hover:opacity-90 glow-brand rounded-lg',
+        outline: 'border border-(--border) bg-transparent hover:bg-(--muted)/50 rounded-lg',
         ghost: 'bg-transparent text-(--muted-foreground) hover:text-(--foreground)',
         link: 'bg-transparent text-[var(--color-a-voir)] underline-offset-4 hover:underline',
       },

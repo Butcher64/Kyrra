@@ -2,16 +2,18 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
   // Public routes — no auth required
   const publicRoutes = ['/login', '/auth/callback', '/token-expired', '/legal']
-  const isPublicRoute = publicRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route),
-  )
+  const isPublicRoute =
+    pathname === '/' ||
+    publicRoutes.some((route) => pathname.startsWith(route))
 
   // Routes that don't require Gmail integration (but do require auth)
   const noIntegrationRoutes = ['/connect-gmail', '/onboarding-progress']
   const isNoIntegrationRoute = noIntegrationRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route),
+    pathname.startsWith(route),
   )
 
   // If Supabase env vars are not set, skip auth (graceful degradation)
@@ -46,7 +48,13 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
+    // Public routes: let through, but redirect authenticated users from / to /dashboard
     if (isPublicRoute) {
+      if (user && pathname === '/') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        return NextResponse.redirect(url)
+      }
       return supabaseResponse
     }
 

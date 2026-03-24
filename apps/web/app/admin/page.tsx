@@ -20,7 +20,7 @@ export default async function AdminPage() {
   // Check admin access
   const adminIds = (process.env.ADMIN_USER_IDS ?? '').split(',').map((id) => id.trim())
   if (!adminIds.includes(user.id)) {
-    redirect('/')
+    redirect('/dashboard')
   }
 
   // Fetch system-wide stats
@@ -78,7 +78,7 @@ export default async function AdminPage() {
         </Card>
       </div>
 
-      <a href="/" className="text-xs text-[var(--color-a-voir)] no-underline transition-opacity duration-150 hover:opacity-70">
+      <a href="/dashboard" className="text-xs text-[var(--color-a-voir)] no-underline transition-opacity duration-150 hover:opacity-70">
         &larr; Retour au tableau de bord
       </a>
     </main>

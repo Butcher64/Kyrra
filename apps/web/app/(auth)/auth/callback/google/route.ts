@@ -13,8 +13,19 @@ const GMAIL_SCOPES = [
   'https://www.googleapis.com/auth/gmail.readonly',
 ].join(' ')
 
+function getPublicOrigin(request: Request): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '')
+  }
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host')
+  const proto = request.headers.get('x-forwarded-proto') || 'https'
+  if (host) return `${proto}://${host}`
+  return new URL(request.url).origin
+}
+
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const { searchParams } = new URL(request.url)
+  const origin = getPublicOrigin(request)
   const code = searchParams.get('code')
   const state = searchParams.get('state')
 

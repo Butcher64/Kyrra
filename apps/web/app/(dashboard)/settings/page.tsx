@@ -1,4 +1,3 @@
-
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { SettingsForm } from '@/components/dashboard/SettingsForm.client'
@@ -18,46 +17,40 @@ export default async function SettingsPage() {
   const recapEnabled = settings?.recap_enabled ?? false
 
   return (
-    <main className="flex justify-center px-6 pt-16 pb-12 min-h-screen">
-      <div className="w-full max-w-[560px]">
-        <Link
-          href="/"
-          className="text-xs text-[var(--color-a-voir)] no-underline transition-opacity duration-150 hover:opacity-70"
-        >
-          &larr; Retour au tableau de bord
-        </Link>
+    <>
+      <h1 className="font-outfit text-2xl font-semibold text-[var(--foreground)]">
+        Paramètres
+      </h1>
+      <p className="mt-1 mb-8 text-sm text-[var(--muted-foreground)]">
+        Configurez le comportement de Kyrra
+      </p>
 
-        <h1 className="text-xl font-medium mb-8 mt-4">
-          Paramètres
-        </h1>
+      <SettingsForm
+        currentMode={currentMode}
+        recapEnabled={recapEnabled}
+        userEmail={user?.email ?? ''}
+      />
 
-        <SettingsForm
-          currentMode={currentMode}
-          recapEnabled={recapEnabled}
-          userEmail={user?.email ?? ''}
-        />
-
-        <div className="mt-12 pt-6 border-t border-[var(--border)]">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)] mb-3">
-            Informations legales
-          </h2>
-          <div className="flex gap-4 text-sm">
-            <Link
-              href="/legal/cgu"
-              className="text-[var(--muted-foreground)] no-underline transition-opacity duration-150 hover:opacity-70"
-            >
-              Conditions Generales d&apos;Utilisation
-            </Link>
-            <span className="text-[var(--muted-foreground)]">&middot;</span>
-            <Link
-              href="/legal/privacy"
-              className="text-[var(--muted-foreground)] no-underline transition-opacity duration-150 hover:opacity-70"
-            >
-              Politique de confidentialite
-            </Link>
-          </div>
+      <div className="mt-12 pt-6 border-t border-[var(--border)]">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)] mb-3">
+          Informations légales
+        </h2>
+        <div className="flex gap-4 text-sm">
+          <Link
+            href="/legal/cgu"
+            className="text-[var(--muted-foreground)] no-underline transition-opacity duration-150 hover:opacity-70"
+          >
+            Conditions Générales d&apos;Utilisation
+          </Link>
+          <span className="text-[var(--muted-foreground)]">&middot;</span>
+          <Link
+            href="/legal/privacy"
+            className="text-[var(--muted-foreground)] no-underline transition-opacity duration-150 hover:opacity-70"
+          >
+            Politique de confidentialité
+          </Link>
         </div>
       </div>
-    </main>
+    </>
   )
 }

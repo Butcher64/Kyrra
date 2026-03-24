@@ -16,7 +16,7 @@ export default function TokenExpiredPage() {
           Reclassifiez directement depuis le tableau de bord.
         </p>
         <Button asChild className="mt-2">
-          <a href="/">Ouvrir le tableau de bord &rarr;</a>
+          <a href="/dashboard">Ouvrir le tableau de bord &rarr;</a>
         </Button>
       </div>
     </main>

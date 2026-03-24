@@ -2,10 +2,15 @@ FROM node:20-alpine AS build
 RUN corepack enable && corepack prepare pnpm@10 --activate
 WORKDIR /app
 
-# Hardcoded for build — NEXT_PUBLIC vars are inlined by Next.js at build time
-ENV NEXT_PUBLIC_SUPABASE_URL=https://nhvlkpibtnggsjuqthuz.supabase.co
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_qQBbp9t-eT8MpvC1ZzwC7w_r8GrkiT1
-ENV NEXT_PUBLIC_APP_URL=https://wo06tt0lfdyui2rfu8q3vlem.hacksprint.fr
+# Build-time args — passed via --build-arg in Coolify
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_APP_URL
+
+# Next.js inlines NEXT_PUBLIC_* at build time
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 
 COPY . .
 RUN pnpm install --frozen-lockfile
@@ -21,8 +26,6 @@ COPY --from=build /app/apps/web/public ./apps/web/public
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-ENV NEXT_PUBLIC_SUPABASE_URL=https://nhvlkpibtnggsjuqthuz.supabase.co
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_qQBbp9t-eT8MpvC1ZzwC7w_r8GrkiT1
 EXPOSE 3000
 
 CMD ["node", "apps/web/server.js"]

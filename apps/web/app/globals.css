@@ -4,6 +4,7 @@
   /* Typography */
   --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-outfit: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   /* Radius */
   --radius-sm: 0.375rem;
@@ -20,24 +21,42 @@
   --color-protected: oklch(0.627 0.194 149.214);
   --color-attention: oklch(0.666 0.179 58.318);
   --color-info: oklch(0.588 0.158 241.966);
+
+  /* Brand */
+  --color-brand-start: oklch(0.45 0.18 265);
+  --color-brand-end: oklch(0.38 0.22 290);
+  --color-brand-accent: oklch(0.72 0.19 195);
+
+  /* Sidebar */
+  --sidebar-bg: oklch(0.13 0.015 270);
+  --sidebar-fg: oklch(0.75 0 0);
+  --sidebar-fg-active: oklch(0.95 0 0);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-hover: oklch(1 0 0 / 5%);
+  --sidebar-active: oklch(1 0 0 / 10%);
+
+  /* Glass */
+  --glass-bg: oklch(1 0 0 / 4%);
+  --glass-border: oklch(1 0 0 / 8%);
+  --glass-blur: 16px;
 }
 
 /* ── Light mode (default) ── */
 :root {
-  --background: oklch(0.985 0 0);
+  --background: oklch(0.975 0.003 270);
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card: oklch(1 0 0 / 80%);
   --card-foreground: oklch(0.145 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.145 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.588 0.158 241.966);
+  --border: oklch(0.90 0.01 270);
+  --input: oklch(0.90 0.01 270);
+  --ring: oklch(0.60 0.20 265);
   --radius: 0.625rem;
-  --primary: oklch(0.145 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.45 0.18 265);
+  --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.145 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -48,24 +67,24 @@
 
 /* ── Dark mode ── */
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.10 0.015 270);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.14 0.015 270);
   --card-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 10%);
-  --ring: oklch(0.588 0.158 241.966);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.145 0 0);
+  --border: oklch(1 0 0 / 7%);
+  --input: oklch(1 0 0 / 7%);
+  --ring: oklch(0.60 0.20 265);
+  --primary: oklch(0.60 0.20 265);
+  --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.14 0.015 270);
   --popover-foreground: oklch(0.985 0 0);
 }
 
@@ -78,6 +97,46 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ── Utility patterns ── */
+.bg-grid {
+  background-image:
+    linear-gradient(oklch(0.5 0 0 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.5 0 0 / 5%) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.bg-dots {
+  background-image: radial-gradient(oklch(0.5 0 0 / 10%) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-brand-gradient {
+  background: linear-gradient(135deg, var(--color-brand-start), var(--color-brand-end));
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.glow-brand {
+  box-shadow: 0 0 20px oklch(0.45 0.18 265 / 0.3),
+              0 0 60px oklch(0.45 0.18 265 / 0.1);
 }
 
 /* ── Animations ── */

@@ -1,28 +1,46 @@
-import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import type { LucideIcon } from 'lucide-react'
 
 interface StatCardProps {
+  icon: LucideIcon
   value: string | number
   label: string
-  accent?: boolean
+  accent?: 'brand' | 'attention' | 'protected' | 'default'
 }
 
-export function StatCard({ value, label, accent }: StatCardProps) {
+const accentStyles: Record<string, string> = {
+  brand: 'bg-[var(--color-brand-accent)]/10 text-[var(--color-brand-accent)]',
+  attention: 'bg-[var(--color-attention)]/10 text-[var(--color-attention)]',
+  protected: 'bg-[var(--color-protected)]/10 text-[var(--color-protected)]',
+  default: 'bg-[var(--muted)] text-[var(--muted-foreground)]',
+}
+
+export function StatCard({ icon: Icon, value, label, accent = 'default' }: StatCardProps) {
+  const showPulse = accent === 'attention' && typeof value === 'number' && value > 0
+
   return (
-    <Card className="flex-1">
-      <CardContent>
-        <div
-          className={cn(
-            'font-(family-name:--font-outfit) text-xl font-medium',
-            accent ? 'text-[var(--color-a-voir)]' : 'text-(--foreground)',
-          )}
-        >
-          {value}
+    <div className="glass rounded-xl px-4 py-3.5 transition-colors duration-150 hover:border-[var(--color-brand-start)]/20">
+      <div className="flex items-center gap-3">
+        <div className={cn(
+          'flex size-9 items-center justify-center rounded-full shrink-0',
+          accentStyles[accent],
+        )}>
+          <Icon size={16} strokeWidth={1.5} />
         </div>
-        <div className="mt-0.5 text-[11px] text-(--muted-foreground) uppercase tracking-[0.06em] font-medium">
-          {label}
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="font-outfit text-2xl font-medium text-[var(--foreground)]">
+              {value}
+            </span>
+            {showPulse && (
+              <span className="size-1.5 rounded-full bg-[var(--color-attention)] animate-pulse" />
+            )}
+          </div>
+          <div className="text-xs text-[var(--muted-foreground)]">
+            {label}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

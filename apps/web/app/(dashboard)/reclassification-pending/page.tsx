@@ -35,7 +35,7 @@ export default function ReclassificationPendingPage() {
         if (data.status === 'done' || data.status === 'failed') {
           clearInterval(interval)
           if (data.status === 'done') {
-            setTimeout(() => { window.location.href = '/' }, 2000)
+            setTimeout(() => { window.location.href = '/dashboard' }, 2000)
           }
         }
       }
@@ -83,7 +83,7 @@ export default function ReclassificationPendingPage() {
                 La reclassification a échoué.
               </p>
               <a
-                href="/"
+                href="/dashboard"
                 className="text-[13px] text-[var(--color-a-voir)] no-underline font-medium transition-opacity hover:opacity-70"
               >
                 Ouvrir le tableau de bord &rarr;
