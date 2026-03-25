@@ -21,6 +21,7 @@
 
 Ce projet utilise **BMAD v6.0.4** (installe dans `Kyrra/_bmad/`).
 Commandes heritees du parent `C:\Users\Thomas\Documents\CLAUDE\.claude\commands`.
+Note : CIS/GDS/BMB retires du parent le 2026-03-24 (optimisation contexte). Modules disponibles localement dans `_bmad/`.
 
 **Phase actuelle** : Solutioning (Phase 3)
 - [x] Product Brief (complete)

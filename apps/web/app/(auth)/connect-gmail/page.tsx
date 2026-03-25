@@ -20,7 +20,7 @@ export default async function ConnectGmailPage() {
           <Logo variant="white" />
         </div>
         <div className="relative z-10">
-          <blockquote className="text-3xl font-outfit font-light leading-snug text-white/90">
+          <blockquote className="text-3xl font-headline font-light leading-snug text-white/90">
             &ldquo;Un clic, et le silence revient.&rdquo;
           </blockquote>
           <p className="mt-4 text-sm text-white/50">&mdash; Sophie, DRH, 120 salaries</p>
@@ -45,7 +45,7 @@ export default async function ConnectGmailPage() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-outfit font-medium text-(--foreground)">
+                <h1 className="text-xl font-headline font-medium text-(--foreground)">
                   Connecter Gmail
                 </h1>
                 <p className="text-xs text-(--muted-foreground) font-mono">

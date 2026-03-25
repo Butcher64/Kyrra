@@ -9,7 +9,7 @@ export function Logo({ variant = 'dark', className }: LogoProps) {
   return (
     <span
       className={cn(
-        'font-outfit text-xl font-semibold tracking-tight',
+        'font-headline text-xl font-semibold tracking-tight',
         variant === 'dark' ? 'text-(--foreground)' : 'text-white',
         className,
       )}

@@ -5,13 +5,17 @@ interface SidebarSectionProps {
 
 export function SidebarSection({ label, children }: SidebarSectionProps) {
   return (
-    <div className="mb-6">
-      <div className="px-3 mb-2 text-[10px] font-medium uppercase tracking-widest text-[var(--sidebar-fg)]/50">
-        {label}
-      </div>
-      <nav className="flex flex-col gap-0.5">
+    <div className="mb-2">
+      {label && (
+        <div className="px-4 mb-3 mt-6">
+          <p className="text-[10px] font-label text-slate-500 tracking-widest uppercase">
+            {label}
+          </p>
+        </div>
+      )}
+      <div className="flex flex-col gap-0.5">
         {children}
-      </nav>
+      </div>
     </div>
   )
 }

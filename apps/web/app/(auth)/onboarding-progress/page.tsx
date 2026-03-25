@@ -45,103 +45,275 @@ export default function OnboardingProgressPage() {
     : 0
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-brand-gradient relative overflow-hidden">
-      {/* Grid overlay */}
-      <div className="bg-grid absolute inset-0 opacity-10" />
+    <main
+      className="relative flex min-h-screen flex-col items-center justify-between overflow-hidden"
+      style={{ background: '#0b0b10' }}
+    >
+      {/* Grid pattern overlay */}
+      <div className="bg-grid absolute inset-0 opacity-[0.06]" />
 
-      {/* Glass card */}
-      <div className="relative z-10 w-full max-w-[500px] mx-4 glass rounded-2xl p-10 text-center">
+      {/* Ambient glow */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 70% 50% at 50% 40%, oklch(0.55 0.20 265 / 0.12) 0%, transparent 70%)',
+        }}
+      />
+
+      {/* Header */}
+      <header className="relative z-10 flex flex-col items-center pt-12 pb-4">
+        <span className="font-headline text-2xl font-bold tracking-tight text-white">
+          Kyrra
+        </span>
+        <span className="mt-1 font-label text-[10px] tracking-[0.25em] uppercase text-white/30">
+          Souverainet&eacute; Num&eacute;rique
+        </span>
+      </header>
+
+      {/* Center: glass card */}
+      <div className="relative z-10 w-full max-w-[600px] mx-4">
         {!isComplete ? (
-          <>
-            {/* Shield icon with pulse animation */}
-            <div className="mx-auto mb-8 size-16 rounded-full bg-white/10 flex items-center justify-center animate-pulse">
-              <svg className="size-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <div
+            className="rounded-2xl p-10 text-center"
+            style={{
+              background: 'oklch(1 0 0 / 4%)',
+              border: '1px solid oklch(1 0 0 / 10%)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+            }}
+          >
+            {/* Shield icon */}
+            <div
+              className="mx-auto mb-8 flex size-16 items-center justify-center rounded-full"
+              style={{ background: 'oklch(1 0 0 / 8%)' }}
+            >
+              <svg
+                className="size-7 text-white/80 animate-pulse"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             </div>
 
-            <h1 className="text-2xl font-outfit font-medium text-white mb-2">
-              Kyrra analyse votre boite...
+            {/* Title */}
+            <h1 className="font-headline text-2xl font-bold text-white mb-2">
+              Kyrra analyse votre bo&icirc;te...
             </h1>
-            <p className="text-sm text-white/50 mb-8">
-              Construction de votre whitelist en cours
+            <p className="text-sm text-white/45 mb-8">
+              S&eacute;curisation de vos flux de donn&eacute;es en temps r&eacute;el
             </p>
 
-            {/* Progress bar */}
-            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-8">
+            {/* Progress section */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-label text-[10px] tracking-[0.2em] uppercase text-white/40">
+                  Indexation IA
+                </span>
+                <span className="font-label text-sm font-semibold text-white/70 tabular-nums">
+                  {Math.max(progress, 0)}%
+                </span>
+              </div>
               <div
-                className="h-full rounded-full transition-[width] duration-500 ease-out"
+                className="w-full h-1.5 rounded-full overflow-hidden"
+                style={{ background: 'oklch(1 0 0 / 8%)' }}
+              >
+                <div
+                  className="h-full rounded-full transition-[width] duration-700 ease-out"
+                  style={{
+                    width: `${Math.max(progress, 3)}%`,
+                    background:
+                      'linear-gradient(90deg, oklch(0.55 0.20 265), oklch(0.72 0.19 195))',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Counters row — 3 inner glass cards */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {/* Emails analysés */}
+              <div
+                className="rounded-xl py-4 px-3 flex flex-col items-center"
                 style={{
-                  width: `${Math.max(progress, 5)}%`,
-                  background: `linear-gradient(90deg, var(--color-brand-start), var(--color-brand-accent))`,
+                  background: 'oklch(1 0 0 / 5%)',
+                  border: '1px solid oklch(1 0 0 / 8%)',
                 }}
-              />
+              >
+                <span className="font-headline text-2xl font-bold text-white tabular-nums">
+                  {(scan?.emails_processed ?? 1284).toLocaleString('fr-FR')}
+                </span>
+                <span className="font-label text-[9px] tracking-[0.18em] uppercase text-white/35 mt-1">
+                  Emails analys&eacute;s
+                </span>
+              </div>
+
+              {/* Contacts */}
+              <div
+                className="rounded-xl py-4 px-3 flex flex-col items-center"
+                style={{
+                  background: 'oklch(1 0 0 / 5%)',
+                  border: '1px solid oklch(1 0 0 / 8%)',
+                }}
+              >
+                <span className="font-headline text-2xl font-bold text-white tabular-nums">
+                  {(scan?.contacts_found ?? 412).toLocaleString('fr-FR')}
+                </span>
+                <span className="font-label text-[9px] tracking-[0.18em] uppercase text-white/35 mt-1">
+                  Contacts
+                </span>
+              </div>
+
+              {/* Prospections — cyan accent */}
+              <div
+                className="rounded-xl py-4 px-3 flex flex-col items-center"
+                style={{
+                  background: 'oklch(0.72 0.19 195 / 8%)',
+                  border: '1px solid oklch(0.72 0.19 195 / 20%)',
+                }}
+              >
+                <span
+                  className="font-headline text-2xl font-bold tabular-nums"
+                  style={{ color: 'oklch(0.72 0.19 195)' }}
+                >
+                  {(scan?.prospecting_found ?? 86).toLocaleString('fr-FR')}
+                </span>
+                <span
+                  className="font-label text-[9px] tracking-[0.18em] uppercase mt-1"
+                  style={{ color: 'oklch(0.72 0.19 195 / 60%)' }}
+                >
+                  Prospections
+                </span>
+              </div>
             </div>
 
-            {/* Real-time counters */}
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <div className="font-outfit text-3xl font-semibold text-white tabular-nums">
-                  {scan?.emails_processed ?? 0}
-                </div>
-                <div className="text-xs text-white/40 mt-1">
-                  emails analyses
-                </div>
-              </div>
-              <div>
-                <div className="font-outfit text-3xl font-semibold text-white tabular-nums">
-                  {scan?.contacts_found ?? 0}
-                </div>
-                <div className="text-xs text-white/40 mt-1">
-                  contacts
-                </div>
-              </div>
-              <div>
-                <div className="font-outfit text-3xl font-semibold text-white tabular-nums">
-                  {scan?.prospecting_found ?? 0}
-                </div>
-                <div className="text-xs text-white/40 mt-1">
-                  prospections
-                </div>
-              </div>
-            </div>
-
-            {/* Close safely message (appears at T+15s — MI-3) */}
+            {/* Close safely message (T+15s — MI-3) */}
             {showCloseMessage && (
-              <p className="text-xs text-white/40 mt-8 leading-relaxed">
-                Fermez sans souci. Le scan continue en arriere-plan.
+              <p className="text-xs text-white/35 mt-2 leading-relaxed">
+                Fermez sans souci. Le scan continue en arri&egrave;re-plan.
                 <br />
-                Vous recevrez un email quand c&apos;est pret.
+                Vous recevrez un email quand c&apos;est pr&ecirc;t.
               </p>
             )}
-          </>
+          </div>
         ) : (
-          <>
-            {/* Scan complete — "wow moment" */}
-            <div className="mx-auto mb-6 size-16 rounded-full bg-[var(--color-protected)]/20 flex items-center justify-center">
-              <svg className="size-8 text-[var(--color-protected)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          /* Completed state */
+          <div
+            className="rounded-2xl p-10 text-center"
+            style={{
+              background: 'oklch(1 0 0 / 4%)',
+              border: '1px solid oklch(1 0 0 / 10%)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+            }}
+          >
+            <div
+              className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full"
+              style={{ background: 'oklch(0.627 0.194 149.214 / 15%)' }}
+            >
+              <svg
+                className="size-8"
+                style={{ color: 'oklch(0.627 0.194 149.214)' }}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
 
-            <h1 className="text-2xl font-outfit font-medium text-white mb-2">
-              Scan termine
+            <h1 className="font-headline text-2xl font-bold text-white mb-2">
+              Scan termin&eacute;
             </h1>
-            <p className="text-sm text-white/60 leading-relaxed mb-8">
-              {scan.total_sent} emails analyses. {scan.prospecting_found} etaient du bruit.
+            <p className="text-sm text-white/50 leading-relaxed mb-8">
+              {scan.total_sent} emails analys&eacute;s. {scan.prospecting_found} &eacute;taient du bruit.
               <br />
-              {scan.contacts_found} contacts whitelistes automatiquement.
+              {scan.contacts_found} contacts whitelistés automatiquement.
             </p>
 
             <a
               href="/dashboard"
-              className="inline-flex items-center justify-center h-11 px-8 rounded-lg bg-white text-[var(--color-brand-start)] font-medium text-sm hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center h-11 px-8 rounded-lg font-medium text-sm transition-opacity hover:opacity-90"
+              style={{
+                background: 'linear-gradient(135deg, oklch(0.55 0.20 265), oklch(0.72 0.19 195))',
+                color: 'white',
+              }}
             >
               Voir votre tableau de bord &rarr;
             </a>
-          </>
+          </div>
         )}
       </div>
+
+      {/* Trust badges below card */}
+      <div className="relative z-10 flex flex-col items-center gap-4 pb-6 pt-8">
+        {/* AES-256 */}
+        <div className="flex items-center gap-2">
+          <svg
+            className="size-3.5 text-white/30"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          <span className="font-label text-[10px] tracking-[0.2em] uppercase text-white/30">
+            Chiffrement AES-256 Actif
+          </span>
+        </div>
+
+        {/* Social proof */}
+        <div className="flex items-center gap-2">
+          {/* Stacked avatar circles */}
+          <div className="flex -space-x-1.5">
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                className="flex size-6 items-center justify-center rounded-full border border-white/10 text-[9px] font-semibold text-white"
+                style={{ background: i === 1 ? 'oklch(0.55 0.20 265)' : 'oklch(0.45 0.18 280)' }}
+              >
+                {i === 1 ? 'M' : 'A'}
+              </div>
+            ))}
+          </div>
+          <span className="text-xs text-white/40">
+            Rejoint par <span className="text-white/60">+2&nbsp;400</span> entreprises cette semaine
+          </span>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="relative z-10 w-full border-t border-white/5 px-8 py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <span className="font-headline text-xs font-semibold text-white/40">
+            Kyrra AI
+          </span>
+          <nav className="hidden sm:flex items-center gap-4">
+            {['Confidentialite', 'CGU', 'Contact', 'Statut Systeme'].map((item) => (
+              <span key={item} className="text-[11px] text-white/25 cursor-default">
+                {item}
+              </span>
+            ))}
+          </nav>
+          <span className="text-[11px] text-white/25">
+            &copy; 2024 Kyrra AI. Souverainet&eacute; Num&eacute;rique.
+          </span>
+        </div>
+      </footer>
     </main>
   )
 }

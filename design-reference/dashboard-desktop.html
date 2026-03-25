@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&amp;family=Inter:wght@400;500&amp;family=Space+Grotesk:wght@500&amp;family=Outfit:wght@600;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary": "#c0c1ff",
+              "primary-fixed-dim": "#adc6ff",
+              "primary-fixed": "#d8e2ff",
+              "on-secondary-fixed": "#07006c",
+              "tertiary-container": "#009eb9",
+              "on-tertiary": "#003640",
+              "tertiary-fixed": "#acedff",
+              "surface-variant": "#35343a",
+              "surface-container-highest": "#35343a",
+              "outline": "#8c909f",
+              "on-primary-fixed": "#001a42",
+              "secondary-fixed": "#e1e0ff",
+              "inverse-on-surface": "#303036",
+              "secondary-fixed-dim": "#c0c1ff",
+              "on-primary": "#002e6a",
+              "on-tertiary-fixed": "#001f26",
+              "surface-tint": "#adc6ff",
+              "outline-variant": "#424754",
+              "tertiary-fixed-dim": "#4cd7f6",
+              "on-tertiary-container": "#002f38",
+              "on-error": "#690005",
+              "error": "#ffb4ab",
+              "secondary-container": "#3131c0",
+              "on-error-container": "#ffdad6",
+              "error-container": "#93000a",
+              "on-secondary": "#1000a9",
+              "on-surface": "#e4e1e9",
+              "on-primary-fixed-variant": "#004395",
+              "on-tertiary-fixed-variant": "#004e5c",
+              "on-primary-container": "#00285d",
+              "background": "#131318",
+              "on-surface-variant": "#c2c6d6",
+              "surface-container-lowest": "#0e0e13",
+              "primary": "#adc6ff",
+              "surface-bright": "#39383e",
+              "tertiary": "#4cd7f6",
+              "surface-container": "#1f1f25",
+              "primary-container": "#4d8eff",
+              "inverse-primary": "#005ac2",
+              "surface-container-low": "#1b1b20",
+              "inverse-surface": "#e4e1e9",
+              "surface-dim": "#131318",
+              "surface-container-high": "#2a292f",
+              "surface": "#131318",
+              "on-background": "#e4e1e9",
+              "on-secondary-fixed-variant": "#2f2ebe",
+              "on-secondary-container": "#b0b2ff"
+            },
+            fontFamily: {
+              "headline": ["Outfit"],
+              "body": ["Inter"],
+              "label": ["JetBrains Mono"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .editorial-grid {
+        background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.03) 1px, transparent 0);
+        background-size: 40px 40px;
+      }
+    </style>
+</head>
+<body class="bg-surface-dim text-on-surface font-body selection:bg-primary selection:text-on-primary min-h-screen">
+<!-- SideNavBar Integration -->
+<aside class="fixed left-0 top-0 h-full w-[260px] bg-[#131318] border-r border-white/5 flex flex-col py-8 z-50">
+<div class="px-8 mb-12">
+<h1 class="text-lg font-bold text-slate-200 font-headline tracking-tight">Kyrra Enterprise</h1>
+<p class="text-[10px] font-label tracking-[0.05em] text-blue-400 mt-1">Filtrage Actif</p>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<div class="px-4 mb-4">
+<p class="text-[10px] font-label text-slate-500 tracking-widest uppercase">APERÇU</p>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-500/10 text-blue-400 border-r-2 border-blue-500 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+<span class="font-medium text-sm">Tableau de bord</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="filter_alt">filter_alt</span>
+<span class="font-medium text-sm">Filtres IA</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="insert_chart">insert_chart</span>
+<span class="font-medium text-sm">Analyses</span>
+</a>
+<div class="px-4 mt-8 mb-4">
+<p class="text-[10px] font-label text-slate-500 tracking-widest uppercase">CONFIGURATION</p>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="inventory_2">inventory_2</span>
+<span class="font-medium text-sm">Archives</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+<span class="font-medium text-sm">Paramètres</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-2">
+<button class="w-full bg-primary-container text-on-primary-container py-3 rounded-lg font-medium text-sm mb-6 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                Nouveau Filtre
+            </button>
+<div class="border-t border-white/5 pt-6 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 hover:text-slate-200 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="help_outline">help_outline</span>
+<span class="font-label text-xs">Support</span>
+</a>
+<div class="flex items-center gap-3 px-4 py-3 mt-2 rounded-xl bg-surface-container-low border border-white/5">
+<div class="w-8 h-8 rounded-full bg-primary/20 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="portrait of a professional executive in business attire with neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLMGVCLj-UCA4-8OdGZAA2lvgacNXVz4PayJcz_Rh9HpkiKEfh7IT147S_pBKPJ03xJKhgJFLAX_FrtGz98wVrLBdddna7Dr5TL7dwjA7bXG615FoLq4A7BdYoZTNVwj1UDpCqbq9MvrMoQy21mu54JZjGG_Yp-EBdJjkiAsQsX9wJrW-8pU2Ko17bSGlHE7xZTSoDDcx54C8hvgR_cCyDBSFT9ta3jv4d8239O1UjHPaV8DunXEsg2QljgVOP3pgQk_BF5VnGDp4a"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-medium text-slate-200 truncate">Jean Dupont</p>
+<p class="text-[10px] text-slate-500 truncate">Admin Enterprise</p>
+</div>
+<span class="material-symbols-outlined text-slate-600 text-[18px] cursor-pointer" data-icon="logout">logout</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-[260px] min-h-screen editorial-grid pb-24">
+<!-- Header Section -->
+<header class="h-[120px] px-12 flex items-center justify-between">
+<div class="space-y-1">
+<h2 class="text-3xl font-headline font-semibold tracking-tight text-on-surface">Tableau de bord</h2>
+<div class="flex items-center gap-4">
+<p class="text-xs font-label text-outline tracking-wider">12 MAI 2024</p>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<div class="flex items-center gap-1.5">
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-highlight opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-highlight"></span>
+</span>
+<span class="text-[10px] font-label text-highlight tracking-[0.1em] uppercase">Statut : Protégé</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="h-10 px-4 glass-card rounded-lg flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="search">search</span>
+<input class="bg-transparent border-none text-xs focus:ring-0 placeholder:text-slate-600 w-48 font-body" placeholder="Rechercher un email..." type="text"/>
+</div>
+<button class="h-10 w-10 glass-card rounded-lg flex items-center justify-center text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Stats Grid -->
+<section class="px-12 grid grid-cols-4 gap-6 mb-12">
+<div class="glass-card p-6 rounded-xl hover:bg-white/[0.05] transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="p-2 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+</span>
+<span class="text-[10px] font-label text-slate-500 group-hover:text-primary transition-colors">EN ATTENTE</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface">24</h3>
+<p class="text-xs text-outline mt-1 font-body">À voir ce matin</p>
+</div>
+<div class="glass-card p-6 rounded-xl hover:bg-white/[0.05] transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="p-2 rounded-lg bg-tertiary/10 text-tertiary">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+</span>
+<span class="text-[10px] font-label text-slate-500 group-hover:text-tertiary transition-colors">CE MOIS</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface">1,429</h3>
+<p class="text-xs text-outline mt-1 font-body">Menaces filtrées</p>
+</div>
+<div class="glass-card p-6 rounded-xl hover:bg-white/[0.05] transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="p-2 rounded-lg bg-secondary/10 text-secondary">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+</span>
+<span class="text-[10px] font-label text-slate-500 group-hover:text-secondary transition-colors">ACTIF</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface">Furtif</h3>
+<p class="text-xs text-outline mt-1 font-body">Mode de filtrage IA</p>
+</div>
+<div class="glass-card p-6 rounded-xl hover:bg-white/[0.05] transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="p-2 rounded-lg bg-highlight/10 text-highlight">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+</span>
+<span class="text-[10px] font-label text-slate-500 group-hover:text-highlight transition-colors">RÉSEAU</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface">99.9%</h3>
+<p class="text-xs text-outline mt-1 font-body">Score de confiance</p>
+</div>
+</section>
+<!-- Main Content Area: Alert Table & Empty State -->
+<section class="px-12 grid grid-cols-12 gap-8">
+<div class="col-span-8">
+<div class="glass-card rounded-2xl overflow-hidden border border-white/5">
+<div class="px-8 py-6 border-b border-white/5 flex justify-between items-center">
+<h4 class="text-sm font-headline font-semibold text-slate-200 uppercase tracking-widest">Alertes de Sécurité</h4>
+<div class="flex gap-2">
+<span class="px-2 py-1 rounded bg-white/5 text-[10px] font-label text-slate-400">FILTRER</span>
+<span class="px-2 py-1 rounded bg-white/5 text-[10px] font-label text-slate-400">EXPORTER</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-white/[0.03]">
+<th class="px-8 py-4 text-[10px] font-label text-slate-500 uppercase tracking-widest">Expéditeur</th>
+<th class="px-6 py-4 text-[10px] font-label text-slate-500 uppercase tracking-widest">Confiance IA</th>
+<th class="px-6 py-4 text-[10px] font-label text-slate-500 uppercase tracking-widest">Temps</th>
+<th class="px-8 py-4 text-right"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/[0.03]">
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-error/10 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[18px]" data-icon="phishing">phishing</span>
+</div>
+<div>
+<p class="text-sm font-medium text-slate-200">security-update@external.net</p>
+<p class="text-[10px] text-slate-500">Objet : Urgent action required</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="w-[12%] h-full bg-error"></div>
+</div>
+<span class="text-xs font-label text-error">12%</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-label text-slate-500">14:22</span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[18px]" data-icon="mail">mail</span>
+</div>
+<div>
+<p class="text-sm font-medium text-slate-200">contact@partner-kyrra.com</p>
+<p class="text-[10px] text-slate-500">Objet : Réunion trimestrielle</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="w-[98%] h-full bg-tertiary"></div>
+</div>
+<span class="text-xs font-label text-tertiary">98%</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-label text-slate-500">13:05</span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-error/10 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[18px]" data-icon="warning">warning</span>
+</div>
+<div>
+<p class="text-sm font-medium text-slate-200">noreply@cloud-service.io</p>
+<p class="text-[10px] text-slate-500">Objet : Payment Failed</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="w-[45%] h-full bg-error/60"></div>
+</div>
+<span class="text-xs font-label text-error/60">45%</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-label text-slate-500">Hier</span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="col-span-4 space-y-8">
+<!-- Analytics/Status Empty State Visual -->
+<div class="glass-card rounded-2xl p-8 flex flex-col items-center justify-center text-center min-h-[360px] relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+<div class="w-20 h-20 rounded-full bg-surface-container flex items-center justify-center mb-6 border border-white/5 relative z-10">
+<span class="material-symbols-outlined text-4xl text-primary animate-pulse" data-icon="shield">shield</span>
+</div>
+<h5 class="text-lg font-headline font-semibold text-on-surface relative z-10">Kyrra surveille votre boîte</h5>
+<p class="text-xs text-outline mt-2 max-w-[200px] leading-relaxed relative z-10">Aucune activité suspecte détectée dans les 30 dernières minutes. Le filtrage en temps réel est actif.</p>
+<button class="mt-8 px-6 py-2 border border-white/10 rounded-full text-[10px] font-label text-slate-400 hover:border-primary/40 hover:text-primary transition-all relative z-10 uppercase tracking-widest">
+                        Journal des logs
+                    </button>
+</div>
+<!-- Secondary Info Card -->
+<div class="glass-card rounded-2xl p-6">
+<h6 class="text-[10px] font-label text-slate-500 uppercase tracking-widest mb-4">Mises à jour IA</h6>
+<div class="space-y-4">
+<div class="flex gap-4 items-start">
+<span class="w-1.5 h-1.5 rounded-full bg-highlight mt-1.5 shrink-0"></span>
+<p class="text-[11px] text-slate-300 leading-relaxed">Nouveaux patterns de phishing financier identifiés et bloqués automatiquement.</p>
+</div>
+<div class="flex gap-4 items-start">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0"></span>
+<p class="text-[11px] text-slate-300 leading-relaxed">Mise à jour du moteur NLP V4.2 terminée. Précision accrue de 0.4%.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Global Footer -->
+<footer class="mt-24 w-full py-12 border-t border-white/5">
+<div class="flex flex-col md:flex-row justify-between items-center px-12 max-w-7xl mx-auto gap-8">
+<div class="flex items-center gap-6">
+<span class="text-sm font-bold text-slate-400 font-headline uppercase tracking-[0.2em]">KYRRA</span>
+<p class="text-[10px] font-label text-slate-500">© 2024 Kyrra AI. Souveraineté Numérique.</p>
+</div>
+<div class="flex gap-8">
+<a class="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors" href="#">Confidentialité</a>
+<a class="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors" href="#">CGU</a>
+<a class="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors" href="#">Contact</a>
+<a class="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors" href="#">Statut Système</a>
+</div>
+</div>
+</footer>
+</main>
+<!-- Floating UI Decoration Elements -->
+<div class="fixed top-1/4 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+<div class="fixed bottom-0 -left-24 w-80 h-80 bg-tertiary/5 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+</body></html>
