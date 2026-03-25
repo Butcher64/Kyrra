@@ -60,7 +60,7 @@ export function Navbar() {
             </Link>
             <Link
               href="/login"
-              className="bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-[var(--on-primary)] px-6 py-2.5 rounded-lg font-bold hover:scale-105 transition-all no-underline inline-block"
+              className="bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-white px-6 py-2.5 rounded-lg font-bold hover:scale-105 transition-all no-underline inline-block"
             >
               Démonstration
             </Link>
@@ -105,7 +105,7 @@ export function Navbar() {
             <div className="mt-12 flex flex-col items-center gap-4">
               <Link
                 href="/login"
-                className="bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-[var(--on-primary)] px-8 py-3 rounded-lg font-bold no-underline"
+                className="bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-white px-8 py-3 rounded-lg font-bold no-underline"
                 onClick={() => setMobileOpen(false)}
               >
                 Démonstration

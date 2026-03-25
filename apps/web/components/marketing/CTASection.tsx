@@ -36,14 +36,14 @@ export function CTASection() {
           <MagneticButton>
             <Link
               href="/login"
-              className="inline-block bg-[var(--color-accent-start)] text-[var(--on-primary)] px-10 py-5 rounded-xl font-bold text-lg hover:shadow-[0_0_40px_rgba(173,198,255,0.4)] transition-all no-underline"
+              className="inline-block bg-[var(--color-accent-start)] text-white px-10 py-5 rounded-xl font-bold text-lg hover:shadow-[var(--shadow-accent-lg)] transition-all no-underline"
             >
               Essai Gratuit de 14 jours
             </Link>
           </MagneticButton>
         </div>
 
-        <p className="mt-6 text-slate-600 text-xs font-label">
+        <p className="mt-6 text-slate-500 text-xs font-label">
           Aucune carte de crédit requise • Annulation à tout moment
         </p>
       </div>

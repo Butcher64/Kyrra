@@ -1,11 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { LayoutDashboard, Mail, Settings, Shield, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Logo } from './Logo'
 import { SidebarSection } from './SidebarSection'
 import { SidebarItem } from './SidebarItem'
+import { createClient } from '@/lib/supabase/browser'
+import {
+  LayoutDashboard,
+  Filter,
+  BarChart2,
+  Archive,
+  Settings,
+  Plus,
+  HelpCircle,
+  LogOut,
+} from 'lucide-react'
 
 interface SidebarProps {
   user: { email: string; name?: string }
@@ -14,65 +24,84 @@ interface SidebarProps {
   onMobileClose?: () => void
 }
 
-const STORAGE_KEY = 'kyrra-sidebar-collapsed'
-
 export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false)
+  const router = useRouter()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'true') setCollapsed(true)
-  }, [])
-
-  function toggleCollapsed() {
-    const next = !collapsed
-    setCollapsed(next)
-    localStorage.setItem(STORAGE_KEY, String(next))
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/login')
   }
 
-  const pipelineDot = pipelineStatus === 'active'
-    ? 'bg-[var(--color-protected)]'
-    : 'bg-[var(--color-attention)]'
+  const avatarLetter = (user.name ?? user.email).charAt(0).toUpperCase()
 
   const sidebarContent = (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col py-8">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-5">
-        {!collapsed && <Logo variant="white" />}
-        <button
-          onClick={toggleCollapsed}
+      <div className="px-8 mb-10">
+        <h1 className="text-[17px] font-bold text-slate-200 font-outfit tracking-tight">
+          Kyrra Enterprise
+        </h1>
+        <p
           className={cn(
-            'rounded-md p-1.5 text-[var(--sidebar-fg)] transition-colors hover:bg-[var(--sidebar-hover)] bg-transparent border-none cursor-pointer',
-            collapsed && 'mx-auto',
+            'text-[10px] font-mono tracking-[0.05em] mt-1',
+            pipelineStatus === 'active' ? 'text-blue-400' : 'text-amber-400',
           )}
-          aria-label={collapsed ? 'Ouvrir la sidebar' : 'Réduire la sidebar'}
         >
-          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
+          {pipelineStatus === 'active' ? 'Filtrage Actif' : 'Filtrage Pausé'}
+        </p>
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-2">
-        <SidebarSection label={collapsed ? '' : 'Aperçu'}>
-          <SidebarItem icon={LayoutDashboard} href="/dashboard" label="Tableau de bord" collapsed={collapsed} />
-          <SidebarItem icon={Mail} href="/emails" label="Emails" collapsed={collapsed} />
+      <nav className="flex-1 px-4 space-y-1">
+        <SidebarSection label="APERÇU">
+          <SidebarItem icon={LayoutDashboard} href="/dashboard" label="Tableau de bord" />
+          <SidebarItem icon={Filter} href="/emails" label="Filtres IA" />
+          <SidebarItem icon={BarChart2} href="/analytics" label="Analyses" />
         </SidebarSection>
 
-        <SidebarSection label={collapsed ? '' : 'Configuration'}>
-          <SidebarItem icon={Settings} href="/settings" label="Paramètres" collapsed={collapsed} />
-          <SidebarItem icon={Shield} href="/whitelist" label="Whitelist" collapsed={collapsed} />
+        <SidebarSection label="CONFIGURATION">
+          <SidebarItem icon={Archive} href="/archives" label="Archives" />
+          <SidebarItem icon={Settings} href="/settings" label="Paramètres" />
         </SidebarSection>
-      </div>
+      </nav>
 
-      {/* Footer — user info */}
-      <div className="border-t border-[var(--sidebar-border)] px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className={cn('size-2 shrink-0 rounded-full', pipelineDot)} />
-          {!collapsed && (
-            <span className="truncate text-[11px] text-[var(--sidebar-fg)]/70">
-              {user.name ?? user.email}
-            </span>
-          )}
+      {/* Footer actions */}
+      <div className="px-4 mt-auto space-y-2">
+        <button className="w-full bg-blue-500/20 text-blue-400 border border-blue-500/30 py-2.5 rounded-lg font-medium text-sm mb-4 flex items-center justify-center gap-2 hover:bg-blue-500/30 transition-colors">
+          <Plus size={16} />
+          Nouveau Filtre
+        </button>
+
+        <div className="border-t border-white/5 pt-4 flex flex-col gap-1">
+          <a
+            href="mailto:support@kyrra.ai"
+            className="flex items-center gap-3 px-4 py-2 text-slate-600 hover:text-slate-300 transition-colors no-underline rounded-lg hover:bg-white/5"
+          >
+            <HelpCircle size={18} className="shrink-0" />
+            <span className="font-mono text-xs">Support</span>
+          </a>
+
+          <div className="flex items-center gap-3 px-4 py-3 mt-1 rounded-xl bg-white/[0.03] border border-white/5">
+            <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 text-blue-300 text-xs font-semibold">
+              {avatarLetter}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-slate-200 truncate">
+                {user.name ?? user.email}
+              </p>
+              <p className="text-[10px] text-slate-500 truncate">
+                {user.email}
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-slate-600 hover:text-slate-300 transition-colors bg-transparent border-none cursor-pointer p-0"
+              aria-label="Se déconnecter"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -81,12 +110,7 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
   return (
     <>
       {/* Desktop sidebar */}
-      <aside
-        className={cn(
-          'hidden lg:flex flex-col h-screen shrink-0 border-r border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] transition-[width] duration-200',
-          collapsed ? 'w-[60px]' : 'w-[260px]',
-        )}
-      >
+      <aside className="hidden lg:flex flex-col h-screen w-[260px] shrink-0 border-r border-white/5 bg-[#131318]">
         {sidebarContent}
       </aside>
 
@@ -98,7 +122,7 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
             onClick={onMobileClose}
             aria-hidden
           />
-          <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-[var(--sidebar-bg)] lg:hidden">
+          <aside className="fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-[#131318] lg:hidden">
             {sidebarContent}
           </aside>
         </>

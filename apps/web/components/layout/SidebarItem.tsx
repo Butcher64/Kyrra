@@ -10,35 +10,28 @@ interface SidebarItemProps {
   href: string
   label: string
   badge?: string | number
-  collapsed?: boolean
 }
 
-export function SidebarItem({ icon: Icon, href, label, badge, collapsed }: SidebarItemProps) {
+export function SidebarItem({ icon: Icon, href, label, badge }: SidebarItemProps) {
   const pathname = usePathname()
-  const isActive = pathname === href
+  const isActive = pathname === href || pathname.startsWith(href + '/')
 
   return (
     <Link
       href={href}
-      title={collapsed ? label : undefined}
       className={cn(
-        'flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors duration-150 no-underline',
+        'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 no-underline',
         isActive
-          ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-fg-active)]'
-          : 'text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-hover)]',
-        collapsed && 'justify-center px-0',
+          ? 'bg-blue-500/10 text-blue-400 border-r-2 border-blue-500'
+          : 'text-slate-500 hover:text-slate-300 hover:bg-white/5 border-r-2 border-transparent',
       )}
     >
       <Icon size={18} strokeWidth={1.5} className="shrink-0" />
-      {!collapsed && (
-        <>
-          <span className="flex-1 truncate">{label}</span>
-          {badge !== undefined && (
-            <span className="ml-auto rounded-full bg-[var(--color-brand-accent)]/15 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-brand-accent)]">
-              {badge}
-            </span>
-          )}
-        </>
+      <span className="flex-1 truncate">{label}</span>
+      {badge !== undefined && (
+        <span className="ml-auto rounded-full bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-blue-400">
+          {badge}
+        </span>
       )}
     </Link>
   )

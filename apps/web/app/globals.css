@@ -64,6 +64,8 @@
   --shadow-xl: 0 16px 64px oklch(0 0 0 / 0.6);
   --shadow-glow: 0 0 20px oklch(0.55 0.20 265 / 0.3), 0 0 60px oklch(0.55 0.20 265 / 0.1);
   --shadow-glow-lg: 0 0 40px oklch(0.55 0.20 265 / 0.4), 0 0 120px oklch(0.55 0.20 265 / 0.15);
+  --shadow-accent-md: 0 0 30px oklch(0.55 0.20 265 / 0.3);
+  --shadow-accent-lg: 0 0 40px oklch(0.55 0.20 265 / 0.4);
 }
 
 /* ── DARK MODE BY DEFAULT ── */

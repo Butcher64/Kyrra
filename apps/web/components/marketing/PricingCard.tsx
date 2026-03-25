@@ -23,12 +23,12 @@ export function PricingCard({ plan, annual }: { plan: Plan; annual: boolean }) {
       className={cn(
         'p-8 rounded-2xl flex flex-col transition-all',
         plan.highlighted
-          ? 'bg-[var(--card)] border border-[var(--color-accent-start)]/30 shadow-[0_0_50px_rgba(77,142,255,0.15)] scale-105 z-10 relative'
+          ? 'bg-[var(--card)] border border-[var(--color-accent-start)]/30 shadow-[var(--shadow-accent-lg)] scale-105 z-10 relative'
           : 'bg-[var(--surface-low)] border border-white/5'
       )}
     >
       {plan.highlighted && (
-        <div className="absolute top-0 right-0 bg-[var(--color-accent-start)] px-4 py-1 text-[10px] font-bold text-[var(--on-primary)] rounded-bl-lg font-label uppercase">
+        <div className="absolute top-0 right-0 bg-[var(--color-accent-start)] px-4 py-1 text-[10px] font-bold text-white rounded-bl-lg font-label uppercase">
           Recommandé
         </div>
       )}
@@ -87,7 +87,7 @@ export function PricingCard({ plan, annual }: { plan: Plan; annual: boolean }) {
         className={cn(
           'w-full py-3 rounded-lg text-sm font-bold text-center transition-all no-underline block',
           plan.highlighted
-            ? 'bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-[var(--on-primary)] py-4 hover:scale-[1.02]'
+            ? 'bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-white py-4 hover:scale-[1.02]'
             : 'border border-white/10 hover:bg-white/5 text-white'
         )}
       >

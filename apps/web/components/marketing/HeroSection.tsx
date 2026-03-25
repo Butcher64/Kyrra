@@ -35,13 +35,14 @@ export function HeroSection() {
           >
             Faites taire le bruit.
           </TextReveal>
-          <TextReveal
-            tag="span"
-            delay={0.3}
+          <motion.span
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.6, ease: 'easeOut' }}
             className="block text-gradient"
           >
-            Gardez l'essentiel.
-          </TextReveal>
+            Gardez l&apos;essentiel.
+          </motion.span>
         </h1>
 
         {/* Subtitle */}
@@ -64,7 +65,7 @@ export function HeroSection() {
           <MagneticButton>
             <Link
               href="/login"
-              className="inline-block bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-[var(--on-primary)] px-8 py-4 rounded-lg font-bold text-base hover:shadow-[0_0_30px_rgba(77,142,255,0.3)] transition-all no-underline"
+              className="inline-block bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-white px-8 py-4 rounded-lg font-bold text-base hover:shadow-[var(--shadow-accent-md)] transition-all no-underline"
             >
               Commencer l'essai gratuit
             </Link>

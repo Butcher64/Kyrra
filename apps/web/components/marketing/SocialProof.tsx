@@ -18,7 +18,7 @@ export function SocialProof() {
           </div>
         </div>
         <div className="md:border-x md:border-white/5">
-          <div className="text-4xl font-headline font-bold text-[var(--color-accent-start)] mb-2">
+          <div className="text-4xl font-headline font-bold text-[var(--color-accent-cyan)] mb-2">
             <CountUp value={99.2} suffix="%" /> précision
           </div>
           <div className="font-label text-xs text-slate-500 uppercase tracking-widest">
