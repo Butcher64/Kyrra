@@ -2,92 +2,81 @@
 
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import { Button } from '@/components/ui/button'
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 },
-}
+import { TextReveal } from '@/components/animation/TextReveal'
+import { MagneticButton } from '@/components/animation/MagneticButton'
+import { HeroGradient } from './HeroGradient'
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-brand-gradient animate-gradient">
-      {/* Dot overlay */}
-      <div className="bg-dots pointer-events-none absolute inset-0 opacity-30" />
+    <section
+      data-section="hero"
+      className="relative min-h-[716px] flex flex-col items-center justify-center text-center px-6 bg-grid overflow-hidden"
+    >
+      {/* Background orbs */}
+      <HeroGradient />
 
       {/* Content */}
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        transition={{ staggerChildren: 0.12 }}
-        className="relative z-10 mx-auto max-w-[800px] px-6 text-center"
-      >
+      <div className="max-w-4xl relative z-10">
         {/* Badge */}
-        <motion.div variants={fadeUp} transition={{ duration: 0.5 }}>
-          <span className="glass inline-block rounded-full px-4 py-1.5 font-mono text-xs text-white/80">
-            Pare-feu cognitif pour dirigeants
-          </span>
-        </motion.div>
-
-        {/* H1 */}
-        <motion.h1
-          variants={fadeUp}
+        <motion.span
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mt-8 font-outfit text-5xl font-light leading-tight text-white md:text-7xl"
+          className="font-label text-[var(--color-accent-cyan)] tracking-[0.2em] text-xs uppercase mb-6 block"
         >
-          Faites taire le bruit.
-          <br />
-          <span className="font-mono text-(--color-brand-accent)">
-            Gardez l&apos;essentiel.
-          </span>
-        </motion.h1>
+          Pare-feu cognitif IA
+        </motion.span>
+
+        {/* Headline */}
+        <h1 className="text-5xl md:text-7xl font-extrabold font-headline tracking-tighter mb-8 leading-[1.1]">
+          <TextReveal
+            tag="span"
+            className="block text-slate-100"
+          >
+            Faites taire le bruit.
+          </TextReveal>
+          <TextReveal
+            tag="span"
+            delay={0.3}
+            className="block text-gradient"
+          >
+            Gardez l'essentiel.
+          </TextReveal>
+        </h1>
 
         {/* Subtitle */}
         <motion.p
-          variants={fadeUp}
-          transition={{ duration: 0.5 }}
-          className="mx-auto mt-6 max-w-[560px] text-lg text-white/70"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed text-[var(--muted-foreground)]"
         >
-          L&apos;IA qui filtre les emails de prospection pour les dirigeants.
-          Aucun email important n&apos;est perdu. Jamais.
+          Kyrra filtre les emails de prospection par IA. Votre boîte ne garde que ce qui compte. Classification intelligente, zéro données stockées.
         </motion.p>
 
         {/* CTAs */}
         <motion.div
-          variants={fadeUp}
-          transition={{ duration: 0.5 }}
-          className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <Button variant="brand" size="lg" className="glow-brand" asChild>
-            <Link href="/login">Essai gratuit 14 jours →</Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="lg"
-            className="border border-white/20 text-white hover:bg-white/10 hover:text-white"
-            asChild
+          <MagneticButton>
+            <Link
+              href="/login"
+              className="inline-block bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-[var(--on-primary)] px-8 py-4 rounded-lg font-bold text-base hover:shadow-[0_0_30px_rgba(77,142,255,0.3)] transition-all no-underline"
+            >
+              Commencer l'essai gratuit
+            </Link>
+          </MagneticButton>
+          <a
+            href="#how-it-works"
+            className="inline-block px-8 py-4 rounded-lg border border-white/10 backdrop-blur-sm hover:bg-white/5 transition-all font-medium text-slate-100 no-underline"
           >
-            <a href="#features">Voir comment ca marche</a>
-          </Button>
+            Voir comment ça marche
+          </a>
         </motion.div>
-
-        {/* Micro-text */}
-        <motion.p
-          variants={fadeUp}
-          transition={{ duration: 0.5 }}
-          className="mt-6 font-mono text-xs text-white/40"
-        >
-          Pas de carte bancaire requise · Gmail uniquement
-        </motion.p>
-      </motion.div>
-
-      {/* Bottom gradient fade */}
-      <div
-        className="pointer-events-none absolute bottom-0 left-0 right-0 h-[200px]"
-        style={{
-          background: 'linear-gradient(to bottom, transparent, var(--background))',
-        }}
-      />
+      </div>
     </section>
   )
 }
