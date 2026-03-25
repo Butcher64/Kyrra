@@ -1,33 +1,51 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { MagneticButton } from '@/components/animation/MagneticButton'
 import { ScrollReveal } from './ScrollReveal'
 
 export function CTASection() {
   return (
-    <section className="relative bg-brand-gradient py-24 text-center overflow-hidden">
-      <div className="bg-grid pointer-events-none absolute inset-0 opacity-10" />
-      <div className="relative z-10 mx-auto max-w-[600px] px-6">
+    <section
+      data-section="cta-final"
+      className="py-32 bg-gradient-to-b from-[var(--background)] to-[var(--surface-darkest)]"
+    >
+      <div className="max-w-4xl mx-auto px-10 text-center">
         <ScrollReveal>
-          <h2 className="font-outfit text-3xl font-light text-white">
-            Pret a retrouver le calme ?
+          <h2 className="text-5xl font-headline font-extrabold text-slate-100 mb-10 leading-tight">
+            Redécouvrez le plaisir d'un travail ininterrompu.
           </h2>
-          <p className="mt-4 text-white/70">
-            Essai gratuit 14 jours. Pas de carte bancaire.
-          </p>
-          <div className="mt-8">
-            <Button variant="brand" size="lg" className="glow-brand" asChild>
-              <Link href="/login">Commencer gratuitement →</Link>
-            </Button>
-          </div>
-          <p className="mt-4">
-            <a
-              href="mailto:legal@kyrra.io"
-              className="text-sm text-white/40 hover:text-white/60 transition-colors"
-            >
-              Ou contactez-nous
-            </a>
-          </p>
         </ScrollReveal>
+
+        {/* Social proof widget */}
+        <div className="glass rounded-2xl inline-flex p-1 mb-10">
+          <div className="flex items-center px-6 py-4 gap-4">
+            <div className="flex -space-x-3">
+              {['TB', 'ML', 'PD'].map((initials) => (
+                <div
+                  key={initials}
+                  className="w-10 h-10 rounded-full border-2 border-[var(--background)] bg-[var(--color-accent-start)]/20 flex items-center justify-center text-[10px] font-semibold text-[var(--color-accent-start)]"
+                >
+                  {initials}
+                </div>
+              ))}
+            </div>
+            <p className="text-sm font-medium text-slate-200">Rejoignez 2,000+ innovateurs</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <MagneticButton>
+            <Link
+              href="/login"
+              className="inline-block bg-[var(--color-accent-start)] text-[var(--on-primary)] px-10 py-5 rounded-xl font-bold text-lg hover:shadow-[0_0_40px_rgba(173,198,255,0.4)] transition-all no-underline"
+            >
+              Essai Gratuit de 14 jours
+            </Link>
+          </MagneticButton>
+        </div>
+
+        <p className="mt-6 text-slate-600 text-xs font-label">
+          Aucune carte de crédit requise • Annulation à tout moment
+        </p>
       </div>
     </section>
   )
