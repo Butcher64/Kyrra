@@ -22,8 +22,15 @@ The landing page was built during commit `43f83ed` (Tech Froide UX Overhaul). Th
 **File**: `components/marketing/Navbar.tsx`
 **Status**: Keep layout, fix content
 **Changes**:
-- Fix "Blog" nav link: change href from `#how-it-works` to `#blog` or remove (no blog for MVP-0)
-- Replace nav links to match actual sections: Solutions → `#features`, Securite → `#security`, Tarifs → `#pricing`, Comment ca marche → `#how-it-works`
+- Replace nav links array with:
+  ```ts
+  const navLinks = [
+    { href: '#features', label: 'Solutions' },
+    { href: '#security', label: 'Securite' },
+    { href: '#pricing', label: 'Tarifs' },
+    { href: '#how-it-works', label: 'Comment ca marche' },
+  ]
+  ```
 - Migrate hardcoded hex colors to CSS vars where applicable
 
 ### S2. Hero
@@ -37,46 +44,47 @@ The landing page was built during commit `43f83ed` (Tech Froide UX Overhaul). Th
 ### S3. Social Proof
 **File**: `components/marketing/SocialProof.tsx`
 **Status**: Keep as-is
-**Notes**: Content is marketing-acceptable for beta. CountUp animations working.
+**Notes**: Content is marketing-acceptable for beta. CountUp animations working. Stats here (users, precision, false positives) are audience-facing social proof — distinct from StatsSection which shows product metrics.
 
 ### S4. Problem Section
 **File**: `components/marketing/ProblemSection.tsx`
-**Status**: Keep layout, fix copy
+**Status**: Keep layout, fix copy + migrate icons
 **Changes**:
 - Card 1 (Fatigue): "Chaque notification inutile..." → "18 a 22 emails de prospection par jour saturent votre attention de dirigeant."
 - Card 2 (Temps): "2,5 heures par jour..." → "2,5h/jour perdues a trier prospection, spam et emails legitimes."
 - Card 3 (Risque): "L'information capitale..." → "Un email client critique noye dans 50 sollicitations = contrat perdu."
-- Migrate Material Symbols icons to Lucide equivalents:
-  - `notification_important` → `BellAlert` (lucide-react)
+- Migrate Material Symbols icons to Lucide:
+  - `notification_important` → `BellRing` (lucide-react)
   - `timer_off` → `TimerOff` (lucide-react)
   - `security_update_warning` → `ShieldAlert` (lucide-react)
 
 ### S5. How It Works
 **File**: `components/marketing/HowItWorks.tsx`
-**Status**: Keep layout, rewrite copy
+**Status**: Keep layout, rewrite titles AND descriptions
 **Changes**:
-- Step 1: "Connectez vos flux — Emails, messageries..." → "Connectez Gmail — OAuth en 1 clic, scan automatique de vos 6 derniers mois d'envois."
-- Step 2: "L'IA Analyse — Kyrra apprend vos priorites..." → "Kyrra classe — Dual-engine IA : fingerprint rapide + LLM pour les cas ambigus, en moins de 2 minutes."
-- Step 3: "Liberez-vous — Recevez un condense..." → "3 labels Gmail — A voir, Filtre, Bloque. Plus un Recap quotidien par email chaque matin."
+- Step 1 title: "Connectez vos flux" → "Connectez Gmail"
+  - Description: "OAuth en 1 clic, scan automatique de vos 6 derniers mois d'envois."
+- Step 2 title: "L'IA Analyse" → "Kyrra classe"
+  - Description: "Dual-engine IA : fingerprint rapide + LLM pour les cas ambigus, en moins de 2 minutes."
+- Step 3 title: "Liberez-vous" → "3 labels Gmail"
+  - Description: "A voir, Filtre, Bloque. Plus un Recap quotidien par email chaque matin."
 
 ### S6. Features
 **File**: `components/marketing/FeaturesSection.tsx`
 **Status**: Keep layout, fix classifier mock labels + colors
 **Changes**:
 - Classifier mock labels:
-  - "Priorite Haute" → "A voir" with color `var(--color-a-voir)` (blue)
-  - "Secondaire" → "Filtre" with color `var(--color-filtre)` (muted purple)
-  - "Bruit" → "Bloque" with color `var(--color-bloque)` (red-orange)
-- Use semantic border colors matching the labels
+  - "Priorite Haute" → "A voir" with text color `var(--color-a-voir)` and border `border-l-[var(--color-a-voir)]`
+  - "Secondaire" → "Filtre" with text color `var(--color-filtre)` and border `border-l-[var(--color-filtre)]`
+  - "Bruit" → "Bloque" with text color `var(--color-bloque)` and border `border-l-[var(--color-bloque)]`
+- Keep opacity treatments (`opacity-40` on Filtre, `opacity-20` on Bloque) for visual hierarchy
 - Left-side bullet copy: keep as-is (acceptable abstraction of PRD features)
 
 ### S7. Security
 **File**: `components/marketing/SecuritySection.tsx`
 **Status**: Keep layout, fix badges + migrate icons
 **Changes**:
-- Remove badges: "ISO 27001 Compliant", "SOC2 Type II" (not yet certified)
-- Keep badge: "RGPD Conforme"
-- Add badges: "Hebergement EU", "Zero Data Retention"
+- Replace badges array: `['ISO 27001 Compliant', 'RGPD Certified', 'SOC2 Type II']` → `['RGPD Conforme', 'Hebergement EU', 'Zero Data Retention']`
 - Migrate Material Symbols to Lucide:
   - `shield_lock` → `ShieldCheck`
   - `public` → `Globe`
@@ -84,33 +92,83 @@ The landing page was built during commit `43f83ed` (Tech Froide UX Overhaul). Th
 
 ### S8. Stats (NEW — add to page)
 **File**: `components/marketing/StatsSection.tsx`
-**Status**: Component exists, needs integration + style alignment
+**Status**: Component exists, needs integration + differentiated content
 **Changes**:
 - Add to page.tsx after SecuritySection
-- Migrate CSS var references to match the hardcoded hex pattern used elsewhere, OR (preferred) migrate everything to CSS vars
-- Stats to show: "99.2% precision", "0 faux positifs", "<2 min setup"
+- Differentiate from SocialProof (which shows audience social proof). StatsSection shows product performance metrics:
+  - `{ value: 312, suffix: '', label: 'Emails filtres par semaine en moyenne' }`
+  - `{ value: 45, suffix: ' min', label: 'Gagnes par jour par dirigeant' }`
+  - `{ value: 2, suffix: ' min', prefix: '<', label: 'Setup complet avec Gmail' }`
+- Align styling to use surface tokens (see Cross-Cutting section)
 
 ### S9. Testimonials (NEW — add to page)
 **File**: `components/marketing/TestimonialsSection.tsx`
-**Status**: Component exists, needs integration + style alignment
+**Status**: Component exists, needs integration
 **Changes**:
 - Add to page.tsx after StatsSection
-- Fix style inconsistency: uses `var(--border)`, `var(--card)`, `var(--foreground)` while other components use hex. Align to whichever convention we standardize on.
+- Styling already uses CSS vars (`var(--border)`, `var(--card)`, `var(--foreground)`) — this is correct per our token standardization direction. Keep as-is.
 - Content: Keep existing testimonials (marketing-appropriate for beta)
 
 ### S10. Pricing
 **File**: `components/marketing/PricingSection.tsx` + `PricingCard.tsx`
 **Status**: REWRITE content, keep layout
 **Changes**:
-- Tier 1: "Essentiel 29EUR" → "Gratuit" — 30 emails/jour, classification de base, 1 compte Gmail
-- Tier 2: "Professionnel 79EUR" → "Pro 15EUR/mois" — emails illimites, Kyrra Recap quotidien, scores de confiance, resume 1 ligne
-- Tier 3: "Entreprise Sur Mesure" → "Team 19EUR/user/mois" — multi-utilisateurs, tableau admin, support prioritaire
-- Features lists: rewrite to match PRD feature set per tier
-- Toggle: Keep monthly/annual toggle (annual = -20% on Pro and Team)
+
+Replace plans array with:
+```ts
+const plans = [
+  {
+    tier: 'Gratuit',
+    tierKey: 'free',
+    monthly: 0,
+    yearly: 0,
+    features: [
+      '30 emails/jour',
+      'Classification de base',
+      '1 compte Gmail',
+      'Dashboard simple',
+    ],
+    cta: 'Commencer gratuitement',
+    highlighted: false,
+  },
+  {
+    tier: 'Pro',
+    tierKey: 'pro',
+    monthly: 15,
+    yearly: 12,
+    features: [
+      'Emails illimites',
+      'Kyrra Recap quotidien',
+      'Scores de confiance',
+      'Resume 1 ligne par email',
+      '3 modes d\'exposition',
+    ],
+    cta: 'Essai gratuit 14 jours',
+    highlighted: true,
+  },
+  {
+    tier: 'Team',
+    tierKey: 'team',
+    monthly: 19,
+    yearly: 15,
+    features: [
+      'Tout Pro inclus',
+      'Multi-utilisateurs',
+      'Tableau admin equipe',
+      'Whitelist partagee',
+      'Support prioritaire (SLA 4h)',
+    ],
+    cta: 'Contacter l\'equipe',
+    highlighted: false,
+  },
+]
+```
+
+PricingCard display logic change:
+- If `price === 0`, render "Gratuit" as the price display instead of "0EUR/mois"
+- Annual toggle: Free tier unaffected, Pro shows 12EUR/mois, Team shows 15EUR/mois
 - "Recommande" badge stays on Pro tier
-- Remove: "Resumes de reunions IA", "Sources de donnees", "On-premise" (not in PRD)
-- Add: "Essai gratuit 14 jours" mention on Pro card
-- Migrate Material Symbols `check_circle` to Lucide `CheckCircle`
+- Migrate Material Symbols `check_circle` → Lucide `CheckCircle`
 
 ### S11. CTA
 **File**: `components/marketing/CTASection.tsx`
@@ -119,42 +177,66 @@ The landing page was built during commit `43f83ed` (Tech Froide UX Overhaul). Th
 
 ### S12. Footer
 **File**: `components/marketing/Footer.tsx`
-**Status**: Keep layout, minor fixes
+**Status**: Keep layout, migrate icons
 **Changes**:
-- Migrate Material Symbols icons (share, alternate_email) to Lucide (Share2, AtSign)
-- Keep all link structure (legal links already point to correct routes)
+- Migrate Material Symbols to Lucide:
+  - `share` → `Share2`
+  - `alternate_email` → `AtSign`
 
 ---
 
 ## Cross-Cutting Changes
 
-### Token Unification
-Standardize on CSS custom properties from `globals.css` instead of hardcoded hex values across all marketing components:
+### New Surface Tokens (add to globals.css @theme)
 
-| Hardcoded | CSS Variable |
-|-----------|-------------|
-| `#131318` | `var(--background)` |
-| `#0e0e13` | Surface lowest — verify against `globals.css` |
-| `#111118` | `var(--card)` |
-| `#1f1f25` | `var(--surface-container)` or closest match |
-| `#1b1b20` | `var(--surface-container-low)` or closest match |
-| `#0A0A0F` | Darker than background — may need new token |
-| `#2a292f` | `var(--surface-container-high)` or closest match |
-| `#35343a` | `var(--surface-container-highest)` or closest match |
-| `#adc6ff` | `var(--color-accent-start)` |
-| `#4d8eff` | Related to primary-container — verify |
-| `#4cd7f6` | `var(--color-accent-cyan)` |
-| `#002e6a` | Dark contrast text on primary — may need token |
-| `#8B8B9E` | Muted foreground — verify against `var(--muted-foreground)` |
+The design-reference uses several surface shades not yet in the design system. Add these tokens:
 
-**Decision**: Verify exact mappings against globals.css during implementation. Some hardcoded values may not have direct var equivalents and will need new tokens added.
+```css
+/* Surface hierarchy (add to @theme block) */
+--surface-lowest: oklch(0.06 0.01 270);      /* replaces #0e0e13 */
+--surface-low: oklch(0.09 0.015 270);        /* replaces #111118 */
+--surface-container: oklch(0.12 0.015 270);  /* replaces #1b1b20 */
+--surface-high: oklch(0.17 0.01 270);        /* replaces #2a292f */
+--surface-highest: oklch(0.21 0.01 270);     /* replaces #35343a */
+--surface-darkest: oklch(0.04 0.01 270);     /* replaces #0A0A0F */
+--on-primary: oklch(0.20 0.08 265);          /* replaces #002e6a (dark text on primary buttons) */
+```
+
+### Token Migration Map
+
+| Hardcoded Hex | New CSS Variable | Where Used |
+|---------------|-----------------|------------|
+| `#131318` | `var(--background)` | Navbar bg, various |
+| `#0e0e13` | `var(--surface-lowest)` | SocialProof bg |
+| `#111118` | `var(--surface-low)` | ProblemSection cards, SecuritySection bg, PricingCard bg |
+| `#1f1f25` | `var(--card)` (existing, close enough) | PricingCard highlighted bg |
+| `#1b1b20` | `var(--surface-container)` | HowItWorks bg |
+| `#0A0A0F` | `var(--surface-darkest)` | CTA gradient end, Footer bg |
+| `#2a292f` | `var(--surface-high)` | ProblemSection icon bg |
+| `#35343a` | `var(--surface-highest)` | PricingSection toggle bg |
+| `#adc6ff` | `var(--color-accent-start)` | Primary color throughout |
+| `#4d8eff` | `var(--primary)` (existing) | Gradient end, buttons |
+| `#4cd7f6` | `var(--color-accent-cyan)` | Cyan accents |
+| `#002e6a` | `var(--on-primary)` | Dark text on gradient buttons |
+| `#8B8B9E` | `var(--muted-foreground)` | Hero subtitle |
+
+### text-gradient CSS utility fix
+In `globals.css`, replace hardcoded hex in `.text-gradient`:
+```css
+/* Before */
+background: linear-gradient(to right, #adc6ff, #4cd7f6);
+/* After */
+background: linear-gradient(to right, var(--color-accent-start), var(--color-accent-cyan));
+```
 
 ### Material Symbols → Lucide Migration
-Remove Google Material Symbols CDN from `app/layout.tsx`. Replace all `<span className="material-symbols-outlined">` with Lucide React components.
 
-**Icon mapping**:
-| Material Symbol | Lucide Equivalent | Used In |
-|----------------|-------------------|---------|
+1. Remove Google Material Symbols CDN link from `app/layout.tsx`
+2. Remove `.material-symbols-outlined` CSS rule from `globals.css` (lines 112-115)
+3. Replace all `<span className="material-symbols-outlined">` with Lucide components:
+
+| Material Symbol | Lucide Component | Used In |
+|----------------|-----------------|---------|
 | `notification_important` | `BellRing` | ProblemSection |
 | `timer_off` | `TimerOff` | ProblemSection |
 | `security_update_warning` | `ShieldAlert` | ProblemSection |
@@ -204,8 +286,11 @@ Navbar and Footer remain in the marketing layout (`(marketing)/layout.tsx`).
 
 1. All section content matches PRD
 2. Pricing reflects actual tiers: Free / Pro 15EUR / Team 19EUR
-3. No Material Symbols CDN dependency
+3. No Material Symbols CDN dependency — all icons via Lucide
 4. All 12 sections rendered in correct order
-5. CSS tokens unified (no hardcoded hex where vars exist)
-6. Playwright screenshot at 1440px matches design-reference proportions
-7. `pnpm build` passes with zero errors
+5. CSS tokens unified — no hardcoded hex where vars exist
+6. `.material-symbols-outlined` CSS rule removed from globals.css
+7. New surface tokens added to globals.css @theme
+8. `.text-gradient` utility uses CSS vars, not hex
+9. Playwright screenshot at 1440px matches design-reference proportions
+10. `pnpm build` passes with zero errors
