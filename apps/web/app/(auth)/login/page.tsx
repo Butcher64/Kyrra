@@ -2,13 +2,20 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { GoogleIcon } from '@/components/icons/GoogleIcon'
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ uninstalled?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
     redirect('/dashboard')
   }
+
+  const params = await searchParams
+  const showUninstalled = params.uninstalled === 'true'
 
   return (
     <main className="flex min-h-screen w-full overflow-hidden bg-[var(--background)] text-[var(--foreground)] antialiased">
@@ -88,6 +95,13 @@ export default async function LoginPage() {
               Accédez à votre espace sécurisé Kyrra AI.
             </p>
           </div>
+
+          {/* Uninstall success banner */}
+          {showUninstalled && (
+            <div className="rounded-xl border border-[var(--color-protected)]/20 bg-[var(--color-protected)]/5 px-4 py-3 text-sm text-[var(--color-protected)]">
+              Votre compte a été supprimé et Kyrra a été désinstallé de Gmail.
+            </div>
+          )}
 
           {/* Google Auth — primary CTA */}
           <form action="/auth/callback" method="GET">
