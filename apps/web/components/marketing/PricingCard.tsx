@@ -1,68 +1,98 @@
-import { Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+'use client'
 
-interface PricingCardProps {
+import { motion, AnimatePresence } from 'motion/react'
+import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { CheckCircle } from 'lucide-react'
+
+interface Plan {
   tier: string
-  price: string
-  period?: string
-  description: string
+  tierKey: string
+  monthly: number | null
+  yearly: number | null
   features: string[]
   cta: string
-  highlighted?: boolean
+  highlighted: boolean
 }
 
-export function PricingCard({
-  tier,
-  price,
-  period,
-  description,
-  features,
-  cta,
-  highlighted = false,
-}: PricingCardProps) {
+export function PricingCard({ plan, annual }: { plan: Plan; annual: boolean }) {
+  const price = annual ? plan.yearly : plan.monthly
+
   return (
     <div
       className={cn(
-        'glass relative rounded-lg p-8',
-        highlighted &&
-          'border-(--color-brand-start) glow-brand',
+        'p-8 rounded-2xl flex flex-col transition-all',
+        plan.highlighted
+          ? 'bg-[var(--card)] border border-[var(--color-accent-start)]/30 shadow-[0_0_50px_rgba(77,142,255,0.15)] scale-105 z-10 relative'
+          : 'bg-[var(--surface-low)] border border-white/5'
       )}
     >
-      {highlighted && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-gradient px-3 py-0.5 text-xs font-medium text-white">
-          Populaire
-        </span>
+      {plan.highlighted && (
+        <div className="absolute top-0 right-0 bg-[var(--color-accent-start)] px-4 py-1 text-[10px] font-bold text-[var(--on-primary)] rounded-bl-lg font-label uppercase">
+          Recommandé
+        </div>
       )}
 
-      <p className="text-sm font-medium uppercase tracking-wider">{tier}</p>
-
-      <div className="mt-4 flex items-baseline gap-1">
-        <span className="font-outfit text-4xl font-light">{price}</span>
-        {period && (
-          <span className="text-sm text-(--muted-foreground)">{period}</span>
-        )}
+      <div className="mb-8">
+        <h4
+          className={cn(
+            'font-label text-xs uppercase tracking-widest mb-2',
+            plan.highlighted ? 'text-[var(--color-accent-start)]' : 'text-slate-500'
+          )}
+        >
+          {plan.tier}
+        </h4>
+        <div className="flex items-baseline gap-1">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={String(price)}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="text-4xl font-headline font-bold text-white"
+            >
+              {price === 0 ? (
+                'Gratuit'
+              ) : price !== null ? (
+                <>
+                  {price}€
+                  <span className="text-sm text-slate-500 font-normal">/mois</span>
+                </>
+              ) : (
+                'Sur Mesure'
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
 
-      <p className="mt-2 text-sm text-(--muted-foreground)">{description}</p>
-
-      <ul className="mt-6 space-y-3">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-(--color-protected)" />
+      <ul className="space-y-4 mb-12 flex-grow">
+        {plan.features.map((f) => (
+          <li
+            key={f}
+            className={cn(
+              'flex items-center gap-3 text-sm',
+              plan.highlighted ? 'text-slate-200' : 'text-slate-400'
+            )}
+          >
+            <CheckCircle className="w-4 h-4 text-[var(--color-accent-start)]" />
             {f}
           </li>
         ))}
       </ul>
 
-      <div className="mt-8">
-        <Button
-          variant={highlighted ? 'brand' : 'outline'}
-          className="w-full"
-        >
-          {cta}
-        </Button>
-      </div>
+      <Link
+        href="/login"
+        className={cn(
+          'w-full py-3 rounded-lg text-sm font-bold text-center transition-all no-underline block',
+          plan.highlighted
+            ? 'bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-[var(--on-primary)] py-4 hover:scale-[1.02]'
+            : 'border border-white/10 hover:bg-white/5 text-white'
+        )}
+      >
+        {plan.cta}
+      </Link>
     </div>
   )
 }
