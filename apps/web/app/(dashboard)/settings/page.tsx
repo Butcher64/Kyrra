@@ -18,7 +18,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <h1 className="font-outfit text-2xl font-semibold text-[var(--foreground)]">
+      <h1 className="font-headline text-2xl font-semibold text-[var(--foreground)]">
         Paramètres
       </h1>
       <p className="mt-1 mb-8 text-sm text-[var(--muted-foreground)]">

@@ -10,19 +10,19 @@ interface StatCardProps {
 }
 
 const iconStyles: Record<string, string> = {
-  brand: 'bg-blue-500/10 text-blue-400',
-  attention: 'bg-amber-500/10 text-amber-400',
-  protected: 'bg-emerald-500/10 text-emerald-400',
+  brand: 'bg-[var(--color-accent-start)]/10 text-[var(--color-accent-start)]',
+  attention: 'bg-[var(--color-attention)]/10 text-[var(--color-attention)]',
+  protected: 'bg-[var(--color-protected)]/10 text-[var(--color-protected)]',
   default: 'bg-white/5 text-slate-400',
-  cyan: 'bg-cyan-500/10 text-cyan-400',
+  cyan: 'bg-[var(--color-accent-cyan)]/10 text-[var(--color-accent-cyan)]',
 }
 
 const labelStyles: Record<string, string> = {
-  brand: 'group-hover:text-blue-400',
-  attention: 'group-hover:text-amber-400',
-  protected: 'group-hover:text-emerald-400',
+  brand: 'group-hover:text-[var(--color-accent-start)]',
+  attention: 'group-hover:text-[var(--color-attention)]',
+  protected: 'group-hover:text-[var(--color-protected)]',
   default: 'group-hover:text-slate-300',
-  cyan: 'group-hover:text-cyan-400',
+  cyan: 'group-hover:text-[var(--color-accent-cyan)]',
 }
 
 export function StatCard({ icon: Icon, value, label, sublabel, accent = 'default' }: StatCardProps) {
@@ -34,20 +34,20 @@ export function StatCard({ icon: Icon, value, label, sublabel, accent = 'default
         <span className={cn('p-2 rounded-lg', iconStyles[accent])}>
           <Icon size={20} strokeWidth={1.5} />
         </span>
-        <span className={cn('text-[10px] font-mono text-slate-500 uppercase tracking-widest transition-colors', labelStyles[accent])}>
+        <span className={cn('text-[10px] font-label text-slate-500 uppercase tracking-widest transition-colors', labelStyles[accent])}>
           {label}
         </span>
       </div>
       <div className="flex items-center gap-1.5">
-        <h3 className="text-2xl font-outfit font-bold text-slate-100">
+        <h3 className="text-2xl font-headline font-bold text-slate-100">
           {value}
         </h3>
         {showPulse && (
-          <span className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
+          <span className="size-1.5 rounded-full bg-[var(--color-attention)] animate-pulse" />
         )}
       </div>
       {sublabel && (
-        <p className="text-xs text-slate-500 mt-1 font-inter">{sublabel}</p>
+        <p className="text-xs text-slate-500 mt-1">{sublabel}</p>
       )}
     </div>
   )

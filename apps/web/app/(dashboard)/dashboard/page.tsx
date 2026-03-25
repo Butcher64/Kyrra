@@ -90,8 +90,8 @@ export default async function DashboardPage() {
   function getConfidenceColor(score: number | null | undefined) {
     if (!score) return { bar: 'bg-slate-500', text: 'text-slate-400', width: '50%' }
     if (score >= 0.8) return { bar: 'bg-cyan-400', text: 'text-cyan-400', width: `${Math.round(score * 100)}%` }
-    if (score >= 0.5) return { bar: 'bg-amber-400/60', text: 'text-amber-400/60', width: `${Math.round(score * 100)}%` }
-    return { bar: 'bg-red-400', text: 'text-red-400', width: `${Math.round(score * 100)}%` }
+    if (score >= 0.5) return { bar: 'bg-[var(--color-attention)]/60', text: 'text-[var(--color-attention)]/60', width: `${Math.round(score * 100)}%` }
+    return { bar: 'bg-red-400', text: 'text-[var(--destructive)]', width: `${Math.round(score * 100)}%` }
   }
 
   function formatTime(dateStr: string) {
@@ -101,20 +101,20 @@ export default async function DashboardPage() {
   return (
     <>
       {/* Page header */}
-      <header className="h-[100px] flex items-center justify-between">
+      <header className="h-[120px] flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-outfit font-semibold tracking-tight text-slate-100">
+          <h2 className="text-3xl font-headline font-semibold tracking-tight text-slate-100">
             Tableau de bord
           </h2>
           <div className="flex items-center gap-4">
-            <p className="text-xs font-mono text-slate-500 tracking-wider">{todayFormatted}</p>
+            <p className="text-xs font-label text-slate-500 tracking-wider">{todayFormatted}</p>
             <span className="w-1 h-1 rounded-full bg-slate-600" />
             <div className="flex items-center gap-1.5">
               <span className="flex h-2 w-2 relative">
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isPaused ? 'bg-amber-400' : 'bg-emerald-400'}`} />
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${isPaused ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isPaused ? 'bg-[var(--color-attention)]' : 'bg-[var(--color-accent-cyan)]'}`} />
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${isPaused ? 'bg-[var(--color-attention)]' : 'bg-[var(--color-accent-cyan)]'}`} />
               </span>
-              <span className={`text-[10px] font-mono tracking-[0.1em] uppercase ${isPaused ? 'text-amber-400' : 'text-emerald-400'}`}>
+              <span className={`text-[10px] font-label tracking-[0.1em] uppercase ${isPaused ? 'text-[var(--color-attention)]' : 'text-[var(--color-accent-cyan)]'}`}>
                 Statut : {isPaused ? 'Pausé' : 'Protégé'}
               </span>
             </div>
@@ -123,15 +123,15 @@ export default async function DashboardPage() {
 
         <div className="flex items-center gap-4">
           <div className="h-10 px-4 glass rounded-lg flex items-center gap-3">
-            <Search size={16} className="text-blue-400/70" strokeWidth={1.5} />
+            <Search size={16} className="text-[var(--color-accent-start)]/70" strokeWidth={1.5} />
             <input
-              className="bg-transparent border-none text-xs focus:ring-0 placeholder:text-slate-600 w-48 font-inter outline-none text-slate-200"
+              className="bg-transparent border-none text-xs focus:ring-0 placeholder:text-slate-600 w-48 font-body outline-none text-slate-200"
               placeholder="Rechercher un email..."
               type="text"
               readOnly
             />
           </div>
-          <button className="h-10 w-10 glass rounded-lg flex items-center justify-center text-slate-500 hover:text-blue-400 transition-colors">
+          <button className="h-10 w-10 glass rounded-lg flex items-center justify-center text-slate-500 hover:text-[var(--color-accent-start)] transition-colors">
             <Bell size={18} strokeWidth={1.5} />
           </button>
         </div>
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
       <HelpKyrraLearnBanner signalCount={labelSignalCount} gmailMessageId={firstSignalMessageId} />
 
       {/* Stats grid */}
-      <section className="grid grid-cols-4 gap-6 mb-10">
+      <section className="grid grid-cols-4 gap-6 mb-12">
         <StatCard
           icon={Mail}
           value={alertCount}
@@ -178,14 +178,14 @@ export default async function DashboardPage() {
         <div className="col-span-8">
           <div className="glass rounded-2xl overflow-hidden border border-white/5">
             <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center">
-              <h4 className="text-sm font-outfit font-semibold text-slate-200 uppercase tracking-widest">
+              <h4 className="text-sm font-headline font-semibold text-slate-200 uppercase tracking-widest">
                 Alertes de Sécurité
               </h4>
               <div className="flex gap-2">
-                <span className="px-2 py-1 rounded bg-white/5 text-[10px] font-mono text-slate-400 cursor-pointer hover:bg-white/10 transition-colors">
+                <span className="px-2 py-1 rounded bg-white/5 text-[10px] font-label text-slate-400 cursor-pointer hover:bg-white/10 transition-colors">
                   FILTRER
                 </span>
-                <span className="px-2 py-1 rounded bg-white/5 text-[10px] font-mono text-slate-400 cursor-pointer hover:bg-white/10 transition-colors">
+                <span className="px-2 py-1 rounded bg-white/5 text-[10px] font-label text-slate-400 cursor-pointer hover:bg-white/10 transition-colors">
                   EXPORTER
                 </span>
               </div>
@@ -196,13 +196,13 @@ export default async function DashboardPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-white/[0.03]">
-                      <th className="px-8 py-4 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                      <th className="px-8 py-4 text-[10px] font-label text-slate-500 uppercase tracking-widest">
                         Expéditeur
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                      <th className="px-6 py-4 text-[10px] font-label text-slate-500 uppercase tracking-widest">
                         Confiance IA
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                      <th className="px-6 py-4 text-[10px] font-label text-slate-500 uppercase tracking-widest">
                         Temps
                       </th>
                       <th className="px-8 py-4 text-right" />
@@ -220,7 +220,7 @@ export default async function DashboardPage() {
                         <tr key={alert.gmail_message_id} className="hover:bg-white/[0.02] transition-colors group">
                           <td className="px-8 py-5">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 shrink-0">
+                              <div className="w-8 h-8 rounded-full bg-[var(--destructive)]/10 flex items-center justify-center text-[var(--destructive)] shrink-0">
                                 <Mail size={16} strokeWidth={1.5} />
                               </div>
                               <div className="min-w-0">
@@ -241,11 +241,11 @@ export default async function DashboardPage() {
                                   style={{ width: confidence.width }}
                                 />
                               </div>
-                              <span className={`text-xs font-mono ${confidence.text}`}>{score}</span>
+                              <span className={`text-xs font-label ${confidence.text}`}>{score}</span>
                             </div>
                           </td>
                           <td className="px-6 py-5">
-                            <span className="text-xs font-mono text-slate-500">
+                            <span className="text-xs font-label text-slate-500">
                               {formatTime(alert.created_at)}
                             </span>
                           </td>
@@ -254,7 +254,7 @@ export default async function DashboardPage() {
                               href={gmailLink}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 group-hover:text-blue-400 transition-colors ml-auto no-underline"
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 group-hover:text-[var(--color-accent-start)] transition-colors ml-auto no-underline"
                             >
                               <ArrowRight size={16} strokeWidth={1.5} />
                             </a>
@@ -267,7 +267,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="py-16 flex flex-col items-center text-center px-8">
-                <ShieldCheck size={32} strokeWidth={1} className="text-emerald-400/30 mb-3" />
+                <ShieldCheck size={32} strokeWidth={1} className="text-[var(--color-accent-cyan)]/30 mb-3" />
                 <p className="text-sm text-slate-500">
                   Aucune alerte aujourd&apos;hui. Kyrra surveille en temps réel.
                 </p>
@@ -279,12 +279,12 @@ export default async function DashboardPage() {
         {/* Right panel — col-span-4 */}
         <div className="col-span-4 space-y-6">
           {/* Surveillance card */}
-          <div className="glass rounded-2xl p-8 flex flex-col items-center justify-center text-center min-h-[320px] relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none" />
-            <div className="w-16 h-16 rounded-full bg-[var(--background)] flex items-center justify-center mb-5 border border-white/5 relative z-10">
-              <ShieldCheck size={32} strokeWidth={1} className="text-blue-400 animate-pulse" />
+          <div className="glass rounded-2xl p-8 flex flex-col items-center justify-center text-center min-h-[360px] relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-accent-start)]/5 to-transparent pointer-events-none" />
+            <div className="w-20 h-20 rounded-full bg-[var(--surface-container)] flex items-center justify-center mb-6 border border-white/5 relative z-10">
+              <ShieldCheck size={32} strokeWidth={1} className="text-[var(--color-accent-start)] animate-pulse" />
             </div>
-            <h5 className="text-base font-outfit font-semibold text-slate-100 relative z-10">
+            <h5 className="text-base font-headline font-semibold text-slate-100 relative z-10">
               Kyrra surveille votre boîte
             </h5>
             <p className="text-xs text-slate-500 mt-2 max-w-[180px] leading-relaxed relative z-10">
@@ -294,7 +294,7 @@ export default async function DashboardPage() {
               href="https://mail.google.com/mail/u/0/#label/Kyrra"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 px-5 py-2 border border-white/10 rounded-full text-[10px] font-mono text-slate-400 hover:border-blue-400/40 hover:text-blue-400 transition-all relative z-10 uppercase tracking-widest no-underline"
+              className="mt-6 px-5 py-2 border border-white/10 rounded-full text-[10px] font-label text-slate-400 hover:border-[var(--color-accent-start)]/40 hover:text-[var(--color-accent-start)] transition-all relative z-10 uppercase tracking-widest no-underline"
             >
               Journal des logs
             </a>
@@ -302,18 +302,18 @@ export default async function DashboardPage() {
 
           {/* AI updates card */}
           <div className="glass rounded-2xl p-6">
-            <h6 className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">
+            <h6 className="text-[10px] font-label text-slate-500 uppercase tracking-widest mb-4">
               Mises à jour IA
             </h6>
             <div className="space-y-4">
               <div className="flex gap-3 items-start">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent-cyan)] mt-1.5 shrink-0" />
                 <p className="text-[11px] text-slate-300 leading-relaxed">
                   Nouveaux patterns de prospection identifiés et bloqués automatiquement.
                 </p>
               </div>
               <div className="flex gap-3 items-start">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent-start)] mt-1.5 shrink-0" />
                 <p className="text-[11px] text-slate-300 leading-relaxed">
                   Moteur de classification mis à jour. Précision accrue sur les emails B2B.
                 </p>
@@ -324,16 +324,17 @@ export default async function DashboardPage() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-16 py-10 border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-5">
-            <span className="text-sm font-bold text-slate-400 font-outfit uppercase tracking-[0.2em]">KYRRA</span>
-            <p className="text-[10px] font-mono text-slate-500">© 2024 Kyrra AI. Souveraineté Numérique.</p>
+      <footer className="mt-24 py-12 border-t border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex items-center gap-6">
+            <span className="text-sm font-bold text-slate-400 font-headline uppercase tracking-[0.2em]">KYRRA</span>
+            <p className="text-[10px] font-label text-slate-500">© 2026 Kyrra AI. Souveraineté Numérique.</p>
           </div>
-          <div className="flex gap-6">
-            <a href="/privacy" className="text-[10px] font-mono text-slate-600 hover:text-slate-300 transition-colors no-underline">Confidentialité</a>
-            <a href="/terms" className="text-[10px] font-mono text-slate-600 hover:text-slate-300 transition-colors no-underline">CGU</a>
-            <a href="mailto:support@kyrra.ai" className="text-[10px] font-mono text-slate-600 hover:text-slate-300 transition-colors no-underline">Contact</a>
+          <div className="flex gap-8">
+            <a href="/legal/privacy" className="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors no-underline">Confidentialité</a>
+            <a href="/legal/cgu" className="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors no-underline">CGU</a>
+            <a href="mailto:support@kyrra.ai" className="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors no-underline">Contact</a>
+            <a href="#" className="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors no-underline">Statut Système</a>
           </div>
         </div>
       </footer>

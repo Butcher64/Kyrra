@@ -39,12 +39,12 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
     <div className="flex h-full flex-col py-8">
       {/* Header */}
       <div className="px-8 mb-10">
-        <h1 className="text-[17px] font-bold text-slate-200 font-outfit tracking-tight">
+        <h1 className="text-[17px] font-bold text-slate-200 font-headline tracking-tight">
           Kyrra Enterprise
         </h1>
         <p
           className={cn(
-            'text-[10px] font-mono tracking-[0.05em] mt-1',
+            'text-[10px] font-label tracking-[0.05em] mt-1',
             pipelineStatus === 'active' ? 'text-blue-400' : 'text-amber-400',
           )}
         >
@@ -79,7 +79,7 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
             className="flex items-center gap-3 px-4 py-2 text-slate-600 hover:text-slate-300 transition-colors no-underline rounded-lg hover:bg-white/5"
           >
             <HelpCircle size={18} className="shrink-0" />
-            <span className="font-mono text-xs">Support</span>
+            <span className="font-label text-xs">Support</span>
           </a>
 
           <div className="flex items-center gap-3 px-4 py-3 mt-1 rounded-xl bg-white/[0.03] border border-white/5">
