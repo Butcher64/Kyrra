@@ -23,7 +23,7 @@ export function PricingCard({ plan, annual }: { plan: Plan; annual: boolean }) {
       className={cn(
         'p-8 rounded-2xl flex flex-col transition-all',
         plan.highlighted
-          ? 'bg-[var(--card)] border border-[var(--color-accent-start)]/30 shadow-[var(--shadow-accent-lg)] scale-105 z-10 relative'
+          ? 'bg-[var(--card)] border border-[var(--color-accent-start)]/30 shadow-[var(--shadow-accent-lg)] md:scale-105 z-10 relative'
           : 'bg-[var(--surface-low)] border border-white/5'
       )}
     >

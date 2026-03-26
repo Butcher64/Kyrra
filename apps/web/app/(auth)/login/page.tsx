@@ -173,7 +173,7 @@ export default async function LoginPage({
         </div>
 
         {/* Footer links */}
-        <div className="absolute bottom-12 w-full max-w-[380px] flex justify-between items-center text-[10px] font-label uppercase tracking-widest text-[var(--muted-foreground)]">
+        <div className="absolute bottom-12 left-8 right-8 lg:left-auto lg:right-auto w-auto lg:w-full lg:max-w-[380px] flex justify-between items-center text-[10px] font-label uppercase tracking-widest text-[var(--muted-foreground)]">
           <a href="/legal/privacy" className="hover:text-slate-100 transition-colors">Confidentialité</a>
           <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
           <a href="/legal/cgu" className="hover:text-slate-100 transition-colors">Conditions</a>

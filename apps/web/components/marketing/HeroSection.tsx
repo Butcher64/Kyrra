@@ -28,7 +28,7 @@ export function HeroSection() {
         </motion.span>
 
         {/* Headline */}
-        <h1 className="text-5xl md:text-7xl font-extrabold font-headline tracking-tighter mb-8 leading-[1.1]">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold font-headline tracking-tighter mb-8 leading-[1.1]">
           <TextReveal
             tag="span"
             className="block text-slate-100"

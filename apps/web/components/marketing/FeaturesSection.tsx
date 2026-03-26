@@ -49,7 +49,7 @@ export function FeaturesSection() {
     <section
       data-section="features"
       id="features"
-      className="py-32 px-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center"
+      className="py-32 px-6 md:px-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center"
     >
       {/* Left: text */}
       <ScrollReveal>
@@ -57,7 +57,7 @@ export function FeaturesSection() {
           <span className="font-label text-[var(--color-accent-cyan)] text-xs uppercase tracking-widest mb-6 block">
             Technologie Exclusive
           </span>
-          <h2 className="text-4xl font-headline font-bold text-slate-100 mb-8 leading-tight">
+          <h2 className="text-3xl md:text-4xl font-headline font-bold text-slate-100 mb-8 leading-tight">
             Le filtrage sémantique nouvelle génération.
           </h2>
           <ul className="space-y-6">

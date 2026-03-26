@@ -8,9 +8,9 @@ export function CTASection() {
       data-section="cta-final"
       className="py-32 bg-gradient-to-b from-[var(--background)] to-[var(--surface-darkest)]"
     >
-      <div className="max-w-4xl mx-auto px-10 text-center">
+      <div className="max-w-4xl mx-auto px-6 md:px-10 text-center">
         <ScrollReveal>
-          <h2 className="text-5xl font-headline font-extrabold text-slate-100 mb-10 leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline font-extrabold text-slate-100 mb-10 leading-tight">
             Redécouvrez le plaisir d'un travail ininterrompu.
           </h2>
         </ScrollReveal>

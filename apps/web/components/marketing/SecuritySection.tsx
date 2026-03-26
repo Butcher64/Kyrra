@@ -28,7 +28,7 @@ export function SecuritySection() {
       id="security"
       className="py-24 bg-[var(--surface-low)]"
     >
-      <div className="max-w-7xl mx-auto px-10 text-center">
+      <div className="max-w-7xl mx-auto px-6 md:px-10 text-center">
         <h2 className="text-3xl font-headline font-bold text-slate-100 mb-16">
           La sécurité au cœur de notre architecture.
         </h2>

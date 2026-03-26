@@ -27,9 +27,9 @@ export function HowItWorks() {
       id="how-it-works"
       className="py-24 bg-[var(--surface-container)] relative overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto px-10">
+      <div className="max-w-7xl mx-auto px-6 md:px-10">
         <div className="text-center mb-20">
-          <h2 className="text-4xl font-headline font-bold text-slate-100 mb-4">
+          <h2 className="text-3xl md:text-4xl font-headline font-bold text-slate-100 mb-4">
             Une intégration, trois étapes.
           </h2>
           <p className="text-slate-500 font-label uppercase tracking-widest text-xs">

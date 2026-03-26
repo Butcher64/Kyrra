@@ -21,7 +21,7 @@ const painPoints = [
 
 export function ProblemSection() {
   return (
-    <section data-section="problem" className="py-24 px-10 max-w-7xl mx-auto">
+    <section data-section="problem" className="py-24 px-6 md:px-10 max-w-7xl mx-auto">
       <div className="mb-16">
         <h2 className="text-3xl font-headline font-bold text-slate-100 mb-4">
           Le coût caché du bruit numérique.

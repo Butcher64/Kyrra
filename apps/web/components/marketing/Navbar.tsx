@@ -28,7 +28,7 @@ export function Navbar() {
       <header
         data-section="navbar"
         className={cn(
-          'fixed top-0 w-full h-[72px] z-50 flex items-center px-10 transition-all duration-300',
+          'fixed top-0 w-full h-[72px] z-50 flex items-center px-4 sm:px-6 md:px-10 transition-all duration-300',
           scrolled
             ? 'bg-[var(--background)]/80 backdrop-blur-xl border-b border-white/5'
             : 'bg-[var(--background)]/60 backdrop-blur-xl'

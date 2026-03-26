@@ -8,7 +8,7 @@ export function SocialProof() {
       data-section="social-proof"
       className="py-20 border-y border-white/5 bg-[var(--surface-lowest)]"
     >
-      <div className="max-w-7xl mx-auto px-10 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+      <div className="max-w-7xl mx-auto px-6 md:px-10 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
         <div>
           <div className="text-4xl font-headline font-bold text-white mb-2">
             <CountUp value={25} suffix="+" /> dirigeants

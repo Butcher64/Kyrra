@@ -58,7 +58,7 @@ export function PricingSection() {
     <section
       data-section="pricing"
       id="pricing"
-      className="py-32 px-10 max-w-7xl mx-auto"
+      className="py-32 px-6 md:px-10 max-w-7xl mx-auto"
     >
       <div className="text-center mb-20">
         <h2 className="text-4xl font-headline font-bold text-slate-100 mb-6">

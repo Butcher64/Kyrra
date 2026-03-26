@@ -28,7 +28,7 @@ export function Footer() {
       data-section="footer"
       className="bg-[var(--surface-darkest)] py-24 border-t border-white/5"
     >
-      <div className="max-w-7xl mx-auto px-12 grid grid-cols-1 md:grid-cols-4 gap-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-16">
         {/* Brand column */}
         <div className="col-span-1">
           <div className="text-2xl font-extrabold font-headline tracking-tighter text-white mb-6">
@@ -99,7 +99,7 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="max-w-7xl mx-auto px-12 mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
         <p className="font-label text-[10px] text-slate-600 uppercase tracking-widest">
           © 2026 Kyrra AI. Souveraineté Numérique.
         </p>
