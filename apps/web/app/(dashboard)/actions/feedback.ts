@@ -3,7 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { feedbackParamsSchema, ERROR_CODES } from '@kyrra/shared'
 import type { ActionResult } from '@kyrra/shared'
-import { addToWhitelist } from './whitelist'
 
 /**
  * Submit classification feedback (FR46 — Trust & Feedback Loop)
