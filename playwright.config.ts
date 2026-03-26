@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 30_000,
   retries: 1,
   use: {
-    baseURL: 'https://wo06tt0lfdyui2rfu8q3vlem.hacksprint.fr',
+    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
     headless: true,
     screenshot: 'only-on-failure',
   },

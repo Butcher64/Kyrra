@@ -7,7 +7,7 @@ const cardVariants = cva(
     variants: {
       variant: {
         default: 'border border-(--border) bg-transparent',
-        glass: 'glass rounded-xl',
+        glass: 'bg-[var(--card)] border border-[var(--border)] backdrop-blur-xl rounded-xl',
       },
     },
     defaultVariants: {
@@ -32,7 +32,7 @@ function Card({ className, variant, ...props }: CardProps) {
 function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
-      className={cn('px-4 py-3.5', className)}
+      className={cn('px-6 py-5', className)}
       {...props}
     />
   )

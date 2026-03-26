@@ -28,8 +28,8 @@ export function DashboardShell({ user, pipelineStatus, children }: DashboardShel
           pipelineStatus={pipelineStatus}
         />
 
-        <main className="flex-1 overflow-y-auto bg-[var(--background)]">
-          <div className="mx-auto max-w-[1000px] px-6 py-8">
+        <main className="flex-1 overflow-y-auto bg-[var(--background)] editorial-grid pb-24">
+          <div className="px-12">
             {children}
           </div>
         </main>

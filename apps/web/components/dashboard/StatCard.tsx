@@ -5,42 +5,50 @@ interface StatCardProps {
   icon: LucideIcon
   value: string | number
   label: string
-  accent?: 'brand' | 'attention' | 'protected' | 'default'
+  sublabel?: string
+  accent?: 'brand' | 'attention' | 'protected' | 'default' | 'cyan'
 }
 
-const accentStyles: Record<string, string> = {
-  brand: 'bg-[var(--color-brand-accent)]/10 text-[var(--color-brand-accent)]',
+const iconStyles: Record<string, string> = {
+  brand: 'bg-[var(--color-accent-start)]/10 text-[var(--color-accent-start)]',
   attention: 'bg-[var(--color-attention)]/10 text-[var(--color-attention)]',
   protected: 'bg-[var(--color-protected)]/10 text-[var(--color-protected)]',
-  default: 'bg-[var(--muted)] text-[var(--muted-foreground)]',
+  default: 'bg-white/5 text-slate-400',
+  cyan: 'bg-[var(--color-accent-cyan)]/10 text-[var(--color-accent-cyan)]',
 }
 
-export function StatCard({ icon: Icon, value, label, accent = 'default' }: StatCardProps) {
+const labelStyles: Record<string, string> = {
+  brand: 'group-hover:text-[var(--color-accent-start)]',
+  attention: 'group-hover:text-[var(--color-attention)]',
+  protected: 'group-hover:text-[var(--color-protected)]',
+  default: 'group-hover:text-slate-300',
+  cyan: 'group-hover:text-[var(--color-accent-cyan)]',
+}
+
+export function StatCard({ icon: Icon, value, label, sublabel, accent = 'default' }: StatCardProps) {
   const showPulse = accent === 'attention' && typeof value === 'number' && value > 0
 
   return (
-    <div className="glass rounded-xl px-4 py-3.5 transition-colors duration-150 hover:border-[var(--color-brand-start)]/20">
-      <div className="flex items-center gap-3">
-        <div className={cn(
-          'flex size-9 items-center justify-center rounded-full shrink-0',
-          accentStyles[accent],
-        )}>
-          <Icon size={16} strokeWidth={1.5} />
-        </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="font-outfit text-2xl font-medium text-[var(--foreground)]">
-              {value}
-            </span>
-            {showPulse && (
-              <span className="size-1.5 rounded-full bg-[var(--color-attention)] animate-pulse" />
-            )}
-          </div>
-          <div className="text-xs text-[var(--muted-foreground)]">
-            {label}
-          </div>
-        </div>
+    <div className="glass rounded-xl p-6 hover:bg-white/[0.05] transition-all group">
+      <div className="flex justify-between items-start mb-4">
+        <span className={cn('p-2 rounded-lg', iconStyles[accent])}>
+          <Icon size={20} strokeWidth={1.5} />
+        </span>
+        <span className={cn('text-[10px] font-label text-slate-500 uppercase tracking-widest transition-colors', labelStyles[accent])}>
+          {label}
+        </span>
       </div>
+      <div className="flex items-center gap-1.5">
+        <h3 className="text-2xl font-headline font-bold text-slate-100">
+          {value}
+        </h3>
+        {showPulse && (
+          <span className="size-1.5 rounded-full bg-[var(--color-attention)] animate-pulse" />
+        )}
+      </div>
+      {sublabel && (
+        <p className="text-xs text-slate-500 mt-1">{sublabel}</p>
+      )}
     </div>
   )
 }

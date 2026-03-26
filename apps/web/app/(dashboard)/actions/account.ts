@@ -50,21 +50,24 @@ export async function deleteAccount(params: unknown): Promise<ActionResult> {
 
       // 3. Stop Pub/Sub watch
       await stopGmailWatch(accessToken)
+
+      // 4. Revoke OAuth token (FR84 — explicit revocation)
+      await revokeGmailToken(accessToken)
     } catch {
       // Gmail cleanup failed — proceed with account deletion anyway
       // Labels will remain but are harmless without Kyrra
     }
   }
 
-  // 4. Delete account via SECURITY DEFINER function (cascades all tables)
+  // 5. Delete account via SECURITY DEFINER function (cascades all tables)
   const { error } = await supabase.rpc('delete_user_account', { p_user_id: user.id })
 
   if (error) {
     return { data: null, error: { code: ERROR_CODES.INTERNAL, message: error.message } }
   }
 
-  // 5. Redirect to login
-  redirect('/login')
+  // 6. Redirect to login with success message
+  redirect('/login?uninstalled=true')
 }
 
 // ── Gmail helpers (inline — web app cannot import from worker) ──
@@ -114,6 +117,13 @@ async function stopGmailWatch(accessToken: string): Promise<void> {
   await fetch(`${GMAIL_API_BASE}/stop`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+async function revokeGmailToken(accessToken: string): Promise<void> {
+  await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(accessToken)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   })
 }
 
