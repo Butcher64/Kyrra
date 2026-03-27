@@ -13,9 +13,7 @@ RUN pnpm install --frozen-lockfile --prod=false
 COPY apps/worker/ ./apps/worker/
 COPY packages/shared/ ./packages/shared/
 COPY packages/tsconfig/ ./packages/tsconfig/
-RUN pnpm turbo run build --filter=@kyrra/worker
-
-# Run
+# Run (tsx handles ESM resolution without .js extensions)
 EXPOSE 8089
 WORKDIR /app/apps/worker
-CMD ["node", "dist/index.js"]
+CMD ["npx", "tsx", "src/index.ts"]
