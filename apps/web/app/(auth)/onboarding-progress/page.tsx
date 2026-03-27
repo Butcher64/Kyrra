@@ -20,9 +20,13 @@ export default function OnboardingProgressPage() {
 
     // Poll scan progress every 3 seconds (NFR-PERF-09)
     const interval = setInterval(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
       const { data } = await supabase
         .from('onboarding_scans')
         .select('status, total_sent, emails_processed, contacts_found, prospecting_found')
+        .eq('user_id', user.id)
         .single()
 
       if (data) {
@@ -146,7 +150,7 @@ export default function OnboardingProgressPage() {
                 }}
               >
                 <span className="font-headline text-2xl font-bold text-white tabular-nums">
-                  {(scan?.emails_processed ?? 1284).toLocaleString('fr-FR')}
+                  {(scan?.emails_processed ?? 0).toLocaleString('fr-FR')}
                 </span>
                 <span className="font-label text-[9px] tracking-[0.18em] uppercase text-white/35 mt-1">
                   Emails analys&eacute;s
@@ -162,7 +166,7 @@ export default function OnboardingProgressPage() {
                 }}
               >
                 <span className="font-headline text-2xl font-bold text-white tabular-nums">
-                  {(scan?.contacts_found ?? 412).toLocaleString('fr-FR')}
+                  {(scan?.contacts_found ?? 0).toLocaleString('fr-FR')}
                 </span>
                 <span className="font-label text-[9px] tracking-[0.18em] uppercase text-white/35 mt-1">
                   Contacts
@@ -181,7 +185,7 @@ export default function OnboardingProgressPage() {
                   className="font-headline text-2xl font-bold tabular-nums"
                   style={{ color: 'oklch(0.72 0.19 195)' }}
                 >
-                  {(scan?.prospecting_found ?? 86).toLocaleString('fr-FR')}
+                  {(scan?.prospecting_found ?? 0).toLocaleString('fr-FR')}
                 </span>
                 <span
                   className="font-label text-[9px] tracking-[0.18em] uppercase mt-1"
@@ -198,6 +202,13 @@ export default function OnboardingProgressPage() {
                 Fermez sans souci. Le scan continue en arri&egrave;re-plan.
                 <br />
                 Vous recevrez un email quand c&apos;est pr&ecirc;t.
+                <br />
+                <a
+                  href="/dashboard"
+                  className="inline-block mt-2 text-white/50 underline underline-offset-4 hover:text-white/70 transition-colors"
+                >
+                  Aller au tableau de bord &rarr;
+                </a>
               </p>
             )}
           </div>

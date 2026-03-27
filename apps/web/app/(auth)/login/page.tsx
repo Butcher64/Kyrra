@@ -92,7 +92,7 @@ export default async function LoginPage({
               Bienvenue
             </h1>
             <p className="text-[var(--muted-foreground)]">
-              Accédez à votre espace sécurisé Kyrra AI.
+              Connectez-vous ou créez votre compte en un clic.
             </p>
           </div>
 
@@ -126,7 +126,10 @@ export default async function LoginPage({
           </div>
 
           {/* Email / password fields — visual only, not wired */}
-          <div className="space-y-6">
+          <div className="relative space-y-6">
+            <div className="absolute -top-3 left-3 px-2 bg-[var(--surface-darkest)] text-[10px] font-label uppercase tracking-widest text-[var(--muted-foreground)]/50">
+              Bientôt disponible
+            </div>
             <div className="space-y-2">
               <label className="block font-label text-[10px] uppercase tracking-widest text-[var(--muted-foreground)] ml-1">
                 Adresse Email
@@ -166,7 +169,7 @@ export default async function LoginPage({
           {/* Sign-up link */}
           <p className="text-center text-sm text-[var(--muted-foreground)]">
             Pas encore de compte ?{' '}
-            <a href="#" className="text-[var(--color-accent-start)] font-medium hover:underline underline-offset-4">
+            <a href="/login" className="text-[var(--color-accent-start)] font-medium hover:underline underline-offset-4">
               Commencer l&apos;essai
             </a>
           </p>

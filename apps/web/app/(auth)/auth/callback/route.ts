@@ -15,6 +15,11 @@ function getPublicOrigin(request: Request): string {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const origin = getPublicOrigin(request)
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return NextResponse.redirect(`${origin}/login?error=config_missing`)
+  }
+
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
 

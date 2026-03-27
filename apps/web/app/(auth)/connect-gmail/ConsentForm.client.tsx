@@ -74,18 +74,22 @@ export function ConsentForm() {
 
     startTransition(async () => {
       setError(null)
-      const result = await saveConsent({
-        consent_given: true,
-        recap_consent: recapConsent,
-      })
+      try {
+        const result = await saveConsent({
+          consent_given: true,
+          recap_consent: recapConsent,
+        })
 
-      if (result.error) {
-        setError('Erreur lors de la sauvegarde du consentement. Veuillez reessayer.')
-        return
+        if (result.error) {
+          setError('Erreur lors de la sauvegarde du consentement. Veuillez reessayer.')
+          return
+        }
+
+        // Consent saved — proceed to Gmail OAuth
+        window.location.href = '/auth/callback/google'
+      } catch {
+        setError('Erreur réseau. Veuillez réessayer.')
       }
-
-      // Consent saved — proceed to Gmail OAuth
-      window.location.href = '/auth/callback/google'
     })
   }
 

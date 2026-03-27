@@ -46,7 +46,7 @@ const plans = [
       'Whitelist partagée',
       'Support prioritaire (SLA 4h)',
     ],
-    cta: "Contacter l'équipe",
+    cta: 'Essai gratuit 14 jours',
     highlighted: false,
   },
 ]

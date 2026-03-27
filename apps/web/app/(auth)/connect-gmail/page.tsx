@@ -49,7 +49,7 @@ export default async function ConnectGmailPage() {
                   Connecter Gmail
                 </h1>
                 <p className="text-xs text-(--muted-foreground) font-mono">
-                  Etape 2 sur 3
+                  Consentement &amp; connexion
                 </p>
               </div>
             </div>

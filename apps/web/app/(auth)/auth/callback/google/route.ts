@@ -36,6 +36,13 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login`)
   }
 
+  // Validate CSRF state parameter
+  if (code && (!state || state !== user.id)) {
+    const url = new URL('/connect-gmail', origin)
+    url.searchParams.set('error', 'csrf_failed')
+    return NextResponse.redirect(url.toString())
+  }
+
   // Step 1: If no code, initiate the PKCE flow
   if (!code) {
     const redirectUri = `${origin}/auth/callback/google`
