@@ -512,6 +512,41 @@ export async function getHistory(
   }
 }
 
+// ── Inbox listing (initial scan after onboarding — Fix 3) ──
+
+/**
+ * List the most recent INBOX message IDs for initial classification scan
+ * Returns up to `maxResults` message IDs (default 100)
+ */
+export async function listInboxMessageIds(
+  accessToken: string,
+  maxResults: number = 100,
+): Promise<string[]> {
+  const messageIds: string[] = []
+  let pageToken: string | undefined
+
+  do {
+    const params = new URLSearchParams({
+      q: 'in:inbox',
+      maxResults: String(Math.min(maxResults - messageIds.length, 100)),
+      fields: 'messages(id),nextPageToken',
+    })
+    if (pageToken) params.set('pageToken', pageToken)
+
+    const response = await gmailFetch(accessToken, `/messages?${params}`)
+    const data = await response.json()
+
+    const ids: string[] = (data.messages ?? []).map((m: { id: string }) => m.id)
+    messageIds.push(...ids)
+
+    if (messageIds.length >= maxResults) break
+
+    pageToken = data.nextPageToken
+  } while (pageToken)
+
+  return messageIds.slice(0, maxResults)
+}
+
 // ── Sent messages (onboarding whitelist scan — Story 1.3) ──
 
 /**
