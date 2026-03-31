@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return <div className="p-12 text-center text-slate-400">Session expirée. <a href="/login" className="text-[var(--color-accent-cyan)] underline">Reconnexion</a></div>
+    return <div className="p-12 text-center text-slate-400">Session expirée. <a href="/login" className="text-[var(--primary)] underline">Reconnexion</a></div>
   }
 
   let filteredToday = 0
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
   return (
     <>
       <div className="mb-10">
-        <h1 className="text-2xl font-headline font-semibold text-slate-100 tracking-tight">
+        <h1 className="text-2xl font-headline font-semibold text-slate-800 tracking-tight">
           Bonjour, {firstName}
         </h1>
         <p className="text-sm text-slate-500 mt-1">
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
             </div>
             <span className="text-xs font-label text-slate-500 uppercase tracking-wider">Triés aujourd&apos;hui</span>
           </div>
-          <p className="text-3xl font-headline font-bold text-slate-100">{filteredToday}</p>
+          <p className="text-3xl font-headline font-bold text-slate-800">{filteredToday}</p>
         </div>
 
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
@@ -89,12 +89,12 @@ export default async function DashboardPage() {
             </div>
             <span className="text-xs font-label text-slate-500 uppercase tracking-wider">Temps gagné</span>
           </div>
-          <p className="text-3xl font-headline font-bold text-slate-100">{timeSaved} <span className="text-base font-normal text-slate-500">min</span></p>
+          <p className="text-3xl font-headline font-bold text-slate-800">{timeSaved} <span className="text-base font-normal text-slate-500">min</span></p>
         </div>
       </div>
 
       <div>
-        <h2 className="text-sm font-headline font-semibold text-slate-300 uppercase tracking-wider mb-4">
+        <h2 className="text-sm font-headline font-semibold text-slate-600 uppercase tracking-wider mb-4">
           Derniers emails triés
         </h2>
 
@@ -105,11 +105,11 @@ export default async function DashboardPage() {
               const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
 
               return (
-                <div key={email.gmail_message_id} className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors group">
+                <div key={email.gmail_message_id} className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors group">
                   <span className={`shrink-0 px-2.5 py-1 rounded-md text-[10px] font-label font-medium uppercase tracking-wider border ${style.bg} ${style.text} ${style.border}`}>
                     {style.label}
                   </span>
-                  <p className="flex-1 text-sm text-slate-300 truncate min-w-0">
+                  <p className="flex-1 text-sm text-slate-600 truncate min-w-0">
                     {email.summary ?? 'Email classifié'}
                   </p>
                   <span className="shrink-0 text-xs text-slate-500 font-label">
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
                     href={gmailLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 p-1.5 rounded-md text-slate-600 group-hover:text-[var(--color-accent-cyan)] transition-colors no-underline"
+                    className="shrink-0 p-1.5 rounded-md text-slate-400 group-hover:text-[var(--primary)] transition-colors no-underline"
                   >
                     <ArrowUpRight size={14} strokeWidth={1.5} />
                   </a>
@@ -129,9 +129,9 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] py-16 text-center">
-            <Mail size={28} strokeWidth={1} className="text-slate-600 mx-auto mb-3" />
+            <Mail size={28} strokeWidth={1} className="text-slate-400 mx-auto mb-3" />
             <p className="text-sm text-slate-500">Aucun email trié pour le moment.</p>
-            <p className="text-xs text-slate-600 mt-1">Kyrra trie vos emails en arrière-plan.</p>
+            <p className="text-xs text-slate-400 mt-1">Kyrra trie vos emails en arrière-plan.</p>
           </div>
         )}
       </div>
