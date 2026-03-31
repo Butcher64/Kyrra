@@ -147,12 +147,11 @@ export async function onboardingScanLoop(supabase: any): Promise<void> {
       console.error('Onboarding email send failed:', (emailError as Error).message)
     }
 
-    // Fix 2 — Create Gmail Watch for real-time Pub/Sub notifications
+    // Create Gmail Watch if Pub/Sub is configured
     if (PUBSUB_TOPIC) {
       try {
         const watchResponse = await createWatch(accessToken, PUBSUB_TOPIC)
         const expirationDate = new Date(Number(watchResponse.expiration))
-
         await supabase
           .from('user_integrations')
           .update({
@@ -161,56 +160,53 @@ export async function onboardingScanLoop(supabase: any): Promise<void> {
             updated_at: new Date().toISOString(),
           })
           .eq('id', integration.id)
-
-        console.log(`Gmail Watch created for user ${scan.user_id}, historyId=${watchResponse.historyId}, expires=${expirationDate.toISOString()}`)
-
-        // Fix 3 — Initial inbox scan: queue last 100 emails for classification
-        try {
-          const inboxMessageIds = await listInboxMessageIds(accessToken, 100)
-
-          if (inboxMessageIds.length > 0) {
-            // Check which messages are already queued or classified
-            const { data: existingQueue } = await supabase
-              .from('email_queue_items')
-              .select('gmail_message_id')
-              .eq('user_id', scan.user_id)
-              .in('gmail_message_id', inboxMessageIds)
-
-            const { data: existingClassifications } = await supabase
-              .from('email_classifications')
-              .select('gmail_message_id')
-              .eq('user_id', scan.user_id)
-              .in('gmail_message_id', inboxMessageIds)
-
-            const alreadyProcessed = new Set([
-              ...(existingQueue ?? []).map((q: any) => q.gmail_message_id),
-              ...(existingClassifications ?? []).map((c: any) => c.gmail_message_id),
-            ])
-
-            const newItems = inboxMessageIds
-              .filter((id) => !alreadyProcessed.has(id))
-              .map((gmailMessageId) => ({
-                user_id: scan.user_id,
-                gmail_message_id: gmailMessageId,
-                gmail_history_id: watchResponse.historyId,
-                status: 'pending' as const,
-              }))
-
-            if (newItems.length > 0) {
-              await supabase.from('email_queue_items').insert(newItems)
-              console.log(`Initial inbox scan: queued ${newItems.length} emails for classification (user ${scan.user_id})`)
-            }
-          }
-        } catch (inboxError) {
-          // Non-fatal — watch is already set up, reconciliation will catch these
-          console.error('Initial inbox scan failed:', (inboxError as Error).message)
-        }
+        console.log(`Gmail Watch created for user ${scan.user_id}, historyId=${watchResponse.historyId}`)
       } catch (watchError) {
-        // Non-fatal — reconciliation loop will retry watch creation
         console.error('Gmail Watch creation failed:', (watchError as Error).message)
       }
     } else {
-      console.warn('GMAIL_PUBSUB_TOPIC not configured — skipping watch creation')
+      console.log('GMAIL_PUBSUB_TOPIC not configured — skipping watch (polling mode)')
+    }
+
+    // Initial inbox scan: queue last 100 emails for classification (works in both polling and Pub/Sub mode)
+    try {
+      const inboxMessageIds = await listInboxMessageIds(accessToken, 100)
+      console.log(`Initial inbox scan: found ${inboxMessageIds.length} inbox emails for user ${scan.user_id}`)
+
+      if (inboxMessageIds.length > 0) {
+        const { data: existingQueue } = await supabase
+          .from('email_queue_items')
+          .select('gmail_message_id')
+          .eq('user_id', scan.user_id)
+          .in('gmail_message_id', inboxMessageIds)
+
+        const { data: existingClassifications } = await supabase
+          .from('email_classifications')
+          .select('gmail_message_id')
+          .eq('user_id', scan.user_id)
+          .in('gmail_message_id', inboxMessageIds)
+
+        const alreadyProcessed = new Set([
+          ...(existingQueue ?? []).map((q: any) => q.gmail_message_id),
+          ...(existingClassifications ?? []).map((c: any) => c.gmail_message_id),
+        ])
+
+        const newItems = inboxMessageIds
+          .filter((id) => !alreadyProcessed.has(id))
+          .map((gmailMessageId) => ({
+            user_id: scan.user_id,
+            gmail_message_id: gmailMessageId,
+            gmail_history_id: 'initial_scan',
+            status: 'pending' as const,
+          }))
+
+        if (newItems.length > 0) {
+          await supabase.from('email_queue_items').insert(newItems)
+          console.log(`Initial inbox scan: queued ${newItems.length} emails for classification`)
+        }
+      }
+    } catch (inboxError) {
+      console.error('Initial inbox scan failed:', (inboxError as Error).message)
     }
   } catch (error) {
     if (error instanceof GmailAuthError) {
