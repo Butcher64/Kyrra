@@ -16,11 +16,14 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith(route),
   )
 
+  console.log('[AUTH MW]', pathname, { isPublicRoute, isNoIntegrationRoute })
+
   // If Supabase env vars are not set, skip auth (graceful degradation)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseKey) {
+    console.log('[AUTH MW] Missing Supabase env vars — redirect to /login')
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
@@ -50,9 +53,12 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
+    console.log('[AUTH MW]', pathname, { hasUser: !!user, userId: user?.id?.slice(0, 8) })
+
     // Public routes: let through, but redirect authenticated users from / to /dashboard
     if (isPublicRoute) {
       if (user && pathname === '/') {
+        console.log('[AUTH MW] Authenticated user on / — redirect to /dashboard')
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
         return NextResponse.redirect(url)
@@ -61,6 +67,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!user) {
+      console.log('[AUTH MW] No user on protected route — redirect to /login')
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
@@ -76,7 +83,10 @@ export async function middleware(request: NextRequest) {
         .eq('status', 'active')
         .maybeSingle()
 
+      console.log('[AUTH MW]', pathname, { hasGmailIntegration: !!integration })
+
       if (!integration) {
+        console.log('[AUTH MW] No Gmail integration — redirect to /connect-gmail')
         const url = request.nextUrl.clone()
         url.pathname = '/connect-gmail'
         return NextResponse.redirect(url)
@@ -84,7 +94,8 @@ export async function middleware(request: NextRequest) {
     }
 
     return supabaseResponse
-  } catch {
+  } catch (err) {
+    console.error('[AUTH MW] Error:', err)
     // If Supabase connection fails, redirect to login on protected routes
     if (!isPublicRoute) {
       const url = request.nextUrl.clone()

@@ -29,15 +29,25 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const state = searchParams.get('state')
 
+  console.log('[AUTH GMAIL] /auth/callback/google hit', {
+    hasCode: !!code,
+    hasState: !!state,
+    origin,
+  })
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
+    console.log('[AUTH GMAIL] No authenticated user — redirect to /login')
     return NextResponse.redirect(`${origin}/login`)
   }
 
+  console.log('[AUTH GMAIL] Authenticated user:', user.id.slice(0, 8))
+
   // Validate CSRF state parameter
   if (code && (!state || state !== user.id)) {
+    console.error('[AUTH GMAIL] CSRF state mismatch', { state, userId: user.id.slice(0, 8) })
     const url = new URL('/connect-gmail', origin)
     url.searchParams.set('error', 'csrf_failed')
     return NextResponse.redirect(url.toString())
@@ -46,6 +56,7 @@ export async function GET(request: Request) {
   // Step 1: If no code, initiate the PKCE flow
   if (!code) {
     const redirectUri = `${origin}/auth/callback/google`
+    console.log('[AUTH GMAIL] Initiating Gmail OAuth, redirectUri:', redirectUri)
     const params = new URLSearchParams({
       client_id: process.env.GOOGLE_CLIENT_ID!,
       redirect_uri: redirectUri,
@@ -62,6 +73,7 @@ export async function GET(request: Request) {
   // Step 2: Exchange code for tokens
   try {
     const redirectUri = `${origin}/auth/callback/google`
+    console.log('[AUTH GMAIL] Exchanging code for Gmail tokens...')
     const tokenResponse = await fetch(GOOGLE_TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -75,7 +87,8 @@ export async function GET(request: Request) {
     })
 
     if (!tokenResponse.ok) {
-      console.error('Gmail token exchange failed:', tokenResponse.status)
+      const body = await tokenResponse.text()
+      console.error('[AUTH GMAIL] Token exchange FAILED:', tokenResponse.status, body)
       return NextResponse.redirect(`${origin}/connect-gmail?error=token_exchange_failed`)
     }
 
@@ -105,9 +118,11 @@ export async function GET(request: Request) {
       })
 
     if (insertError) {
-      console.error('Failed to store Gmail tokens:', insertError.message)
+      console.error('[AUTH GMAIL] Failed to store tokens:', insertError.message)
       return NextResponse.redirect(`${origin}/connect-gmail?error=storage_failed`)
     }
+
+    console.log('[AUTH GMAIL] Tokens stored, integration active for:', userInfo.email)
 
     // Initialize pipeline health for this user
     await supabase
@@ -132,9 +147,10 @@ export async function GET(request: Request) {
       })
 
     // Redirect to onboarding progress (scan will start)
+    console.log('[AUTH GMAIL] Success — redirecting to /onboarding-progress')
     return NextResponse.redirect(`${origin}/onboarding-progress`)
   } catch (error) {
-    console.error('Gmail OAuth error:', error)
+    console.error('[AUTH GMAIL] OAuth error:', error)
     return NextResponse.redirect(`${origin}/connect-gmail?error=oauth_failed`)
   }
 }
