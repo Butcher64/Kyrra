@@ -17,9 +17,11 @@ export default function MarketingLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify([getOrganizationSchema(), getSoftwareApplicationSchema()]) }}
         />
-        <Navbar />
-        <main className="pt-[72px]">{children}</main>
-        <Footer />
+        <div className="dark bg-[var(--background)] text-[var(--foreground)] min-h-screen">
+          <Navbar />
+          <main className="pt-[72px]">{children}</main>
+          <Footer />
+        </div>
       </LazyMotion>
     </SmoothScroll>
   )

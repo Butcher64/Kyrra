@@ -92,27 +92,27 @@
   --popover-foreground: #1a1a2e;
 }
 
-/* ── Light mode override (for future use) ── */
-.light {
-  --background: oklch(0.985 0.003 270);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.145 0 0);
-  --border: oklch(0.90 0.01 270);
-  --input: oklch(0.90 0.01 270);
-  --ring: oklch(0.60 0.20 265);
-  --primary: oklch(0.45 0.18 265);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.145 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+/* ── Dark mode for marketing pages ── */
+.dark {
+  --background: #0e0e13;
+  --foreground: #e4e1e9;
+  --card: #1a1a22;
+  --card-foreground: #e4e1e9;
+  --muted: #1f1f27;
+  --muted-foreground: #8c909f;
+  --accent: #1f1f27;
+  --accent-foreground: #e4e1e9;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #4f6df5;
+  --primary: #4f6df5;
+  --primary-foreground: #ffffff;
+  --secondary: #1f1f27;
+  --secondary-foreground: #e4e1e9;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --popover: #1a1a22;
+  --popover-foreground: #e4e1e9;
 }
 
 /* ── Base ── */
