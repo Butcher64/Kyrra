@@ -22,16 +22,16 @@ export function SidebarItem({ icon: Icon, href, label, badge, onClick }: Sidebar
       href={href}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 no-underline',
+        'flex items-center gap-3 px-3 py-2.5 text-[13px] transition-colors duration-150 no-underline',
         isActive
-          ? 'bg-blue-500/10 text-blue-400 border-r-2 border-blue-500'
-          : 'text-slate-500 hover:text-slate-300 hover:bg-white/5 border-r-2 border-transparent',
+          ? 'bg-white/[0.06] text-white'
+          : 'text-white/30 hover:bg-white/[0.06] hover:text-white/50',
       )}
     >
-      <Icon size={18} strokeWidth={1.5} className="shrink-0" />
+      <Icon size={16} strokeWidth={1.5} className="shrink-0" />
       <span className="flex-1 truncate">{label}</span>
       {badge !== undefined && (
-        <span className="ml-auto rounded-full bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-blue-400">
+        <span className="ml-auto bg-white/[0.08] px-1.5 py-0.5 text-[10px] font-mono text-white/40">
           {badge}
         </span>
       )}
