@@ -29,21 +29,40 @@ export default async function DashboardPage() {
   let filteredToday = 0
   let blockedToday = 0
   let recentEmails: Array<{ gmail_message_id: string; classification_result: string; summary: string | null; confidence_score: number | null; created_at: string }> = []
+  let weeklyByDay: number[] = [0, 0, 0, 0, 0, 0, 0]
+  let weekBlocked = 0
 
   try {
-    const today = new Date().toISOString().split('T')[0]
+    const now = new Date()
+    const today = now.toISOString().split('T')[0]
 
-    const [countRes, blockedRes, recentRes] = await Promise.all([
+    // Start of week (Monday)
+    const mondayOffset = (now.getDay() + 6) % 7
+    const monday = new Date(now)
+    monday.setDate(now.getDate() - mondayOffset)
+    monday.setHours(0, 0, 0, 0)
+    const weekStart = monday.toISOString()
+
+    const [countRes, blockedRes, recentRes, weekRes, weekBlockedRes] = await Promise.all([
       supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', `${today}T00:00:00Z`),
       supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('classification_result', 'BLOQUE').gte('created_at', `${today}T00:00:00Z`),
       supabase.from('email_classifications').select('gmail_message_id, classification_result, summary, confidence_score, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+      supabase.from('email_classifications').select('created_at').eq('user_id', user.id).gte('created_at', weekStart),
+      supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('classification_result', 'BLOQUE').gte('created_at', weekStart),
     ])
 
     filteredToday = countRes.count ?? 0
     blockedToday = blockedRes.count ?? 0
     recentEmails = (recentRes.data ?? []) as typeof recentEmails
+    weekBlocked = weekBlockedRes.count ?? 0
 
-    console.log('[DASHBOARD] Data loaded', { filteredToday, blockedToday, recentCount: recentEmails.length })
+    // Build weekly bar chart from real data
+    if (weekRes.data) {
+      for (const row of weekRes.data) {
+        const dayOfWeek = (new Date(row.created_at).getDay() + 6) % 7 // Monday=0
+        weeklyByDay[dayOfWeek]++
+      }
+    }
   } catch (error) {
     console.error('[DASHBOARD] Failed to load data:', error)
   }
@@ -59,14 +78,13 @@ export default async function DashboardPage() {
   const filtreEmails = recentEmails.filter(e => e.classification_result === 'FILTRE').slice(0, 2)
   const bloqueEmails = recentEmails.filter(e => e.classification_result === 'BLOQUE').slice(0, 2)
 
-  // Weekly bar chart data (placeholder proportions — replace with real weekly query later)
+  // Weekly bar chart from real data
   const dayLabels = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim']
   const todayIndex = (now.getDay() + 6) % 7 // Monday=0
-  const weekBars = [12, 18, 8, 22, 15, 4, filteredToday || 6]
+  const weekBars = weeklyByDay
 
-  // Weekly totals (using today's data as approximation for now)
+  // Weekly totals from real data
   const weekSorted = weekBars.reduce((a, b) => a + b, 0)
-  const weekBlocked = blockedToday
   const weekTimeSaved = Math.round(weekSorted * 0.75)
 
   const maxBar = Math.max(...weekBars, 1)

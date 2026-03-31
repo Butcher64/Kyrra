@@ -75,7 +75,7 @@ export default async function EmailsPage() {
             Mes emails
           </h1>
           <p className="font-mono text-[11px] text-[#8b90a0] mt-1">
-            {emails.length} emails triés cette semaine
+            {emails.length} derniers emails triés
           </p>
         </div>
 
