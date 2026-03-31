@@ -569,6 +569,9 @@ export async function listSentMessages(
     await onBatch(batch)
     totalProcessed += batch.length
 
+    // Beta limit: stop after 100 emails to avoid excessive API usage
+    if (totalProcessed >= 100) break
+
     pageToken = listData.nextPageToken
   } while (pageToken)
 
