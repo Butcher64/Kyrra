@@ -7,67 +7,47 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Fetch today's classification stats
-  const today = new Date().toISOString().split('T')[0]
-  const { count: filteredToday } = await supabase
-    .from('email_classifications')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user!.id)
-    .gte('created_at', `${today}T00:00:00Z`)
+  if (!user) {
+    console.error('[DASHBOARD] No user found')
+    return <div className="p-12 text-center text-slate-400">Session expirée. <a href="/login" className="text-blue-400 underline">Reconnexion</a></div>
+  }
 
-  // Fetch "À voir" emails (low confidence alerts)
-  const { data: alerts } = await supabase
-    .from('email_classifications')
-    .select('gmail_message_id, summary, confidence_score, created_at')
-    .eq('user_id', user!.id)
-    .eq('classification_result', 'A_VOIR')
-    .gte('created_at', `${today}T00:00:00Z`)
-    .order('created_at', { ascending: false })
-    .limit(10)
+  // All queries wrapped in try/catch — any failure shows fallback, not crash
+  let filteredToday = 0
+  let alerts: Array<{ gmail_message_id: string; summary: string | null; confidence_score: number | null; created_at: string }> = []
+  let health: { mode: string } | null = null
+  let settings: { exposure_mode: string } | null = null
+  let labelSignalCount = 0
+  let firstSignalMessageId: string | null = null
+  let total7d = 0
+  let reclass7d = 0
 
-  // Fetch pipeline health
-  const { data: health } = await supabase
-    .from('user_pipeline_health')
-    .select('mode')
-    .eq('user_id', user!.id)
-    .maybeSingle()
+  try {
+    const today = new Date().toISOString().split('T')[0]
 
-  // Fetch user settings for exposure mode
-  const { data: settings } = await supabase
-    .from('user_settings')
-    .select('exposure_mode')
-    .eq('user_id', user!.id)
-    .maybeSingle()
+    const [classRes, alertsRes, healthRes, settingsRes, total7dRes, reclass7dRes, signalsRes] = await Promise.all([
+      supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', `${today}T00:00:00Z`),
+      supabase.from('email_classifications').select('gmail_message_id, summary, confidence_score, created_at').eq('user_id', user.id).eq('classification_result', 'A_VOIR').gte('created_at', `${today}T00:00:00Z`).order('created_at', { ascending: false }).limit(10),
+      supabase.from('user_pipeline_health').select('mode').eq('user_id', user.id).maybeSingle(),
+      supabase.from('user_settings').select('exposure_mode').eq('user_id', user.id).maybeSingle(),
+      supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', new Date(Date.now() - 7 * 86_400_000).toISOString()),
+      supabase.from('classification_feedback').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', new Date(Date.now() - 7 * 86_400_000).toISOString()),
+      supabase.from('label_change_signals').select('gmail_message_id').eq('user_id', user.id).eq('acknowledged', false).order('detected_at', { ascending: false }).limit(1),
+    ])
 
-  // Compute real trust score over last 7 days
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
-  const { count: totalClassified7d } = await supabase
-    .from('email_classifications')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user!.id)
-    .gte('created_at', sevenDaysAgo)
+    filteredToday = classRes.count ?? 0
+    alerts = (alertsRes.data ?? []) as typeof alerts
+    health = healthRes.data
+    settings = settingsRes.data
+    total7d = total7dRes.count ?? 0
+    reclass7d = reclass7dRes.count ?? 0
+    labelSignalCount = signalsRes.data?.length ?? 0
+    firstSignalMessageId = signalsRes.data?.[0]?.gmail_message_id ?? null
 
-  // Count reclassifications via classification_feedback table (not a column)
-  const { count: reclassified7d } = await supabase
-    .from('classification_feedback')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user!.id)
-    .gte('created_at', sevenDaysAgo)
-
-  // Fetch unacknowledged label change signals for learn banner (B3.2)
-  const { data: labelSignals } = await supabase
-    .from('label_change_signals')
-    .select('gmail_message_id')
-    .eq('user_id', user!.id)
-    .eq('acknowledged', false)
-    .order('detected_at', { ascending: false })
-    .limit(1)
-
-  const labelSignalCount = labelSignals?.length ?? 0
-  const firstSignalMessageId = labelSignals?.[0]?.gmail_message_id ?? null
-
-  const total7d = totalClassified7d ?? 0
-  const reclass7d = reclassified7d ?? 0
+    console.log('[DASHBOARD] Data loaded', { filteredToday, alertCount: alerts.length, health: health?.mode, settings: settings?.exposure_mode })
+  } catch (error) {
+    console.error('[DASHBOARD] Failed to load data:', error)
+  }
   const trustScore = total7d > 0
     ? `${Math.round((1 - reclass7d / total7d) * 100)}%`
     : '99.9%'
