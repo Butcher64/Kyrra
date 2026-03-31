@@ -53,10 +53,10 @@ export function SettingsForm({ currentMode, recapEnabled, userEmail }: SettingsF
     <>
       {/* Exposure mode */}
       <section className="mb-8">
-        <h2 className="text-sm font-semibold mb-3 text-(--card-foreground)">
+        <h2 className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-3">
           Mode d&apos;exposition
         </h2>
-        <p className="text-xs text-(--muted-foreground) mb-4">
+        <p className="text-[12px] text-[#8b90a0] mb-4">
           Contrôlez le niveau de filtrage de Kyrra.
         </p>
         <div className={savingMode ? 'opacity-60 pointer-events-none' : ''}>
@@ -66,23 +66,23 @@ export function SettingsForm({ currentMode, recapEnabled, userEmail }: SettingsF
 
       {/* Recap preferences */}
       <section className="mb-8">
-        <h2 className="text-sm font-semibold mb-3 text-(--card-foreground)">
+        <h2 className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-3">
           Recap
         </h2>
         <div className="flex items-center justify-between">
-          <p className="text-xs text-(--muted-foreground)">
+          <p className="text-[12px] text-[#8b90a0]">
             Email récapitulatif quotidien
           </p>
           <button
             onClick={handleRecapToggle}
             disabled={savingRecap}
             aria-pressed={recap}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-none transition-colors duration-200 ${
-              recap ? 'bg-[var(--color-a-voir)]' : 'bg-(--muted)'
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer border border-[#e4e6ed] transition-colors duration-200 ${
+              recap ? 'bg-[#3a5bc7]' : 'bg-[#e4e6ed]'
             } ${savingRecap ? 'opacity-60 pointer-events-none' : ''}`}
           >
             <span
-              className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
+              className={`pointer-events-none inline-block size-5 bg-white transform transition-transform duration-200 ${
                 recap ? 'translate-x-[22px]' : 'translate-x-[2px]'
               } mt-[2px]`}
             />
@@ -92,24 +92,24 @@ export function SettingsForm({ currentMode, recapEnabled, userEmail }: SettingsF
 
       {/* Display preferences */}
       <section className="mb-8">
-        <h2 className="text-sm font-semibold mb-3 text-(--card-foreground)">
+        <h2 className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-3">
           Affichage
         </h2>
-        <p className="text-xs text-(--muted-foreground)">
+        <p className="text-[12px] text-[#8b90a0]">
           Scores de confiance : seulement en cas de doute (&lt;75%) ou toujours afficher.
         </p>
       </section>
 
       {/* Account */}
       <section className="mb-8">
-        <h2 className="text-sm font-semibold mb-3 text-(--card-foreground)">
+        <h2 className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-3">
           Compte
         </h2>
-        <p className="text-xs text-(--muted-foreground) mb-4">
+        <p className="text-[12px] text-[#8b90a0] mb-4">
           {userEmail}
         </p>
-        <div className="pt-4 border-t border-(--border)">
-          <p className="text-xs text-(--muted-foreground) mb-2">
+        <div className="pt-4 border-t border-[#e4e6ed]">
+          <p className="font-mono text-[9px] uppercase tracking-wider text-[#c23a3a] mb-2">
             Zone dangereuse
           </p>
           <DeleteAccountDialog />

@@ -22,14 +22,14 @@ export function DashboardShell({ user, pipelineStatus, children }: DashboardShel
         onMobileClose={() => setMobileOpen(false)}
       />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden lg:ml-[260px]">
         <TopBar
           onMenuClick={() => setMobileOpen(true)}
           pipelineStatus={pipelineStatus}
         />
 
-        <main className="flex-1 overflow-y-auto bg-[var(--background)] pb-24">
-          <div className="px-12">
+        <main className="flex-1 overflow-y-auto bg-[#f5f6f9] pb-24">
+          <div className="px-9 py-7">
             {children}
           </div>
         </main>
