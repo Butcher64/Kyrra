@@ -39,9 +39,9 @@ export function DeleteAccountDialog() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-xs text-red-500 bg-transparent border-none cursor-pointer font-medium transition-opacity duration-150 hover:opacity-70"
+        className="text-[11px] text-[#c23a3a] bg-transparent border border-[#c23a3a] px-3 py-1.5 cursor-pointer font-mono font-medium transition-opacity duration-150 hover:opacity-70 shrink-0"
       >
-        Supprimer mon compte
+        Supprimer
       </button>
 
       <AnimatePresence>

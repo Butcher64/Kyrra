@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { SettingsForm } from '@/components/dashboard/SettingsForm.client'
 
@@ -18,39 +17,20 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <h1 className="text-[22px] font-bold text-[#0c1a32] tracking-tight">
-        Paramètres
-      </h1>
-      <p className="font-mono text-[11px] text-[#8b90a0] mt-1 mb-8">
-        Configurez le comportement de Kyrra
-      </p>
+      <div className="mb-10">
+        <h1 className="text-[22px] font-bold text-[#0c1a32] tracking-tight">
+          Paramètres
+        </h1>
+        <p className="font-mono text-[11px] text-[#8b90a0] mt-1">
+          Configuration de votre compte Kyrra
+        </p>
+      </div>
 
       <SettingsForm
         currentMode={currentMode}
         recapEnabled={recapEnabled}
         userEmail={user?.email ?? ''}
       />
-
-      <div className="mt-12 pt-6 border-t border-[#e4e6ed]">
-        <h2 className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-3">
-          Informations légales
-        </h2>
-        <div className="flex gap-4 text-[12px]">
-          <Link
-            href="/legal/cgu"
-            className="text-[#8b90a0] no-underline transition-opacity duration-150 hover:opacity-70"
-          >
-            Conditions Générales d&apos;Utilisation
-          </Link>
-          <span className="text-[#c4c7d4]">&middot;</span>
-          <Link
-            href="/legal/privacy"
-            className="text-[#8b90a0] no-underline transition-opacity duration-150 hover:opacity-70"
-          >
-            Politique de confidentialité
-          </Link>
-        </div>
-      </div>
     </>
   )
 }
