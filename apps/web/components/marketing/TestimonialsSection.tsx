@@ -8,7 +8,7 @@ export function TestimonialsSection() {
   return (
     <section
       data-section="testimonials"
-      className="px-8 lg:px-12 py-12 flex flex-col lg:flex-row gap-12"
+      className="px-8 lg:px-12 py-20 flex flex-col lg:flex-row gap-12"
     >
       {/* Left — quote */}
       <div className="flex-1 border-l-2 border-[#0c1a32] pl-6 flex flex-col justify-center">

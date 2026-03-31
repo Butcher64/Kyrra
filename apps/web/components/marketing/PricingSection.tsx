@@ -57,7 +57,7 @@ export function PricingSection() {
     <section
       data-section="pricing"
       id="pricing"
-      className="px-8 lg:px-12 py-12 border-t border-[#e4e6ed]"
+      className="px-8 lg:px-12 py-20 border-t border-[#e4e6ed]"
     >
       {/* Header */}
       <div className="mb-8">

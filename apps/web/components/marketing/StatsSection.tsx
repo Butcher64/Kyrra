@@ -22,7 +22,7 @@ export function StatsSection() {
       {stats.map((s, i) => (
         <div
           key={i}
-          className={`flex-1 px-12 py-7 ${i < stats.length - 1 ? 'md:border-r md:border-[#e4e6ed]' : ''} ${i > 0 ? 'border-t md:border-t-0 border-[#e4e6ed]' : ''}`}
+          className={`flex-1 px-12 py-10 ${i < stats.length - 1 ? 'md:border-r md:border-[#e4e6ed]' : ''} ${i > 0 ? 'border-t md:border-t-0 border-[#e4e6ed]' : ''}`}
         >
           <div className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-1">
             {s.label}

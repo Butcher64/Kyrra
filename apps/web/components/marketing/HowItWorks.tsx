@@ -29,7 +29,7 @@ export function HowItWorks() {
     <section
       data-section="how-it-works"
       id="how-it-works"
-      className="bg-[#f5f6f9] bg-dot-grid px-8 lg:px-12 py-12"
+      className="bg-[#f5f6f9] bg-dot-grid px-8 lg:px-12 py-20"
     >
       {/* Section label */}
       <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[#8b90a0] mb-8">

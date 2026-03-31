@@ -10,7 +10,7 @@ export function SecuritySection() {
     <section
       data-section="security"
       id="security"
-      className="bg-[#0c1a32] section-navy bg-noise relative px-8 lg:px-12 py-12"
+      className="bg-[#0c1a32] section-navy bg-noise relative px-8 lg:px-12 py-20"
     >
       <div className="relative z-10 flex flex-col lg:flex-row gap-12 items-start">
         {/* Left */}
