@@ -91,32 +91,57 @@ export async function classificationLoop(supabase: any): Promise<void> {
       return
     }
 
-    // Free plan usage counter (B1.3) — atomic increment with 30/day boundary
-    const { data: usageCount } = await supabase.rpc('increment_usage_counter', {
-      p_user_id: job.user_id,
-      p_date: new Date().toISOString().split('T')[0],
-    })
-
-    if (usageCount === null) {
-      // Daily limit reached — skip classification
-      ClassificationLogger.log({
-        event: 'classification_skipped',
-        email_id: job.gmail_message_id,
-        reason: 'daily_limit_reached',
-      })
-      await completeJob(supabase, job.id)
-      return
-    }
-
-    // Load user settings (B1.2 — dynamic role + exposure mode)
+    // Load user settings (role, credits, exposure mode)
     const { data: userSettings } = await supabase
       .from('user_settings')
-      .select('user_role, exposure_mode')
+      .select('user_role, exposure_mode, role, daily_credit_limit')
       .eq('user_id', job.user_id)
       .maybeSingle()
 
+    const accountRole: string = userSettings?.role ?? 'user'
+    const dailyCreditLimit: number = userSettings?.daily_credit_limit ?? 0
     const userRole: string = userSettings?.user_role ?? 'CEO'
     const exposureMode: string = userSettings?.exposure_mode ?? 'normal'
+
+    // Credit check — admin accounts bypass all limits
+    if (accountRole !== 'admin') {
+      if (dailyCreditLimit === 0) {
+        // No credits — classification disabled for this user
+        ClassificationLogger.log({
+          event: 'classification_skipped',
+          email_id: job.gmail_message_id,
+          reason: 'no_credits',
+        })
+        await completeJob(supabase, job.id)
+        return
+      }
+
+      // dailyCreditLimit > 0 — enforce daily limit via usage_counters
+      const todayDate = new Date().toISOString().split('T')[0]
+      const { data: usageRow } = await supabase
+        .from('usage_counters')
+        .select('count')
+        .eq('user_id', job.user_id)
+        .eq('date_bucket', todayDate)
+        .maybeSingle()
+
+      const currentCount = usageRow?.count ?? 0
+      if (currentCount >= dailyCreditLimit) {
+        ClassificationLogger.log({
+          event: 'classification_skipped',
+          email_id: job.gmail_message_id,
+          reason: 'daily_limit_reached',
+        })
+        await completeJob(supabase, job.id)
+        return
+      }
+
+      // Increment usage counter atomically
+      await supabase.rpc('increment_usage_counter', {
+        p_user_id: job.user_id,
+        p_date: todayDate,
+      })
+    }
 
     // Step 1: Fingerprinting
     const fpResult = fingerprintEmail(emailHeaders)
