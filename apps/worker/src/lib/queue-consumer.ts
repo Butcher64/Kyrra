@@ -1,29 +1,24 @@
 /**
  * Queue Consumer — Atomic job claiming (ADR-001)
- * ALWAYS use claimNextJob() — NEVER SELECT + UPDATE (race condition)
- *
- * Source: [architecture.md — Communication Patterns, Queue Atomicity]
+ * Uses a Postgres function for atomic SELECT FOR UPDATE SKIP LOCKED
  */
 
 /**
  * Atomically claim the next pending job from the queue
- * Uses UPDATE...WHERE status='pending' ORDER BY created_at LIMIT 1
- * Returns null if no pending jobs (another worker claimed it first)
+ * Uses Postgres function with FOR UPDATE SKIP LOCKED for true atomicity
+ * Returns null if no pending jobs
  */
 export async function claimNextJob(supabase: any) {
-  const { data } = await supabase
-    .from('email_queue_items')
-    .update({
-      status: 'processing',
-      claimed_at: new Date().toISOString(),
-    })
-    .eq('status', 'pending')
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .select()
-    .single()
+  const { data, error } = await supabase.rpc('claim_next_queue_item')
 
-  return data // null = no pending job
+  if (error) {
+    console.error('[queue] claimNextJob RPC error:', error.message)
+    return null
+  }
+
+  // RPC returns an array — get the first item
+  if (!data || data.length === 0) return null
+  return data[0]
 }
 
 /**
