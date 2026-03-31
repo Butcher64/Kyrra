@@ -52,116 +52,232 @@ export default async function DashboardPage() {
   const firstName = user.user_metadata?.full_name?.split(' ')[0] ?? user.email?.split('@')[0] ?? 'vous'
 
   const now = new Date()
-  const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+  const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' })
+
+  // Split emails by classification
+  const aVoirEmails = recentEmails.filter(e => e.classification_result === 'A_VOIR').slice(0, 3)
+  const filtreEmails = recentEmails.filter(e => e.classification_result === 'FILTRE').slice(0, 2)
+  const bloqueEmails = recentEmails.filter(e => e.classification_result === 'BLOQUE').slice(0, 2)
+
+  // Weekly bar chart data (placeholder proportions — replace with real weekly query later)
+  const dayLabels = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim']
+  const todayIndex = (now.getDay() + 6) % 7 // Monday=0
+  const weekBars = [12, 18, 8, 22, 15, 4, filteredToday || 6]
+
+  // Weekly totals (using today's data as approximation for now)
+  const weekSorted = weekBars.reduce((a, b) => a + b, 0)
+  const weekBlocked = blockedToday
+  const weekTimeSaved = Math.round(weekSorted * 0.75)
+
+  const maxBar = Math.max(...weekBars, 1)
 
   return (
     <>
-      {/* Header */}
-      <div className="flex items-start justify-between mb-10">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[22px] font-bold text-[#0c1a32] tracking-tight">
+          <h1 className="text-[22px] font-bold text-[#0c1a32]">
             Bonjour, {firstName}
           </h1>
-          <p className="font-mono text-[11px] text-[#8b90a0] mt-1 capitalize">
-            {dateStr}
+          <p className="font-mono text-[11px] text-[#8b90a0] mt-1">
+            {dateStr} &middot; {filteredToday} emails tri&eacute;s aujourd&apos;hui
           </p>
         </div>
-        <div className="flex items-center gap-2 border border-[#e4e6ed] px-3 py-1.5">
-          <span className="w-[5px] h-[5px] bg-[#2dd881] rounded-full shadow-[0_0_6px_#2dd881]" />
-          <span className="font-mono text-[10px] text-[#1a7a4a]">protégé</span>
-        </div>
-      </div>
 
-      {/* Stats block */}
-      <div className="bg-white border border-[#e4e6ed] mb-10">
-        <div className="flex divide-x divide-[#e4e6ed]">
-          {/* Triés */}
-          <div className="flex-1 px-6 py-5">
-            <p className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-1">
-              Triés aujourd&apos;hui
-            </p>
-            <p className="text-4xl font-bold text-[#3a5bc7]">{filteredToday}</p>
-            <p className="font-mono text-[9px] text-[#c4c7d4] mt-1">emails analysés</p>
+        <div className="flex items-center gap-5">
+          <div className="text-center">
+            <p className="text-[20px] font-bold text-[#0c1a32]">{blockedToday}</p>
+            <p className="font-mono text-[10px] text-[#8b90a0]">bloqu&eacute;s</p>
           </div>
-          {/* Bloqués */}
-          <div className="flex-1 px-6 py-5">
-            <p className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-1">
-              Bloqués
-            </p>
-            <p className="text-4xl font-bold text-[#c23a3a]">{blockedToday}</p>
-            <p className="font-mono text-[9px] text-[#c4c7d4] mt-1">prospection stoppée</p>
+          <div className="w-px h-7 bg-[#e4e6ed]" />
+          <div className="text-center">
+            <p className="text-[20px] font-bold text-[#1a7a4a]">{timeSaved}min</p>
+            <p className="font-mono text-[10px] text-[#8b90a0]">gagn&eacute;es</p>
           </div>
-          {/* Temps gagné */}
-          <div className="flex-1 px-6 py-5">
-            <p className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-1">
-              Temps gagné
-            </p>
-            <p className="text-4xl font-bold text-[#1a7a4a]">
-              {timeSaved}<span className="text-base font-normal text-[#8b90a0] ml-1">min</span>
-            </p>
-            <p className="font-mono text-[9px] text-[#c4c7d4] mt-1">estimé ce jour</p>
+          <div className="w-px h-7 bg-[#e4e6ed]" />
+          <div className="flex items-center gap-2 border border-[#e4e6ed] px-3 py-1.5">
+            <span className="w-[5px] h-[5px] bg-[#2dd881] rounded-full" />
+            <span className="font-mono text-[10px] text-[#1a7a4a]">prot&eacute;g&eacute;</span>
           </div>
         </div>
       </div>
 
-      {/* Email list */}
+      {/* 2-column grid */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* Left: Overview card */}
+        <div className="bg-white border border-[#e4e6ed] p-6">
+          <p className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-4">
+            Cette semaine
+          </p>
+
+          {/* 3 stat numbers */}
+          <div className="flex items-baseline gap-6 mb-6">
+            <div>
+              <span className="text-[28px] font-bold text-[#0c1a32]">{weekSorted}</span>
+              <span className="font-mono text-[10px] text-[#8b90a0] ml-1.5">tri&eacute;s</span>
+            </div>
+            <div>
+              <span className="text-[28px] font-bold text-[#c23a3a]">{weekBlocked}</span>
+              <span className="font-mono text-[10px] text-[#8b90a0] ml-1.5">bloqu&eacute;s</span>
+            </div>
+            <div>
+              <span className="text-[28px] font-bold text-[#1a7a4a]">{weekTimeSaved}</span>
+              <span className="font-mono text-[10px] text-[#8b90a0] ml-1.5">min</span>
+            </div>
+          </div>
+
+          {/* Mini bar chart */}
+          <div className="flex items-end gap-2 h-[80px] mb-2">
+            {weekBars.map((val, i) => (
+              <div
+                key={i}
+                className={`flex-1 ${i === todayIndex ? 'bg-[#0c1a32]' : 'bg-[#e4e6ed]'}`}
+                style={{ height: `${Math.max((val / maxBar) * 100, 4)}%` }}
+              />
+            ))}
+          </div>
+          <div className="flex gap-2">
+            {dayLabels.map((d, i) => (
+              <span
+                key={d}
+                className={`flex-1 text-center font-mono text-[9px] ${i === todayIndex ? 'text-[#0c1a32] font-bold' : 'text-[#c4c7d4]'}`}
+              >
+                {d}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: A voir card */}
+        <div className="bg-white border border-[#e4e6ed]">
+          {/* Header with blue bar */}
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-[#e4e6ed]">
+            <div className="w-[3px] h-4 bg-[#3a5bc7]" />
+            <h2 className="text-[13px] font-semibold text-[#0c1a32]">&Agrave; voir</h2>
+            <span className="font-mono text-[10px] text-[#8b90a0]">{aVoirEmails.length}</span>
+            <Link href="/emails?filter=a_voir" className="font-mono text-[11px] text-[#3a5bc7] no-underline hover:underline ml-auto">
+              tout voir &rarr;
+            </Link>
+          </div>
+
+          {aVoirEmails.length > 0 ? (
+            <div className="divide-y divide-[#e4e6ed]">
+              {aVoirEmails.map((email) => {
+                const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
+                return (
+                  <a
+                    key={email.gmail_message_id}
+                    href={gmailLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 px-6 py-3.5 no-underline hover:bg-[#f5f6f9] transition-colors"
+                  >
+                    <div className="w-[3px] self-stretch bg-[#3a5bc7] shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium text-[#0c1a32] truncate">
+                        {email.summary ?? 'Email &agrave; consulter'}
+                      </p>
+                      <p className="font-mono text-[10px] text-[#c4c7d4] mt-0.5">
+                        {timeAgo(email.created_at)}
+                      </p>
+                    </div>
+                  </a>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="py-12 text-center">
+              <Mail size={22} strokeWidth={1} className="text-[#c4c7d4] mx-auto mb-2" />
+              <p className="text-[12px] text-[#8b90a0]">Aucun email &agrave; voir</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom: Recently filtered — full width */}
       <div className="bg-white border border-[#e4e6ed]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#e4e6ed]">
-          <h2 className="text-[13px] font-semibold text-[#0c1a32]">
-            Derniers emails triés
-          </h2>
+          <h2 className="text-[13px] font-semibold text-[#0c1a32]">R&eacute;cemment filtr&eacute;s</h2>
           <Link href="/emails" className="font-mono text-[11px] text-[#3a5bc7] no-underline hover:underline">
-            tout voir →
+            tout voir &rarr;
           </Link>
         </div>
 
-        {recentEmails.length > 0 ? (
-          <div className="divide-y divide-[#e4e6ed]">
-            {recentEmails.map((email) => {
-              const config = classificationConfig[email.classification_result as keyof typeof classificationConfig] ?? classificationConfig.FILTRE
-              const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
-
-              return (
-                <a
-                  key={email.gmail_message_id}
-                  href={gmailLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center gap-3 px-6 py-3.5 no-underline transition-opacity duration-150 hover:bg-[#f5f6f9] ${config.opacity}`}
-                >
-                  {/* Classification bar */}
-                  <span className={`self-stretch ${config.bar}`} />
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-[13px] ${config.fontWeight} text-[#0c1a32] truncate`}>
-                      {email.summary ?? 'Email classifié'}
-                    </p>
-                  </div>
-
-                  {/* Badge */}
-                  <span className={`shrink-0 px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider ${config.badgeBg} ${config.badgeText}`}>
-                    {config.label}
-                  </span>
-
-                  {/* Confidence + time */}
-                  {email.confidence_score !== null && (
-                    <span className="shrink-0 font-mono text-[10px] text-[#c4c7d4]">
-                      {Math.round(email.confidence_score * 100)}%
+        {(filtreEmails.length > 0 || bloqueEmails.length > 0) ? (
+          <div className="grid grid-cols-2 divide-x divide-[#e4e6ed]">
+            {/* Left: Filtered */}
+            <div className="divide-y divide-[#e4e6ed]">
+              {filtreEmails.map((email) => {
+                const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
+                return (
+                  <a
+                    key={email.gmail_message_id}
+                    href={gmailLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 px-6 py-3.5 no-underline hover:bg-[#f5f6f9] transition-colors opacity-60"
+                  >
+                    <div className="w-[3px] self-stretch bg-[#c4c7d4] shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] text-[#0c1a32] truncate">
+                        {email.summary ?? 'Email filtr&eacute;'}
+                      </p>
+                      <p className="font-mono text-[10px] text-[#c4c7d4] mt-0.5">
+                        {timeAgo(email.created_at)}
+                      </p>
+                    </div>
+                    <span className="shrink-0 px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-[#edeef2] text-[#5c6070]">
+                      Filtr&eacute;
                     </span>
-                  )}
-                  <span className="shrink-0 font-mono text-[10px] text-[#c4c7d4]">
-                    {timeAgo(email.created_at)}
-                  </span>
-                </a>
-              )
-            })}
+                  </a>
+                )
+              })}
+              {filtreEmails.length === 0 && (
+                <div className="py-8 text-center opacity-60">
+                  <p className="text-[12px] text-[#8b90a0]">Aucun email filtr&eacute;</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Blocked */}
+            <div className="divide-y divide-[#e4e6ed]">
+              {bloqueEmails.map((email) => {
+                const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
+                return (
+                  <a
+                    key={email.gmail_message_id}
+                    href={gmailLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 px-6 py-3.5 no-underline hover:bg-[#f5f6f9] transition-colors opacity-35"
+                  >
+                    <div className="w-[3px] self-stretch bg-[#c23a3a] shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] text-[#0c1a32] truncate line-through">
+                        {email.summary ?? 'Email bloqu&eacute;'}
+                      </p>
+                      <p className="font-mono text-[10px] text-[#c4c7d4] mt-0.5">
+                        {timeAgo(email.created_at)}
+                      </p>
+                    </div>
+                    <span className="shrink-0 px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-[#f8e8e8] text-[#8a2d2d]">
+                      Bloqu&eacute;
+                    </span>
+                  </a>
+                )
+              })}
+              {bloqueEmails.length === 0 && (
+                <div className="py-8 text-center opacity-35">
+                  <p className="text-[12px] text-[#8b90a0]">Aucun email bloqu&eacute;</p>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="py-16 text-center">
             <Mail size={28} strokeWidth={1} className="text-[#c4c7d4] mx-auto mb-3" />
-            <p className="text-[13px] text-[#8b90a0]">Aucun email trié pour le moment.</p>
-            <p className="font-mono text-[10px] text-[#c4c7d4] mt-1">Kyrra trie vos emails en arrière-plan.</p>
+            <p className="text-[13px] text-[#8b90a0]">Aucun email filtr&eacute; pour le moment.</p>
+            <p className="font-mono text-[10px] text-[#c4c7d4] mt-1">Kyrra trie vos emails en arri&egrave;re-plan.</p>
           </div>
         )}
       </div>

@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Mail,
   Tag,
-  Settings,
   LogOut,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -24,7 +23,6 @@ const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
   { href: '/emails', icon: Mail, label: 'Mes emails' },
   { href: '/labels', icon: Tag, label: 'Libellés' },
-  { href: '/settings', icon: Settings, label: 'Paramètres' },
 ]
 
 const pipelineRows = [
@@ -132,13 +130,21 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
           {/* User section */}
           <div className="px-3 border-t border-white/[0.06]">
             <div className="flex items-center gap-3 px-3 py-4">
-              <div className="w-[28px] h-[28px] bg-white/[0.06] flex items-center justify-center text-[11px] font-medium text-white/50">
-                {userInitial}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[12px] text-white/70 truncate">{displayName}</p>
-                <p className="font-mono text-[9px] text-white/25 truncate">{user.email}</p>
-              </div>
+              <Link
+                href="/settings"
+                className="flex items-center gap-3 flex-1 min-w-0 no-underline group"
+              >
+                <div className="w-[28px] h-[28px] bg-white/[0.06] flex items-center justify-center text-[11px] font-medium text-white/50 group-hover:bg-white/[0.1] transition-colors">
+                  {userInitial}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] text-white/70 truncate group-hover:text-white/90 transition-colors">{displayName}</p>
+                  <p className="font-mono text-[9px] text-white/25 truncate">{user.email}</p>
+                </div>
+                <span className="text-[12px] text-white/20 group-hover:text-white/40 transition-colors shrink-0">
+                  &#9881;
+                </span>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="p-1.5 text-white/25 hover:text-white/50 transition-colors bg-transparent border-none cursor-pointer"
