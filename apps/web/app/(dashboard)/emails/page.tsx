@@ -28,10 +28,10 @@ export default async function EmailsPage() {
     <>
       <div className="mb-8">
         <h1 className="font-outfit text-2xl font-semibold text-[var(--foreground)]">
-          Emails
+          Mes emails
         </h1>
         <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          Les 50 dernières classifications
+          Historique de tri
         </p>
       </div>
 
@@ -39,10 +39,10 @@ export default async function EmailsPage() {
         <div className="mt-16 flex flex-col items-center text-center">
           <Mail size={32} strokeWidth={1} className="text-[var(--muted-foreground)]/40 mb-3" />
           <p className="text-sm text-[var(--muted-foreground)]">
-            Aucune classification pour le moment.
+            Aucun email trié pour le moment.
           </p>
           <p className="mt-1 text-xs text-[var(--muted-foreground)]/60">
-            Kyrra analyse vos emails en arrière-plan.
+            Kyrra trie vos emails en arrière-plan.
           </p>
         </div>
       ) : (
@@ -71,7 +71,7 @@ export default async function EmailsPage() {
                     {config.label}
                   </Badge>
                   <span className="flex-1 truncate text-[13px] text-[var(--card-foreground)]">
-                    {email.summary ?? 'Email classifié'}
+                    {email.summary ?? 'Email trié'}
                   </span>
                   {email.confidence_score !== null && (
                     <span className="shrink-0 text-[11px] text-[var(--muted-foreground)]">

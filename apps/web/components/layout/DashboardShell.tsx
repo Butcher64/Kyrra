@@ -28,7 +28,7 @@ export function DashboardShell({ user, pipelineStatus, children }: DashboardShel
           pipelineStatus={pipelineStatus}
         />
 
-        <main className="flex-1 overflow-y-auto bg-[var(--background)] editorial-grid pb-24">
+        <main className="flex-1 overflow-y-auto bg-[var(--background)] pb-24">
           <div className="px-12">
             {children}
           </div>
