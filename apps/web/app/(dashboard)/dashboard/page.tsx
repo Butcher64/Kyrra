@@ -30,14 +30,14 @@ export default async function DashboardPage() {
     .from('user_pipeline_health')
     .select('mode')
     .eq('user_id', user!.id)
-    .single()
+    .maybeSingle()
 
   // Fetch user settings for exposure mode
   const { data: settings } = await supabase
     .from('user_settings')
     .select('exposure_mode')
     .eq('user_id', user!.id)
-    .single()
+    .maybeSingle()
 
   // Compute real trust score over last 7 days
   const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
@@ -47,12 +47,12 @@ export default async function DashboardPage() {
     .eq('user_id', user!.id)
     .gte('created_at', sevenDaysAgo)
 
+  // Count reclassifications via classification_feedback table (not a column)
   const { count: reclassified7d } = await supabase
-    .from('email_classifications')
+    .from('classification_feedback')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user!.id)
     .gte('created_at', sevenDaysAgo)
-    .not('reclassified_to', 'is', null)
 
   // Fetch unacknowledged label change signals for learn banner (B3.2)
   const { data: labelSignals } = await supabase
