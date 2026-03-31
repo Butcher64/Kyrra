@@ -1,80 +1,67 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
-import { cn } from '@/lib/utils'
 
 const navLinks = [
-  { href: '#features', label: 'Solutions' },
-  { href: '#security', label: 'Sécurité' },
+  { href: '#product', label: 'Produit' },
+  { href: '#security', label: 'Securite' },
   { href: '#pricing', label: 'Tarifs' },
-  { href: '#how-it-works', label: 'Comment ça marche' },
 ]
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   return (
     <>
       <header
         data-section="navbar"
-        className={cn(
-          'fixed top-0 w-full h-[72px] z-50 flex items-center px-4 sm:px-6 md:px-10 transition-all duration-300',
-          scrolled
-            ? 'bg-[var(--background)]/80 backdrop-blur-xl border-b border-white/5'
-            : 'bg-[var(--background)]/60 backdrop-blur-xl'
-        )}
+        className="w-full bg-white border-b border-[#e4e6ed] px-12 py-3.5 flex items-center justify-between z-50 relative"
       >
-        <nav className="w-full max-w-[1920px] mx-auto flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="text-2xl font-extrabold tracking-tighter text-slate-100 font-headline shrink-0 no-underline">
-            Kyrra.
-          </Link>
-
-          {/* Desktop nav links */}
-          <div className="hidden md:flex items-center gap-8 font-label text-[13px] tracking-wide">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-slate-400 hover:text-slate-100 transition-colors no-underline"
-              >
-                {link.label}
-              </a>
-            ))}
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 no-underline">
+          <div className="w-5 h-5 bg-[#0c1a32] flex items-center justify-center">
+            <div className="w-[9px] h-[9px] border-[1.5px] border-white" />
           </div>
+          <span className="text-[15px] font-bold text-[#0c1a32] tracking-tighter">Kyrra</span>
+        </Link>
 
-          {/* Desktop CTAs */}
-          <div className="hidden md:flex items-center gap-4 font-label text-[12px]">
-            <Link href="/login" className="text-slate-400 hover:text-slate-100 transition-colors no-underline">
-              Connexion
-            </Link>
-            <Link
-              href="/login"
-              className="bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-white px-6 py-2.5 rounded-lg font-bold hover:scale-105 transition-all no-underline inline-block"
+        {/* Desktop nav links */}
+        <div className="hidden md:flex items-center gap-7">
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="text-[13px] text-[#4a5068] font-medium no-underline hover:text-[#0c1a32] transition-colors"
             >
-              Démonstration
-            </Link>
-          </div>
+              {link.label}
+            </a>
+          ))}
+        </div>
 
-          {/* Mobile hamburger */}
-          <button
-            className="rounded-md p-2 text-slate-100 md:hidden bg-transparent border-none cursor-pointer"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+        {/* Desktop CTAs */}
+        <div className="hidden md:flex items-center gap-5">
+          <Link href="/login" className="text-[13px] text-[#8b90a0] no-underline hover:text-[#4a5068] transition-colors">
+            Connexion
+          </Link>
+          <Link
+            href="/login"
+            className="px-5 py-2.5 bg-[#0c1a32] text-white text-[13px] font-medium no-underline hover:bg-[#1a2a4a] transition-colors"
           >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </nav>
+            Essai gratuit →
+          </Link>
+        </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="p-2 text-[#0c1a32] md:hidden bg-transparent border-none cursor-pointer"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+        >
+          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </header>
 
       {/* Mobile fullscreen menu */}
@@ -85,8 +72,17 @@ export function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[var(--background)]/95 backdrop-blur-xl md:hidden"
+            className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-white md:hidden"
           >
+            {/* Close button in top right */}
+            <button
+              className="absolute top-4 right-4 p-2 text-[#0c1a32] bg-transparent border-none cursor-pointer"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Fermer le menu"
+            >
+              <X size={24} />
+            </button>
+
             <nav className="flex flex-col items-center gap-8">
               {navLinks.map((link, i) => (
                 <motion.a
@@ -95,7 +91,7 @@ export function Navbar() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.3 }}
-                  className="font-headline text-2xl text-slate-100 no-underline"
+                  className="text-2xl font-bold text-[#0c1a32] no-underline"
                   onClick={() => setMobileOpen(false)}
                 >
                   {link.label}
@@ -105,14 +101,14 @@ export function Navbar() {
             <div className="mt-12 flex flex-col items-center gap-4">
               <Link
                 href="/login"
-                className="bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-white px-8 py-3 rounded-lg font-bold no-underline"
+                className="px-8 py-3 bg-[#0c1a32] text-white text-[14px] font-medium no-underline"
                 onClick={() => setMobileOpen(false)}
               >
-                Démonstration
+                Essai gratuit →
               </Link>
               <Link
                 href="/login"
-                className="text-slate-400 no-underline"
+                className="text-[#8b90a0] text-[13px] no-underline"
                 onClick={() => setMobileOpen(false)}
               >
                 Connexion

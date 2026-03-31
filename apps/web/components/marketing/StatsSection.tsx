@@ -1,24 +1,40 @@
-import { CountUp } from '@/components/animation'
-
 const stats = [
-  { value: 312, suffix: '', prefix: '', label: 'Emails filtrés par semaine en moyenne' },
-  { value: 45, suffix: ' min', prefix: '', label: 'Gagnées par jour par dirigeant' },
-  { value: 2, suffix: ' min', prefix: '<', label: 'Setup complet avec Gmail' },
+  {
+    label: 'distractions supprimees',
+    value: '312',
+    sublabel: 'par semaine en moyenne',
+  },
+  {
+    label: 'temps executif recupere',
+    value: '45min',
+    sublabel: 'chaque jour ouvre',
+  },
+  {
+    label: 'latence de classification',
+    value: '<2sec',
+    sublabel: 'dual engine · rule + llm',
+  },
 ]
 
 export function StatsSection() {
   return (
-    <section data-section="stats" className="py-24 md:py-32">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-12 px-6 md:px-10 md:flex-row md:gap-24">
-        {stats.map((s, i) => (
-          <div key={i} className="text-center">
-            <div className="font-headline text-[clamp(3rem,6vw,5rem)] font-bold text-[var(--foreground)]">
-              <CountUp value={s.value} prefix={s.prefix} suffix={s.suffix} />
-            </div>
-            <div className="mt-2 text-sm uppercase tracking-wider text-[var(--muted-foreground)]">{s.label}</div>
+    <section data-section="stats" className="border-t border-b border-[#e4e6ed] flex flex-col md:flex-row">
+      {stats.map((s, i) => (
+        <div
+          key={i}
+          className={`flex-1 px-12 py-7 ${i < stats.length - 1 ? 'md:border-r md:border-[#e4e6ed]' : ''} ${i > 0 ? 'border-t md:border-t-0 border-[#e4e6ed]' : ''}`}
+        >
+          <div className="font-mono text-[9px] uppercase tracking-wider text-[#8b90a0] mb-1">
+            {s.label}
           </div>
-        ))}
-      </div>
+          <div className="text-[40px] font-bold text-[#0c1a32] tracking-tight leading-none mb-1">
+            {s.value}
+          </div>
+          <div className="font-mono text-[11px] text-[#c4c7d4]">
+            {s.sublabel}
+          </div>
+        </div>
+      ))}
     </section>
   )
 }

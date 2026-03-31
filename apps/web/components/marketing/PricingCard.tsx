@@ -1,9 +1,7 @@
 'use client'
 
-import { motion, AnimatePresence } from 'motion/react'
+import { AnimatePresence, m } from 'motion/react'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
-import { CheckCircle } from 'lucide-react'
 
 interface Plan {
   tier: string
@@ -20,76 +18,61 @@ export function PricingCard({ plan, annual }: { plan: Plan; annual: boolean }) {
 
   return (
     <div
-      className={cn(
-        'p-8 rounded-2xl flex flex-col transition-all',
-        plan.highlighted
-          ? 'bg-[var(--card)] border border-[var(--color-accent-start)]/30 shadow-[var(--shadow-accent-lg)] md:scale-105 z-10 relative'
-          : 'bg-[var(--surface-low)] border border-white/5'
-      )}
+      className={`border border-[#e4e6ed] p-6 flex flex-col ${
+        plan.highlighted ? 'border-l-[3px] border-l-[#0c1a32]' : ''
+      }`}
     >
-      {plan.highlighted && (
-        <div className="absolute top-0 right-0 bg-[var(--color-accent-start)] px-4 py-1 text-[10px] font-bold text-white rounded-bl-lg font-label uppercase">
-          Recommandé
-        </div>
-      )}
-
-      <div className="mb-8">
-        <h4
-          className={cn(
-            'font-label text-xs uppercase tracking-widest mb-2',
-            plan.highlighted ? 'text-[var(--color-accent-start)]' : 'text-slate-500'
-          )}
-        >
-          {plan.tier}
-        </h4>
-        <div className="flex items-baseline gap-1">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={String(price)}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.2 }}
-              className="text-4xl font-headline font-bold text-white"
-            >
-              {price === 0 ? (
-                'Gratuit'
-              ) : price !== null ? (
-                <>
-                  {price}€
-                  <span className="text-sm text-slate-500 font-normal">/mois</span>
-                </>
-              ) : (
-                'Sur Mesure'
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+      {/* Plan name */}
+      <div className="font-mono text-[10px] uppercase tracking-wider text-[#8b90a0] mb-3">
+        {plan.tier}
       </div>
 
-      <ul className="space-y-4 mb-12 flex-grow">
+      {/* Price */}
+      <div className="mb-6">
+        <AnimatePresence mode="wait">
+          <m.div
+            key={String(price)}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2 }}
+            className="text-4xl font-bold text-[#0c1a32]"
+          >
+            {price === 0 ? (
+              'Gratuit'
+            ) : price !== null ? (
+              <>
+                {price}&euro;
+                <span className="text-[13px] text-[#8b90a0] font-normal">/mois</span>
+              </>
+            ) : (
+              'Sur Mesure'
+            )}
+          </m.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Features */}
+      <ul className="space-y-3 mb-8 flex-grow list-none p-0 m-0">
         {plan.features.map((f) => (
           <li
             key={f}
-            className={cn(
-              'flex items-center gap-3 text-sm',
-              plan.highlighted ? 'text-slate-200' : 'text-slate-400'
-            )}
+            className="flex items-center gap-2 text-[13px] text-[#4a5068]"
           >
-            <CheckCircle className="w-4 h-4 text-[var(--color-accent-start)]" />
+            <span className="text-[#0c1a32] text-[12px]">&#10003;</span>
             {f}
           </li>
         ))}
       </ul>
 
+      {/* CTA */}
       <Link
         href="/login"
-        className={cn(
-          'w-full py-3 rounded-lg text-sm font-bold text-center transition-all no-underline block',
+        className={`w-full py-3 text-[13px] font-medium text-center no-underline block transition-colors ${
           plan.highlighted
-            ? 'bg-gradient-to-r from-[var(--color-accent-start)] to-[var(--primary)] text-white py-4 hover:scale-[1.02]'
-            : 'border border-white/10 hover:bg-white/5 text-white'
-        )}
+            ? 'bg-[#0c1a32] text-white hover:bg-[#1a2a4a]'
+            : 'border border-[#e4e6ed] text-[#0c1a32] hover:bg-[#f5f6f9]'
+        }`}
       >
         {plan.cta}
       </Link>

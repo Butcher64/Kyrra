@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
 import { PricingCard } from './PricingCard'
 
 const plans = [
@@ -25,10 +24,10 @@ const plans = [
     monthly: 15,
     yearly: 12,
     features: [
-      'Emails illimités',
+      'Emails illimites',
       'Kyrra Recap quotidien',
       'Scores de confiance',
-      'Résumé 1 ligne par email',
+      'Resume 1 ligne par email',
       "3 modes d'exposition",
     ],
     cta: 'Essai gratuit 14 jours',
@@ -42,8 +41,8 @@ const plans = [
     features: [
       'Tout Pro inclus',
       'Multi-utilisateurs',
-      'Tableau admin équipe',
-      'Whitelist partagée',
+      'Tableau admin equipe',
+      'Whitelist partagee',
       'Support prioritaire (SLA 4h)',
     ],
     cta: 'Essai gratuit 14 jours',
@@ -58,31 +57,44 @@ export function PricingSection() {
     <section
       data-section="pricing"
       id="pricing"
-      className="py-32 px-6 md:px-10 max-w-7xl mx-auto"
+      className="px-8 lg:px-12 py-12 border-t border-[#e4e6ed]"
     >
-      <div className="text-center mb-20">
-        <h2 className="text-4xl font-headline font-bold text-slate-100 mb-6">
-          Un investissement pour votre esprit.
+      {/* Header */}
+      <div className="mb-8">
+        <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[#8b90a0] mb-3">
+          Tarifs
+        </div>
+        <h2 className="text-[22px] font-bold text-[#0c1a32] mb-4">
+          Un prix simple.
         </h2>
-        <div className="flex items-center justify-center gap-4 font-label text-sm">
-          <span className={cn(annual ? 'text-slate-400' : 'text-white')}>Mensuel</span>
+
+        {/* Toggle */}
+        <div className="flex items-center gap-0">
           <button
-            onClick={() => setAnnual(!annual)}
-            className="w-12 h-6 rounded-full bg-[var(--surface-highest)] relative p-1 flex items-center cursor-pointer border-none"
-            aria-label="Toggle billing period"
+            onClick={() => setAnnual(true)}
+            className={`px-4 py-2 text-[12px] font-medium cursor-pointer transition-colors ${
+              annual
+                ? 'bg-[#0c1a32] text-white border border-[#0c1a32]'
+                : 'bg-transparent text-[#4a5068] border border-[#e4e6ed]'
+            }`}
           >
-            <div className={cn(
-              'w-4 h-4 bg-[var(--color-accent-start)] rounded-full transition-transform',
-              annual ? 'translate-x-6' : 'translate-x-0'
-            )} />
+            Annuel
           </button>
-          <span className={cn(annual ? 'text-white' : 'text-slate-400')}>
-            Annuel{' '}
-            <span className="text-[var(--color-accent-cyan)] text-xs ml-1">(-20%)</span>
-          </span>
+          <button
+            onClick={() => setAnnual(false)}
+            className={`px-4 py-2 text-[12px] font-medium cursor-pointer transition-colors ${
+              !annual
+                ? 'bg-[#0c1a32] text-white border border-[#0c1a32]'
+                : 'bg-transparent text-[#4a5068] border border-[#e4e6ed]'
+            }`}
+          >
+            Mensuel
+          </button>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+
+      {/* Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
         {plans.map((plan) => (
           <PricingCard key={plan.tierKey} plan={plan} annual={annual} />
         ))}
