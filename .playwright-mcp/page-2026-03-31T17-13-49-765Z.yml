@@ -1,0 +1,402 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e13]:
+    - generic [ref=e15]:
+      - paragraph [ref=e16]: Get 20% (up to $100) off your first payment for design and development services on Dribbble! Use code WELCOME20 🎉
+      - link "Get Started" [ref=e17] [cursor=pointer]:
+        - /url: https://dribbble.com/instantmatch
+    - button "close" [ref=e18] [cursor=pointer]:
+      - img [ref=e19]
+  - generic [ref=e22]:
+    - button "Toggle mobile menu" [ref=e23] [cursor=pointer]
+    - link "Back to home page" [ref=e27] [cursor=pointer]:
+      - /url: /
+      - 'img "Dribbble: the community for graphic design" [ref=e28]'
+    - generic [ref=e31]:
+      - combobox "Submit" [ref=e33]:
+        - search [ref=e34]:
+          - searchbox "Submit" [ref=e36]
+      - generic "Change search type" [ref=e37]:
+        - generic:
+          - generic:
+            - button "Shots" [ref=e38] [cursor=pointer]:
+              - generic [ref=e39]: Shots
+            - generic:
+              - generic:
+                - generic:
+                  - generic: Shots
+                  - generic: Designers
+                  - generic: Services
+      - button "Search" [ref=e40] [cursor=pointer]:
+        - img [ref=e41]
+    - generic [ref=e43]:
+      - link "Sign up" [ref=e44] [cursor=pointer]:
+        - /url: /signups/new
+      - link "Log in" [ref=e45] [cursor=pointer]:
+        - /url: /session/new
+  - main [ref=e48]:
+    - generic [ref=e50]:
+      - generic [ref=e52]:
+        - heading "Clause - Contract Management Landing Page" [level=1] [ref=e55]
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - link "Dipa UI/UX" [ref=e59] [cursor=pointer]:
+              - /url: /dipauix
+              - generic [ref=e60]:
+                - img "Dipa UI/UX" [ref=e61]
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Online
+            - generic [ref=e62]:
+              - generic [ref=e63]:
+                - generic [ref=e65]:
+                  - link "Dipa UI/UX" [ref=e66] [cursor=pointer]:
+                    - /url: /dipauix
+                  - text: for
+                  - link "Dipa Inhouse" [ref=e67] [cursor=pointer]:
+                    - /url: /dipainhouse
+                - generic [ref=e68]:
+                  - button "Available for work" [ref=e69] [cursor=pointer]
+                  - link "Follow" [ref=e71] [cursor=pointer]:
+                    - /url: /dipauix/followers
+              - generic [ref=e72]:
+                - generic [ref=e73]:
+                  - img [ref=e74]
+                  - button "Copy email to clipboard" [ref=e76] [cursor=pointer]:
+                    - generic [ref=e77]: hi@dipainhouse.com
+                - link "dipainhouse.com" [ref=e78] [cursor=pointer]:
+                  - /url: https://www.dipainhouse.com/contact-us
+                  - img [ref=e79]
+                  - generic [ref=e82]: dipainhouse.com
+          - generic [ref=e83]:
+            - button [ref=e85] [cursor=pointer]:
+              - img [ref=e86]
+            - listitem [ref=e88]:
+              - link "Save shot" [ref=e89] [cursor=pointer]:
+                - /url: /signups/new
+                - img [ref=e90]
+            - link [ref=e92] [cursor=pointer]:
+              - /url: https://calendly.com/d/5gw-xzj-33h/dipa-inhouse-meeting-discussion
+              - img [ref=e93]
+            - link "Get in touch" [ref=e95] [cursor=pointer]:
+              - /url: /signups/new
+              - generic [ref=e96]: Get in touch
+        - generic [ref=e97]:
+          - button "Pause" [ref=e359] [cursor=pointer]:
+            - img [ref=e360]
+          - generic [ref=e113]:
+            - heading "Hi Dribbble!" [level=1] [ref=e365]
+            - paragraph [ref=e366]: Clause is the best solution to manage the end-to-end contract lifecycle with a single intuitive, secure and collaborative application.
+            - paragraph [ref=e367]
+            - paragraph [ref=e368]: Scroll to see full version case study!
+            - paragraph [ref=e369]
+            - heading "Full Preview" [level=1] [ref=e370]
+            - paragraph [ref=e371]: Here's the detail view of our design project. Check it out!
+          - link [ref=e373] [cursor=pointer]:
+            - /url: https://cdn.dribbble.com/userupload/13260559/file/original-58e9807ad9831d85c605ff7173a87e28.png?resize=752x&vertical=center
+          - generic [ref=e127]:
+            - heading "Wireframe, & Brand Guideline" [level=1] [ref=e374]
+            - paragraph [ref=e375]: The following brand guidelines are used in our design projects.
+          - link [ref=e377] [cursor=pointer]:
+            - /url: https://cdn.dribbble.com/userupload/13260557/file/original-69af0b2f5a4fcc8fcfb20c02d9153ad7.png?resize=752x&vertical=center
+          - link [ref=e379] [cursor=pointer]:
+            - /url: https://cdn.dribbble.com/userupload/13260556/file/original-d10c880185a7b9bbfb4f6e4414c16884.png?resize=752x&vertical=center
+          - link [ref=e381] [cursor=pointer]:
+            - /url: https://cdn.dribbble.com/userupload/13260558/file/original-9efc30a8b8db91b63714d513833101da.png?resize=752x&vertical=center
+          - generic [ref=e146]:
+            - heading "Interested to collaborate? Let’s connect!" [level=1] [ref=e382]:
+              - strong [ref=e383]: Interested to collaborate? Let’s connect!
+            - paragraph [ref=e384]
+            - paragraph [ref=e385]: Dipa Inhouse is a design and development agency providing high quality services that help finding solutions with an intuitive approach that meet user’s business goal.
+            - paragraph [ref=e386]
+            - paragraph [ref=e387]
+        - generic [ref=e153]:
+          - link "Dipa Inhouse" [ref=e156] [cursor=pointer]:
+            - /url: /dipainhouse
+            - generic [ref=e157]:
+              - img "Dipa Inhouse" [ref=e158]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: Online
+          - link "Dipa Inhouse" [ref=e160] [cursor=pointer]:
+            - /url: /dipainhouse
+          - generic [ref=e161]:
+            - link "Get in touch" [ref=e162] [cursor=pointer]:
+              - /url: /signups/new
+              - generic [ref=e163]: Get in touch
+            - link "Schedule a call" [ref=e164] [cursor=pointer]:
+              - /url: https://calendly.com/d/5gw-xzj-33h/dipa-inhouse-meeting-discussion
+        - generic [ref=e166]:
+          - generic [ref=e167]:
+            - img [ref=e168]
+            - button "Copy email to clipboard" [ref=e170] [cursor=pointer]:
+              - generic [ref=e171]: hi@dipainhouse.com
+          - link "dipainhouse.com" [ref=e172] [cursor=pointer]:
+            - /url: https://www.dipainhouse.com/contact-us
+            - img [ref=e173]
+            - generic [ref=e176]: dipainhouse.com
+        - generic [ref=e177]:
+          - generic [ref=e178]:
+            - heading "More by Dipa Inhouse" [level=4] [ref=e179]
+            - link "View profile" [ref=e180] [cursor=pointer]:
+              - /url: /dipainhouse
+          - generic [ref=e181]:
+            - listitem [ref=e389]:
+              - generic [ref=e390]:
+                - figure [ref=e391]:
+                  - img "Humax – AI-Powered HR Approach Page ai ai agent ai powered artificial intelligence b2b clean dipa inhouse hr human resource landing page minimalist modern design recruitment agency saas startup ui uiux web design webflow website" [ref=e392]
+                - link "View Humax – AI-Powered HR Approach Page" [ref=e394] [cursor=pointer]:
+                  - /url: /shots/26509708-Humax-AI-Powered-HR-Approach-Page
+                  - generic: View Humax – AI-Powered HR Approach Page
+                - generic:
+                  - generic:
+                    - generic: Humax – AI-Powered HR Approach Page
+                    - list:
+                      - listitem:
+                        - link "Save shot" [ref=e395] [cursor=pointer]:
+                          - /url: /signups/new
+                          - img [ref=e396]
+                      - button [ref=e398] [cursor=pointer]:
+                        - img [ref=e399]
+            - listitem [ref=e402]:
+              - generic [ref=e403]:
+                - figure [ref=e404]:
+                  - img "NeuroHR - AI Powered HRM Landing Page ai animation b2b career clean dipa inhouse hiring hr hris human resource landing page minimalist modern recruitment saas startup ui design uiux web design website" [ref=e405]
+                - generic [ref=e406]:
+                  - img [ref=e408]
+                  - link "Shot Link":
+                    - /url: /shots/25759276-NeuroHR-AI-Powered-HRM-Landing-Page
+                    - generic: Shot Link
+                - link "View NeuroHR - AI Powered HRM Landing Page" [ref=e411] [cursor=pointer]:
+                  - /url: /shots/25759276-NeuroHR-AI-Powered-HRM-Landing-Page
+                  - generic: View NeuroHR - AI Powered HRM Landing Page
+                - generic:
+                  - generic:
+                    - generic: NeuroHR - AI Powered HRM Landing Page
+                    - list:
+                      - listitem:
+                        - link "Save shot" [ref=e412] [cursor=pointer]:
+                          - /url: /signups/new
+                          - img [ref=e413]
+                      - button [ref=e415] [cursor=pointer]:
+                        - img [ref=e416]
+            - listitem [ref=e419]:
+              - generic [ref=e420]:
+                - figure [ref=e421]:
+                  - img "Human Resource - Component Interaction ai animation b2b clean component design system dipa inhouse hr hris human resources interactions micro interaction minimal modern motion product product design recruitment saas startup" [ref=e422]
+                - generic [ref=e423]:
+                  - img [ref=e425]
+                  - link "Shot Link":
+                    - /url: /shots/25819500-Human-Resource-Component-Interaction
+                    - generic: Shot Link
+                - link "View Human Resource - Component Interaction" [ref=e428] [cursor=pointer]:
+                  - /url: /shots/25819500-Human-Resource-Component-Interaction
+                  - generic: View Human Resource - Component Interaction
+                - generic:
+                  - generic:
+                    - generic: Human Resource - Component Interaction
+                    - list:
+                      - listitem:
+                        - link "Save shot" [ref=e429] [cursor=pointer]:
+                          - /url: /signups/new
+                          - img [ref=e430]
+                      - button [ref=e432] [cursor=pointer]:
+                        - img [ref=e433]
+            - listitem [ref=e436]:
+              - generic [ref=e437]:
+                - figure [ref=e438]:
+                  - img "Clara - CRM Landing page ai animation artificial intelligence b2b clean ui crm dipa inhouse homepage interaction landing page modern revenue tracking saas sales sales and marketing start up ui ui design uiux web design" [ref=e439]
+                - generic [ref=e440]:
+                  - img [ref=e442]
+                  - link "Shot Link":
+                    - /url: /shots/26167368-Clara-CRM-Landing-page
+                    - generic: Shot Link
+                - link "View Clara - CRM Landing page" [ref=e445] [cursor=pointer]:
+                  - /url: /shots/26167368-Clara-CRM-Landing-page
+                  - generic: View Clara - CRM Landing page
+                - generic:
+                  - generic:
+                    - generic: Clara - CRM Landing page
+                    - list:
+                      - listitem:
+                        - link "Save shot" [ref=e446] [cursor=pointer]:
+                          - /url: /signups/new
+                          - img [ref=e447]
+                      - button [ref=e449] [cursor=pointer]:
+                        - img [ref=e450]
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - heading "Services by Dipa UI/UX" [level=4] [ref=e192]
+            - paragraph [ref=e193]:
+              - link "View all services" [ref=e194] [cursor=pointer]:
+                - /url: /dipauix/services
+          - 'button "View service: Landing Page Design" [ref=e196] [cursor=pointer]':
+            - img [ref=e198]
+            - generic [ref=e199]:
+              - generic [ref=e200]: Landing Page Design
+              - generic [ref=e201]: $2,000
+      - generic [ref=e207]:
+        - button "View comments 65" [ref=e208] [cursor=pointer]:
+          - img [ref=e452]
+          - generic: View comments
+          - generic [ref=e209]: "65"
+        - button "Share actions" [ref=e210] [cursor=pointer]:
+          - img [ref=e454]
+          - generic: Share actions
+        - button "Detail actions" [ref=e211] [cursor=pointer]:
+          - img [ref=e456]
+          - generic: Detail actions
+  - contentinfo [ref=e212]:
+    - generic [ref=e215]:
+      - link "Animation Animation" [ref=e216] [cursor=pointer]:
+        - /url: /shots/popular/animation
+        - img "Animation" [ref=e219]
+        - generic [ref=e220]: Animation
+      - link "Branding Branding" [ref=e221] [cursor=pointer]:
+        - /url: /shots/popular/branding
+        - img "Branding" [ref=e224]
+        - generic [ref=e225]: Branding
+      - link "Mobile Mobile" [ref=e226] [cursor=pointer]:
+        - /url: /shots/popular/mobile
+        - img "Mobile" [ref=e229]
+        - generic [ref=e230]: Mobile
+      - link "Product Design Product Design" [ref=e231] [cursor=pointer]:
+        - /url: /shots/popular/product-design
+        - img "Product Design" [ref=e234]
+        - generic [ref=e235]: Product Design
+      - link "Web Design Web Design" [ref=e236] [cursor=pointer]:
+        - /url: /shots/popular/web-design
+        - img "Web Design" [ref=e239]
+        - generic [ref=e240]: Web Design
+      - link "Illustration Illustration" [ref=e241] [cursor=pointer]:
+        - /url: /shots/popular/illustration
+        - img "Illustration" [ref=e244]
+        - generic [ref=e245]: Illustration
+      - link "Typography Typography" [ref=e246] [cursor=pointer]:
+        - /url: /shots/popular/typography
+        - img "Typography" [ref=e249]
+        - generic [ref=e250]: Typography
+      - link "Print Print" [ref=e251] [cursor=pointer]:
+        - /url: /shots/popular/print
+        - img "Print" [ref=e254]
+        - generic [ref=e255]: Print
+      - link "Animation Animation" [ref=e256] [cursor=pointer]:
+        - /url: /shots/popular/animation
+        - img "Animation" [ref=e259]
+        - generic [ref=e260]: Animation
+      - link "Branding Branding" [ref=e261] [cursor=pointer]:
+        - /url: /shots/popular/branding
+        - img "Branding" [ref=e264]
+        - generic [ref=e265]: Branding
+      - link "Mobile Mobile" [ref=e266] [cursor=pointer]:
+        - /url: /shots/popular/mobile
+        - img "Mobile" [ref=e269]
+        - generic [ref=e270]: Mobile
+      - link "Product Design Product Design" [ref=e271] [cursor=pointer]:
+        - /url: /shots/popular/product-design
+        - img "Product Design" [ref=e274]
+        - generic [ref=e275]: Product Design
+      - link "Web Design Web Design" [ref=e276] [cursor=pointer]:
+        - /url: /shots/popular/web-design
+        - img "Web Design" [ref=e279]
+        - generic [ref=e280]: Web Design
+      - link "Illustration Illustration" [ref=e281] [cursor=pointer]:
+        - /url: /shots/popular/illustration
+        - img "Illustration" [ref=e284]
+        - generic [ref=e285]: Illustration
+      - link "Typography Typography" [ref=e286] [cursor=pointer]:
+        - /url: /shots/popular/typography
+        - img "Typography" [ref=e289]
+        - generic [ref=e290]: Typography
+      - link "Print Print" [ref=e291] [cursor=pointer]:
+        - /url: /shots/popular/print
+        - img "Print" [ref=e294]
+        - generic [ref=e295]: Print
+    - generic [ref=e296]:
+      - generic [ref=e297]:
+        - 'link "Dribbble: the community for graphic design Back to home page" [ref=e298] [cursor=pointer]':
+          - /url: /
+          - 'img "Dribbble: the community for graphic design" [ref=e299]'
+          - generic: Back to home page
+        - list [ref=e301]:
+          - listitem [ref=e302]:
+            - link "For designers" [ref=e303] [cursor=pointer]:
+              - /url: /for-designers
+          - listitem [ref=e304]:
+            - link "Hire talent" [ref=e305] [cursor=pointer]:
+              - /url: /hiring
+          - listitem [ref=e306]:
+            - link "Inspiration" [ref=e307] [cursor=pointer]:
+              - /url: /shots/popular
+          - listitem [ref=e308]:
+            - link "Advertising" [ref=e309] [cursor=pointer]:
+              - /url: /advertise
+          - listitem [ref=e310]:
+            - link "Blog" [ref=e311] [cursor=pointer]:
+              - /url: /stories
+          - listitem [ref=e312]:
+            - link "About" [ref=e313] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e314]:
+            - link "Careers" [ref=e315] [cursor=pointer]:
+              - /url: /careers
+          - listitem [ref=e316]:
+            - link "Support" [ref=e317] [cursor=pointer]:
+              - /url: /contact
+        - generic [ref=e318]:
+          - link "X" [ref=e319] [cursor=pointer]:
+            - /url: http://x.com/dribbble
+            - img [ref=e320]
+            - generic: X
+          - link "Facebook" [ref=e322] [cursor=pointer]:
+            - /url: http://facebook.com/dribbble
+            - img [ref=e323]
+            - generic: Facebook
+          - link "Instagram" [ref=e325] [cursor=pointer]:
+            - /url: http://instagram.com/dribbble
+            - img [ref=e326]
+            - generic: Instagram
+          - link "Pinterest" [ref=e328] [cursor=pointer]:
+            - /url: http://www.pinterest.com/dribbble/
+            - img [ref=e329]
+            - generic: Pinterest
+      - generic [ref=e331]:
+        - list [ref=e332]:
+          - listitem [ref=e333]: © 2026 Dribbble
+          - listitem [ref=e334]:
+            - link "Terms" [ref=e335] [cursor=pointer]:
+              - /url: /terms
+          - listitem [ref=e336]:
+            - link "Privacy" [ref=e337] [cursor=pointer]:
+              - /url: /privacy
+          - listitem [ref=e338]:
+            - link "Cookies" [ref=e339] [cursor=pointer]:
+              - /url: /cookie-policy
+        - list [ref=e340]:
+          - listitem [ref=e341]:
+            - link "Jobs" [ref=e342] [cursor=pointer]:
+              - /url: /directories/jobs
+          - listitem [ref=e343]:
+            - link "Designers" [ref=e344] [cursor=pointer]:
+              - /url: /directories/designers
+          - listitem [ref=e345]:
+            - link "Freelancers" [ref=e346] [cursor=pointer]:
+              - /url: /directories/freelance-designers
+          - listitem [ref=e347]:
+            - link "Tags" [ref=e348] [cursor=pointer]:
+              - /url: /tags
+          - listitem [ref=e349]:
+            - link "Places" [ref=e350] [cursor=pointer]:
+              - /url: /places
+          - listitem [ref=e351]:
+            - link "Resources" [ref=e352] [cursor=pointer]:
+              - /url: /resources
+  - generic:
+    - link "close":
+      - /url: "#"
+      - img
+  - iframe [ref=e353]:
+    

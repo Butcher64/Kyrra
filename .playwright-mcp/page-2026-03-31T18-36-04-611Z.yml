@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e8]: Kyrra
+      - generic [ref=e9]:
+        - paragraph [ref=e10]: “312 distractions supprimées cette semaine.”
+        - generic [ref=e11]:
+          - paragraph [ref=e12]: Marc, CEO
+          - paragraph [ref=e13]: Innovatech
+      - generic [ref=e14]:
+        - generic [ref=e15]: Souveraineté numérique
+        - generic [ref=e18]: Opérationnel
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - heading "Bienvenue" [level=1] [ref=e22]
+          - paragraph [ref=e23]: Connectez-vous ou créez votre compte.
+        - button "Se connecter avec Google" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - generic [ref=e31]: Se connecter avec Google
+        - generic [ref=e34]: ou
+        - generic [ref=e36]:
+          - paragraph [ref=e37]: Bientôt disponible
+          - generic [ref=e38]:
+            - generic [ref=e39]: Adresse Email
+            - textbox "nom@entreprise.com" [disabled] [ref=e40]
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: Mot de passe
+              - generic [ref=e44]: Oublié ?
+            - textbox "••••••••" [disabled] [ref=e45]
+          - button "Connexion" [disabled] [ref=e46]
+        - paragraph [ref=e47]:
+          - text: Pas encore de compte ?
+          - link "Commencer l'essai" [ref=e48] [cursor=pointer]:
+            - /url: /login
+      - generic [ref=e49]:
+        - link "Confidentialité" [ref=e50] [cursor=pointer]:
+          - /url: /legal/privacy
+        - link "CGU" [ref=e52] [cursor=pointer]:
+          - /url: /legal/cgu
+        - link "Support" [ref=e54] [cursor=pointer]:
+          - /url: mailto:support@kyrra.ai
+      - generic [ref=e55]: KYRRA AI SOUVERAINETÉ NUMÉRIQUE © 2026
+  - button "Open Next.js Dev Tools" [ref=e61] [cursor=pointer]:
+    - img [ref=e62]

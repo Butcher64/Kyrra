@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kyrra — Design System v2 Tech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0c1a32;
+    --navy-95: rgba(12,26,50,0.95);
+    --ink: #1a1f36;
+    --slate: #4a5068;
+    --muted: #8b90a0;
+    --subtle: #c4c7d4;
+    --line: #e4e6ed;
+    --surface: #f5f6f9;
+    --white: #ffffff;
+    --blue-tag-bg: #e8edf8;
+    --blue-tag: #2d4a8a;
+    --gray-tag-bg: #edeef2;
+    --gray-tag: #5c6070;
+    --red-tag-bg: #f8e8e8;
+    --red-tag: #8a2d2d;
+    --green: #1a7a4a;
+    --green-dot: #2dd881;
+    --red-num: #c23a3a;
+    --accent: #3a5bc7;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #08080b;
+    color: #e8e8ec;
+    padding: 40px 60px;
+    line-height: 1.6;
+  }
+
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 42px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  h1 em { font-style: italic; color: var(--subtle); }
+
+  .intro {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 48px;
+    max-width: 560px;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .section { margin-bottom: 56px; }
+
+  .mockup-frame {
+    border: 1px solid rgba(255,255,255,0.08);
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .mockup-title {
+    background: rgba(255,255,255,0.03);
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* dot grid pattern */
+  .dot-grid {
+    background-image: radial-gradient(circle at 1px 1px, rgba(12,26,50,0.04) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+
+  /* noise overlay */
+  .noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>Kyrra — <em>Design System v2</em></h1>
+<p class="intro">
+  Navy serein + accents tech. Monospace pour les données, serif pour la personnalité, sans-serif pour le contenu. Angles droits. Dot grid. Noise texture.
+</p>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- LANDING PAGE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">01 — Landing page</div>
+
+  <div class="mockup-frame">
+    <div class="mockup-title">
+      kyrra.ai <span>1440 × 900</span>
+    </div>
+    <div style="background:var(--white);overflow:hidden;">
+
+      <!-- NAVBAR -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 48px;border-bottom:1px solid var(--line);">
+        <div style="display:flex;align-items:center;gap:28px;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <div style="width:20px;height:20px;background:var(--navy);display:flex;align-items:center;justify-content:center;">
+              <div style="width:9px;height:9px;border:1.5px solid white;"></div>
+            </div>
+            <span style="font-size:15px;font-weight:700;color:var(--navy);letter-spacing:-0.04em;">Kyrra</span>
+          </div>
+          <div style="display:flex;gap:24px;">
+            <span style="font-size:12px;color:var(--slate);font-weight:500;">Produit</span>
+            <span style="font-size:12px;color:var(--slate);font-weight:500;">Sécurité</span>
+            <span style="font-size:12px;color:var(--slate);font-weight:500;">Tarifs</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:center;">
+          <span style="font-size:12px;color:var(--muted);">Connexion</span>
+          <div style="padding:8px 20px;background:var(--navy);color:white;font-size:12px;font-weight:500;">Essai gratuit →</div>
+        </div>
+      </div>
+
+      <!-- HERO — split -->
+      <div style="display:flex;">
+        <!-- Left -->
+        <div style="flex:1;padding:56px 48px 48px;">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+            <div style="width:6px;height:6px;background:var(--green-dot);box-shadow:0 0 8px var(--green-dot);border-radius:50%;"></div>
+            Classification IA en temps réel
+          </div>
+          <div style="font-family:'Instrument Serif',serif;font-size:52px;color:var(--navy);line-height:1.06;letter-spacing:-0.02em;margin-bottom:8px;">
+            Faites taire<br>le bruit.
+          </div>
+          <div style="font-family:'Instrument Serif',serif;font-size:52px;font-style:italic;color:var(--subtle);line-height:1.06;letter-spacing:-0.02em;margin-bottom:28px;">
+            Gardez l'essentiel.
+          </div>
+          <p style="font-size:15px;color:var(--slate);line-height:1.7;max-width:420px;margin-bottom:32px;">
+            Kyrra filtre la prospection B2B de votre boîte mail grâce à un double moteur IA. Vous ne gardez que ce qui compte.
+          </p>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div style="padding:12px 28px;background:var(--navy);color:white;font-size:13px;font-weight:500;">Commencer — c'est gratuit</div>
+            <div style="padding:12px 28px;border:1px solid var(--line);color:var(--navy);font-size:13px;">Voir la démo</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:16px;display:flex;gap:16px;">
+            <span>14 jours gratuits</span>
+            <span style="color:var(--line);">·</span>
+            <span>Sans carte bancaire</span>
+            <span style="color:var(--line);">·</span>
+            <span>Setup &lt; 2min</span>
+          </div>
+        </div>
+
+        <!-- Right — product preview with dot grid bg -->
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px;position:relative;background:var(--surface);" class="dot-grid">
+          <div style="width:100%;max-width:400px;border:1px solid var(--line);background:white;position:relative;z-index:1;">
+            <!-- Header bar -->
+            <div style="padding:10px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div style="width:12px;height:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;">
+                  <div style="width:5px;height:5px;border:1px solid white;"></div>
+                </div>
+                <span style="font-size:11px;font-weight:600;color:var(--navy);">Boîte de réception</span>
+              </div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--muted);">trié par kyrra</div>
+            </div>
+            <!-- Emails -->
+            <div style="padding:12px 14px;border-bottom:1px solid var(--surface);display:flex;align-items:flex-start;gap:10px;">
+              <div style="width:3px;min-height:32px;background:var(--blue-tag);flex-shrink:0;margin-top:2px;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                  <div style="font-size:12px;font-weight:500;color:var(--ink);">Proposition partenariat — Acme Corp</div>
+                  <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--blue-tag-bg);color:var(--blue-tag);flex-shrink:0;margin-left:8px;">À voir</span>
+                </div>
+                <div style="font-size:10px;color:var(--muted);">CEO souhaite discuter d'une collaboration technique</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--subtle);margin-top:4px;display:flex;gap:10px;">
+                  <span>conf. 94%</span>
+                  <span>14:32</span>
+                </div>
+              </div>
+            </div>
+            <div style="padding:12px 14px;border-bottom:1px solid var(--surface);display:flex;align-items:flex-start;gap:10px;opacity:0.55;">
+              <div style="width:3px;min-height:32px;background:var(--subtle);flex-shrink:0;margin-top:2px;"></div>
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                  <div style="font-size:12px;color:var(--slate);">Offre exclusive — GrowthTool</div>
+                  <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--gray-tag-bg);color:var(--gray-tag);flex-shrink:0;margin-left:8px;">Filtré</span>
+                </div>
+                <div style="font-size:10px;color:var(--muted);">-50% sur votre abonnement Pro</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--subtle);margin-top:4px;display:flex;gap:10px;">
+                  <span>conf. 87%</span>
+                  <span>13:15</span>
+                </div>
+              </div>
+            </div>
+            <div style="padding:12px 14px;display:flex;align-items:flex-start;gap:10px;opacity:0.3;">
+              <div style="width:3px;min-height:32px;background:#d4a0a0;flex-shrink:0;margin-top:2px;"></div>
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                  <div style="font-size:12px;color:var(--muted);text-decoration:line-through;">Newsletter Growth Hacking</div>
+                  <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--red-tag-bg);color:var(--red-tag);flex-shrink:0;margin-left:8px;">Bloqué</span>
+                </div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--subtle);margin-top:4px;display:flex;gap:10px;">
+                  <span>conf. 99%</span>
+                  <span>11:47</span>
+                </div>
+              </div>
+            </div>
+            <!-- Processing bar -->
+            <div style="padding:8px 14px;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+                <div style="width:4px;height:4px;background:var(--green-dot);box-shadow:0 0 4px var(--green-dot);border-radius:50%;"></div>
+                pipeline actif
+              </div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--subtle);">47 emails traités aujourd'hui</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- METRICS — technical data strip -->
+      <div style="border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;">
+        <div style="flex:1;padding:28px 48px;border-right:1px solid var(--line);">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Distractions supprimées</div>
+          <div style="font-size:40px;font-weight:700;color:var(--navy);letter-spacing:-0.04em;line-height:1;">312</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--subtle);margin-top:4px;">par semaine en moyenne</div>
+        </div>
+        <div style="flex:1;padding:28px 48px;border-right:1px solid var(--line);">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Temps exécutif récupéré</div>
+          <div style="font-size:40px;font-weight:700;color:var(--navy);letter-spacing:-0.04em;line-height:1;">45<span style="font-size:18px;font-weight:400;color:var(--muted);">min</span></div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--subtle);margin-top:4px;">chaque jour ouvré</div>
+        </div>
+        <div style="flex:1;padding:28px 48px;">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Latence de classification</div>
+          <div style="font-size:40px;font-weight:700;color:var(--navy);letter-spacing:-0.04em;line-height:1;">&lt;2<span style="font-size:18px;font-weight:400;color:var(--muted);">sec</span></div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--subtle);margin-top:4px;">dual engine · rule + llm</div>
+        </div>
+      </div>
+
+      <!-- HOW IT WORKS — numbered, with technical details -->
+      <div style="background:var(--surface);padding:48px;position:relative;" class="dot-grid">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.14em;color:var(--muted);margin-bottom:32px;">Architecture du pipeline</div>
+        <div style="display:flex;gap:0;">
+          <div style="flex:1;padding-right:32px;border-right:1px solid var(--line);">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--subtle);font-weight:500;margin-bottom:10px;">01</div>
+            <div style="font-size:17px;font-weight:600;color:var(--navy);margin-bottom:8px;">Connexion Gmail</div>
+            <div style="font-size:13px;color:var(--slate);line-height:1.6;margin-bottom:12px;">OAuth 2.0 sécurisé. Kyrra scanne vos 6 derniers mois d'envois pour construire votre whitelist de confiance.</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.8;">
+              scope: gmail.readonly<br>
+              scan: 180 jours · sha-256 hashed<br>
+              durée: &lt; 45 secondes
+            </div>
+          </div>
+          <div style="flex:1;padding:0 32px;border-right:1px solid var(--line);">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--subtle);font-weight:500;margin-bottom:10px;">02</div>
+            <div style="font-size:17px;font-weight:600;color:var(--navy);margin-bottom:8px;">Classification IA</div>
+            <div style="font-size:13px;color:var(--slate);line-height:1.6;margin-bottom:12px;">Double moteur : fingerprinting rule-based pour 70% des emails, LLM pour les 30% ambigus. Score de confiance par email.</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.8;">
+              engine_1: fingerprint · 65-70%<br>
+              engine_2: gpt-4o-mini · 30-35%<br>
+              latence: &lt; 2 secondes
+            </div>
+          </div>
+          <div style="flex:1;padding-left:32px;">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--subtle);font-weight:500;margin-bottom:10px;">03</div>
+            <div style="font-size:17px;font-weight:600;color:var(--navy);margin-bottom:8px;">3 labels Gmail</div>
+            <div style="font-size:13px;color:var(--slate);line-height:1.6;margin-bottom:12px;">Classification directement dans votre boîte. Rien à installer, rien à configurer. Gmail reste votre source de vérité.</div>
+            <div style="display:flex;gap:6px;margin-top:12px;">
+              <div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid var(--line);background:white;">
+                <div style="width:3px;height:12px;background:var(--blue-tag);"></div>
+                <span style="font-family:var(--mono);font-size:9px;color:var(--blue-tag);">à_voir</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid var(--line);background:white;">
+                <div style="width:3px;height:12px;background:var(--subtle);"></div>
+                <span style="font-family:var(--mono);font-size:9px;color:var(--gray-tag);">filtré</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid var(--line);background:white;">
+                <div style="width:3px;height:12px;background:#d4a0a0;"></div>
+                <span style="font-family:var(--mono);font-size:9px;color:var(--red-tag);">bloqué</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOVEREIGN — navy with noise -->
+      <div style="background:var(--navy);padding:48px;position:relative;overflow:hidden;" class="noise">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;">
+          <div style="max-width:440px;">
+            <div style="font-family:var(--mono);font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:0.14em;color:rgba(255,255,255,0.3);margin-bottom:14px;">Souveraineté</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:30px;color:white;line-height:1.2;letter-spacing:-0.01em;margin-bottom:12px;">Vos données restent en Europe.</div>
+            <div style="font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;">Hébergement UE. RGPD natif. Chiffrement bout en bout. Zéro data retention — vos emails ne sont jamais stockés sur nos serveurs.</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid rgba(255,255,255,0.08);">
+              <div style="width:4px;height:4px;background:var(--green-dot);box-shadow:0 0 4px var(--green-dot);border-radius:50%;"></div>
+              <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;">RGPD conforme</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid rgba(255,255,255,0.08);">
+              <div style="width:4px;height:4px;background:var(--green-dot);box-shadow:0 0 4px var(--green-dot);border-radius:50%;"></div>
+              <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;">Hébergement UE</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid rgba(255,255,255,0.08);">
+              <div style="width:4px;height:4px;background:var(--green-dot);box-shadow:0 0 4px var(--green-dot);border-radius:50%;"></div>
+              <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;">Zero retention</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid rgba(255,255,255,0.08);">
+              <div style="width:4px;height:4px;background:var(--green-dot);box-shadow:0 0 4px var(--green-dot);border-radius:50%;"></div>
+              <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;">E2E chiffrement</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TESTIMONIAL -->
+      <div style="padding:48px;border-bottom:1px solid var(--line);">
+        <div style="display:flex;gap:48px;align-items:flex-start;">
+          <div style="flex:1;border-left:2px solid var(--navy);padding-left:24px;">
+            <p style="font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:var(--ink);line-height:1.5;margin-bottom:16px;">
+              312 distractions supprimées cette semaine. Je ne reviens pas en arrière.
+            </p>
+            <div style="font-size:13px;font-weight:600;color:var(--navy);">Marc, CEO — Innovatech</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;">45 employés · utilisateur depuis 3 mois</div>
+          </div>
+          <div style="width:200px;border:1px solid var(--line);padding:16px;">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Résultats Marc</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="font-family:var(--mono);font-size:9px;color:var(--slate);">emails/sem</span>
+                  <span style="font-size:14px;font-weight:700;color:var(--navy);">847</span>
+                </div>
+                <div style="height:2px;background:var(--surface);margin-top:4px;"><div style="height:2px;background:var(--navy);width:85%;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="font-family:var(--mono);font-size:9px;color:var(--slate);">filtrés</span>
+                  <span style="font-size:14px;font-weight:700;color:var(--red-num);">312</span>
+                </div>
+                <div style="height:2px;background:var(--surface);margin-top:4px;"><div style="height:2px;background:var(--red-num);width:37%;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="font-family:var(--mono);font-size:9px;color:var(--slate);">précision</span>
+                  <span style="font-size:14px;font-weight:700;color:var(--green);">99.2%</span>
+                </div>
+                <div style="height:2px;background:var(--surface);margin-top:4px;"><div style="height:2px;background:var(--green);width:99%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="background:var(--navy);padding:48px;display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden;" class="noise">
+        <div style="position:relative;z-index:1;">
+          <div style="font-family:'Instrument Serif',serif;font-size:30px;color:white;letter-spacing:-0.01em;">Prêt pour le calme ?</div>
+          <div style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.3);margin-top:8px;">14 jours gratuits · sans carte bancaire · setup &lt; 2min</div>
+        </div>
+        <div style="padding:14px 36px;background:white;color:var(--navy);font-size:14px;font-weight:600;position:relative;z-index:1;">Essayer Kyrra →</div>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="padding:20px 48px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">© 2026 Kyrra</span>
+          <div style="width:1px;height:12px;background:var(--line);"></div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">Confidentialité</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">CGU</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">Support</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:4px;height:4px;background:var(--green-dot);box-shadow:0 0 4px var(--green-dot);border-radius:50%;"></div>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--muted);">all systems operational</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- DASHBOARD -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">02 — Dashboard</div>
+
+  <div class="mockup-frame">
+    <div class="mockup-title">
+      dashboard.kyrra.ai <span>1440 × 900</span>
+    </div>
+    <div style="display:flex;background:var(--surface);min-height:480px;">
+
+      <!-- Sidebar -->
+      <div style="width:230px;background:var(--navy);padding:20px 14px;display:flex;flex-direction:column;position:relative;overflow:hidden;" class="noise">
+        <div style="position:relative;z-index:1;display:flex;flex-direction:column;flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:28px;">
+            <div style="width:22px;height:22px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.6);"></div>
+            </div>
+            <span style="font-size:15px;font-weight:700;color:white;letter-spacing:-0.04em;">Kyrra</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:5px;">
+              <div style="width:5px;height:5px;background:var(--green-dot);box-shadow:0 0 6px var(--green-dot);border-radius:50%;"></div>
+              <span style="font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.3);">actif</span>
+            </div>
+          </div>
+
+          <div style="font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(255,255,255,0.15);margin-bottom:8px;padding:0 10px;">Navigation</div>
+          <div style="display:flex;flex-direction:column;gap:1px;flex:1;">
+            <div style="padding:9px 10px;background:rgba(255,255,255,0.06);font-size:13px;color:white;display:flex;align-items:center;gap:9px;font-weight:500;">
+              <span style="opacity:0.5;font-size:13px;">▦</span> Tableau de bord
+            </div>
+            <div style="padding:9px 10px;font-size:13px;color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:9px;">
+              <span style="opacity:0.2;font-size:13px;">✉</span> Mes emails
+            </div>
+            <div style="padding:9px 10px;font-size:13px;color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:9px;">
+              <span style="opacity:0.2;font-size:13px;">◫</span> Libellés
+            </div>
+            <div style="padding:9px 10px;font-size:13px;color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:9px;">
+              <span style="opacity:0.2;font-size:13px;">⚙</span> Paramètres
+            </div>
+          </div>
+
+          <!-- Pipeline status -->
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;margin-bottom:12px;">
+            <div style="font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.15);margin-bottom:6px;">Pipeline</div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.35);">fingerprint</span>
+                <div style="display:flex;align-items:center;gap:4px;">
+                  <div style="width:3px;height:3px;background:var(--green-dot);border-radius:50%;"></div>
+                  <span style="font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.25);">ok</span>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.35);">llm gateway</span>
+                <div style="display:flex;align-items:center;gap:4px;">
+                  <div style="width:3px;height:3px;background:var(--green-dot);border-radius:50%;"></div>
+                  <span style="font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.25);">ok</span>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.35);">gmail sync</span>
+                <div style="display:flex;align-items:center;gap:4px;">
+                  <div style="width:3px;height:3px;background:var(--green-dot);border-radius:50%;"></div>
+                  <span style="font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.25);">ok</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- User -->
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;display:flex;align-items:center;gap:9px;">
+            <div style="width:28px;height:28px;background:rgba(255,255,255,0.06);font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-weight:600;">T</div>
+            <div style="flex:1;">
+              <div style="font-size:12px;color:rgba(255,255,255,0.6);">Thomas</div>
+              <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.2);">thomas@kyrra.ai</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main -->
+      <div style="flex:1;padding:28px 36px;overflow:hidden;">
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;">
+          <div>
+            <div style="font-size:22px;font-weight:700;color:var(--navy);letter-spacing:-0.03em;">Bonjour, Thomas</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px;">lun. 31 mars 2026 · pipeline actif</div>
+          </div>
+          <div style="padding:6px 14px;border:1px solid var(--line);display:flex;align-items:center;gap:6px;">
+            <div style="width:5px;height:5px;background:var(--green-dot);box-shadow:0 0 4px var(--green-dot);border-radius:50%;"></div>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--green);">protégé</span>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:flex;background:white;border:1px solid var(--line);margin-bottom:24px;">
+          <div style="flex:1;padding:20px 24px;border-right:1px solid var(--line);">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Triés aujourd'hui</div>
+            <div style="font-size:36px;font-weight:700;color:var(--navy);letter-spacing:-0.04em;line-height:1;">47</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--subtle);margin-top:4px;">↑ 12% vs hier</div>
+          </div>
+          <div style="flex:1;padding:20px 24px;border-right:1px solid var(--line);">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Prospection bloquée</div>
+            <div style="font-size:36px;font-weight:700;color:var(--red-num);letter-spacing:-0.04em;line-height:1;">18</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--subtle);margin-top:4px;">38% du volume</div>
+          </div>
+          <div style="flex:1;padding:20px 24px;">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Temps gagné</div>
+            <div style="font-size:36px;font-weight:700;color:var(--green);letter-spacing:-0.04em;line-height:1;">23<span style="font-size:15px;font-weight:400;color:var(--muted);">min</span></div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--subtle);margin-top:4px;">~115 min / semaine</div>
+          </div>
+        </div>
+
+        <!-- Email list -->
+        <div style="background:white;border:1px solid var(--line);overflow:hidden;">
+          <div style="padding:14px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:14px;font-weight:600;color:var(--navy);">Derniers emails triés</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--accent);font-weight:500;">tout voir →</div>
+          </div>
+
+          <div style="padding:14px 20px;border-bottom:1px solid var(--surface);display:flex;align-items:flex-start;gap:14px;">
+            <div style="width:3px;min-height:36px;background:var(--blue-tag);flex-shrink:0;margin-top:2px;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px;">Proposition de partenariat stratégique — Acme Corp</div>
+              <div style="font-size:11px;color:var(--muted);">CEO souhaite discuter d'une collaboration technique sur le Q2</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+              <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--blue-tag-bg);color:var(--blue-tag);">À voir</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--subtle);">conf. 94% · 14:32</span>
+            </div>
+          </div>
+
+          <div style="padding:14px 20px;border-bottom:1px solid var(--surface);display:flex;align-items:flex-start;gap:14px;opacity:0.55;">
+            <div style="width:3px;min-height:36px;background:var(--subtle);flex-shrink:0;margin-top:2px;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;color:var(--slate);margin-bottom:2px;">Offre exclusive SaaS — GrowthTool Pro</div>
+              <div style="font-size:11px;color:var(--muted);">Réduction de 50% sur votre abonnement annuel</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+              <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--gray-tag-bg);color:var(--gray-tag);">Filtré</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--subtle);">conf. 87% · 13:15</span>
+            </div>
+          </div>
+
+          <div style="padding:14px 20px;border-bottom:1px solid var(--surface);display:flex;align-items:flex-start;gap:14px;opacity:0.3;">
+            <div style="width:3px;min-height:36px;background:#d4a0a0;flex-shrink:0;margin-top:2px;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;color:var(--muted);text-decoration:line-through;margin-bottom:2px;">Newsletter Growth Hacking Weekly</div>
+              <div style="font-size:11px;color:var(--subtle);">Votre dose hebdomadaire de growth hacking</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+              <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--red-tag-bg);color:var(--red-tag);">Bloqué</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--subtle);">conf. 99% · 11:47</span>
+            </div>
+          </div>
+
+          <div style="padding:14px 20px;display:flex;align-items:flex-start;gap:14px;">
+            <div style="width:3px;min-height:36px;background:var(--blue-tag);flex-shrink:0;margin-top:2px;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px;">Invitation webinar — Transformation digitale PME</div>
+              <div style="font-size:11px;color:var(--muted);">Organisé par BPI France le 15 avril 2026</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+              <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--blue-tag-bg);color:var(--blue-tag);">À voir</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--subtle);">conf. 91% · 09:22</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- DESIGN TOKENS -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">03 — Tokens de design</div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;">
+    <div style="background:rgba(255,255,255,0.03);padding:16px;">
+      <div style="font-family:var(--mono);font-size:10px;color:white;margin-bottom:4px;">Typographie</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.8;">
+        display: Instrument Serif<br>
+        body: DM Sans<br>
+        data: IBM Plex Mono<br>
+        <br>
+        Serif = hero tagline + citations<br>
+        Mono = labels, metadata, stats
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,0.03);padding:16px;">
+      <div style="font-family:var(--mono);font-size:10px;color:white;margin-bottom:4px;">Forme</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.8;">
+        border-radius: 0<br>
+        border: 1px solid #e4e6ed<br>
+        shadow: none<br>
+        gradient: none<br>
+        <br>
+        Exception: status dot (circle)<br>
+        Exception: avatar (circle)
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,0.03);padding:16px;">
+      <div style="font-family:var(--mono);font-size:10px;color:white;margin-bottom:4px;">Texture</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.8;">
+        dot-grid: 20px · 4% opacity<br>
+        noise: fractal · 3% opacity<br>
+        <br>
+        dot-grid → surface sections<br>
+        noise → navy sections<br>
+        le reste → flat white
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

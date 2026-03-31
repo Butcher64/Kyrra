@@ -1,0 +1,2 @@
+[    9638ms] [ERROR] Sending form data to 'https://web-production-87a24.up.railway.app/auth/callback?next=%2Fconnect-gmail' violates the following Content Security Policy directive: "form-action 'self'". The request has been blocked.
+ @ https://web-production-87a24.up.railway.app/login:0

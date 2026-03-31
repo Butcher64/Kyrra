@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kyrra — Landing v3 Structure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: #fff; color: #1a1f36; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  .serif { font-family: 'Instrument Serif', serif; }
+  .navy { color: #0c1a32; }
+  .muted { color: #8b90a0; }
+  .slate { color: #4a5068; }
+  .subtle { color: #c4c7d4; }
+  .bg-navy { background: #0c1a32; }
+  .bg-surface { background: #f5f6f9; }
+  .border-line { border-color: #e4e6ed; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PROPOSED STRUCTURE -->
+<!-- ═══════════════════════════════════════ -->
+
+<div style="max-width: 1000px; margin: 40px auto; padding: 0 40px;">
+
+  <h1 class="serif" style="font-size:36px;margin-bottom:8px;">Landing page v3 — Structure</h1>
+  <p class="muted" style="font-size:14px;margin-bottom:40px;">
+    5 sections au lieu de 8. Chaque section a un rôle clair. Pas de texte dans le vide.
+  </p>
+
+  <!-- SECTION 1: HERO -->
+  <div style="border:1px solid #e4e6ed;margin-bottom:32px;overflow:hidden;">
+    <div style="background:#f5f6f9;padding:8px 14px;border-bottom:1px solid #e4e6ed;display:flex;justify-content:space-between;">
+      <span class="mono" style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;" class="muted">Section 1 — Hero</span>
+      <span class="mono" style="font-size:10px;" class="muted">100vh · full screen</span>
+    </div>
+    <div style="display:flex;min-height:400px;">
+      <!-- Left -->
+      <div style="flex:1;padding:40px;display:flex;flex-direction:column;justify-content:center;">
+        <div class="mono" style="font-size:10px;color:#3a5bc7;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:16px;display:flex;align-items:center;gap:6px;">
+          <div style="width:5px;height:5px;background:#2dd881;border-radius:50%;box-shadow:0 0 4px #2dd881;"></div>
+          Classification IA en temps réel
+        </div>
+        <div class="serif" style="font-size:48px;color:#0c1a32;line-height:0.95;margin-bottom:4px;">Faites taire<br>le bruit.</div>
+        <div class="serif" style="font-size:48px;font-style:italic;color:#c4c7d4;line-height:0.95;margin-bottom:24px;">Gardez l'essentiel.</div>
+        <p style="font-size:15px;color:#4a5068;line-height:1.7;max-width:400px;margin-bottom:24px;">Kyrra filtre la prospection B2B de votre boîte mail grâce à un double moteur IA.</p>
+        <div style="display:flex;gap:10px;margin-bottom:8px;">
+          <div style="padding:10px 24px;background:#0c1a32;color:white;font-size:13px;font-weight:500;">Commencer — c'est gratuit</div>
+          <div style="padding:10px 24px;border:1px solid #e4e6ed;color:#0c1a32;font-size:13px;">Comment ça marche</div>
+        </div>
+        <div class="mono" style="font-size:10px;color:#8b90a0;">14 jours gratuits · Sans carte bancaire</div>
+      </div>
+      <!-- Right: product screenshot / UI preview -->
+      <div style="flex:1;background:#f5f6f9;display:flex;align-items:center;justify-content:center;padding:32px;position:relative;">
+        <div style="background:radial-gradient(circle at 1px 1px, rgba(12,26,50,0.04) 1px, transparent 0);background-size:20px 20px;position:absolute;inset:0;"></div>
+        <div style="width:90%;max-width:400px;background:white;border:1px solid #e4e6ed;position:relative;z-index:1;">
+          <div style="background:#f5f6f9;border-bottom:1px solid #e4e6ed;padding:8px 12px;display:flex;justify-content:space-between;">
+            <span style="font-size:11px;font-weight:600;color:#0c1a32;">Boîte de réception</span>
+            <span class="mono" style="font-size:8px;color:#8b90a0;">TRIÉ PAR KYRRA</span>
+          </div>
+          <!-- Email rows -->
+          <div style="padding:10px 12px;border-bottom:1px solid #f5f6f9;display:flex;align-items:center;gap:8px;">
+            <div style="width:3px;height:24px;background:#2d4a8a;"></div>
+            <div style="flex:1;"><div style="font-size:11px;font-weight:500;color:#0c1a32;">Partenariat Q2 — Acme Corp</div><div style="font-size:9px;color:#8b90a0;">CEO souhaite discuter</div></div>
+            <span style="font-size:8px;padding:2px 6px;background:#e8edf8;color:#2d4a8a;font-weight:600;text-transform:uppercase;">À voir</span>
+          </div>
+          <div style="padding:10px 12px;border-bottom:1px solid #f5f6f9;display:flex;align-items:center;gap:8px;opacity:0.5;">
+            <div style="width:3px;height:24px;background:#c4c7d4;"></div>
+            <div style="flex:1;"><div style="font-size:11px;color:#4a5068;">Offre SaaS — GrowthTool</div><div style="font-size:9px;color:#c4c7d4;">-50% limité</div></div>
+            <span style="font-size:8px;padding:2px 6px;background:#edeef2;color:#5c6070;font-weight:600;text-transform:uppercase;">Filtré</span>
+          </div>
+          <div style="padding:10px 12px;display:flex;align-items:center;gap:8px;opacity:0.25;">
+            <div style="width:3px;height:24px;background:#d4a0a0;"></div>
+            <div style="flex:1;"><div style="font-size:11px;color:#8b90a0;text-decoration:line-through;">Newsletter Growth Weekly</div></div>
+            <span style="font-size:8px;padding:2px 6px;background:#f8e8e8;color:#8a2d2d;font-weight:600;text-transform:uppercase;">Bloqué</span>
+          </div>
+          <div style="background:#f5f6f9;border-top:1px solid #e4e6ed;padding:6px 12px;display:flex;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:4px;height:4px;background:#2dd881;border-radius:50%;"></div><span class="mono" style="font-size:8px;color:#8b90a0;">pipeline actif</span></div>
+            <span class="mono" style="font-size:8px;color:#c4c7d4;">47 traités aujourd'hui</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 14px;background:#f0f8f0;border-top:1px solid #e4e6ed;">
+      <span style="font-size:11px;color:#1a7a4a;">✓ Le preview email à droite montre le produit en action. Le visiteur comprend en 2 secondes.</span>
+    </div>
+  </div>
+
+  <!-- SECTION 2: COMMENT ÇA MARCHE + STATS -->
+  <div style="border:1px solid #e4e6ed;margin-bottom:32px;overflow:hidden;">
+    <div style="background:#f5f6f9;padding:8px 14px;border-bottom:1px solid #e4e6ed;display:flex;justify-content:space-between;">
+      <span class="mono" style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#8b90a0;">Section 2 — Comment ça marche</span>
+      <span class="mono" style="font-size:10px;color:#8b90a0;">fond blanc · aéré</span>
+    </div>
+    <div style="padding:48px 40px;">
+      <!-- Header -->
+      <div style="text-align:center;margin-bottom:40px;">
+        <div class="mono" style="font-size:10px;color:#8b90a0;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:8px;">Comment ça marche</div>
+        <div style="font-size:24px;font-weight:700;color:#0c1a32;">Trois étapes. Zéro effort.</div>
+      </div>
+      <!-- 3 cards with icons -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:48px;">
+        <div style="border:1px solid #e4e6ed;padding:28px 24px;">
+          <div style="width:40px;height:40px;background:#f5f6f9;border:1px solid #e4e6ed;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:18px;">🔗</div>
+          <div class="mono" style="font-size:10px;color:#c4c7d4;margin-bottom:6px;">01</div>
+          <div style="font-size:16px;font-weight:600;color:#0c1a32;margin-bottom:6px;">Connectez Gmail</div>
+          <p style="font-size:13px;color:#4a5068;line-height:1.6;">OAuth sécurisé en un clic. Kyrra construit votre whitelist automatiquement.</p>
+          <div class="mono" style="font-size:9px;color:#8b90a0;margin-top:10px;">setup &lt; 2 minutes</div>
+        </div>
+        <div style="border:1px solid #e4e6ed;padding:28px 24px;">
+          <div style="width:40px;height:40px;background:#f5f6f9;border:1px solid #e4e6ed;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:18px;">⚡</div>
+          <div class="mono" style="font-size:10px;color:#c4c7d4;margin-bottom:6px;">02</div>
+          <div style="font-size:16px;font-weight:600;color:#0c1a32;margin-bottom:6px;">Classification IA</div>
+          <p style="font-size:13px;color:#4a5068;line-height:1.6;">Double moteur : règles métier + LLM pour les cas ambigus. Score de confiance par email.</p>
+          <div class="mono" style="font-size:9px;color:#8b90a0;margin-top:10px;">latence &lt; 2 secondes</div>
+        </div>
+        <div style="border:1px solid #e4e6ed;padding:28px 24px;">
+          <div style="width:40px;height:40px;background:#f5f6f9;border:1px solid #e4e6ed;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:18px;">🏷️</div>
+          <div class="mono" style="font-size:10px;color:#c4c7d4;margin-bottom:6px;">03</div>
+          <div style="font-size:16px;font-weight:600;color:#0c1a32;margin-bottom:6px;">3 labels Gmail</div>
+          <p style="font-size:13px;color:#4a5068;line-height:1.6;">À voir · Filtré · Bloqué. Directement dans votre boîte. Gmail reste votre source de vérité.</p>
+          <div class="mono" style="font-size:9px;color:#8b90a0;margin-top:10px;">+ recap quotidien</div>
+        </div>
+      </div>
+      <!-- Stats intégrés en bas — trust strip -->
+      <div style="display:flex;justify-content:center;gap:48px;padding-top:24px;border-top:1px solid #e4e6ed;">
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#0c1a32;">312</div>
+          <div class="mono" style="font-size:9px;color:#8b90a0;text-transform:uppercase;">distractions / sem.</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#0c1a32;">45<span style="font-size:14px;font-weight:400;color:#8b90a0;">min</span></div>
+          <div class="mono" style="font-size:9px;color:#8b90a0;text-transform:uppercase;">gagnées / jour</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#0c1a32;">99.2<span style="font-size:14px;font-weight:400;color:#8b90a0;">%</span></div>
+          <div class="mono" style="font-size:9px;color:#8b90a0;text-transform:uppercase;">précision</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 14px;background:#f0f8f0;border-top:1px solid #e4e6ed;">
+      <span style="font-size:11px;color:#1a7a4a;">✓ Cards avec icônes (pas du texte dans le vide). Stats intégrés en bas comme trust strip. Une seule section = how it works + proof.</span>
+    </div>
+  </div>
+
+  <!-- SECTION 3: PRICING — vertical cards -->
+  <div style="border:1px solid #e4e6ed;margin-bottom:32px;overflow:hidden;">
+    <div style="background:#f5f6f9;padding:8px 14px;border-bottom:1px solid #e4e6ed;display:flex;justify-content:space-between;">
+      <span class="mono" style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#8b90a0;">Section 3 — Tarifs</span>
+      <span class="mono" style="font-size:10px;color:#8b90a0;">cards verticales SaaS standard</span>
+    </div>
+    <div style="padding:48px 40px;background:#f5f6f9;">
+      <!-- Header -->
+      <div style="text-align:center;margin-bottom:32px;">
+        <div class="mono" style="font-size:10px;color:#8b90a0;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:8px;">Tarifs</div>
+        <div style="font-size:24px;font-weight:700;color:#0c1a32;margin-bottom:4px;">Un prix simple, transparent.</div>
+        <p style="font-size:14px;color:#4a5068;">Commencez gratuitement. Évoluez quand vous êtes prêt.</p>
+      </div>
+      <!-- Cards -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px;margin:0 auto;">
+        <!-- Free -->
+        <div style="background:white;border:1px solid #e4e6ed;padding:32px 24px;display:flex;flex-direction:column;">
+          <div class="mono" style="font-size:10px;color:#8b90a0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Gratuit</div>
+          <div style="font-size:36px;font-weight:700;color:#0c1a32;margin-bottom:4px;">0€</div>
+          <div style="font-size:12px;color:#8b90a0;margin-bottom:24px;">pour toujours</div>
+          <div style="display:flex;flex-direction:column;gap:10px;flex:1;margin-bottom:24px;">
+            <div style="font-size:13px;color:#4a5068;">✓ 30 emails/jour</div>
+            <div style="font-size:13px;color:#4a5068;">✓ Classification de base</div>
+            <div style="font-size:13px;color:#4a5068;">✓ 1 compte Gmail</div>
+          </div>
+          <div style="padding:10px;border:1px solid #e4e6ed;text-align:center;font-size:13px;font-weight:500;color:#0c1a32;">Commencer</div>
+        </div>
+        <!-- Pro — highlighted -->
+        <div style="background:white;border:1px solid #0c1a32;border-top:3px solid #0c1a32;padding:32px 24px;display:flex;flex-direction:column;position:relative;">
+          <div style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:#0c1a32;color:white;font-size:9px;padding:2px 10px;text-transform:uppercase;letter-spacing:0.08em;" class="mono">Populaire</div>
+          <div class="mono" style="font-size:10px;color:#8b90a0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Pro</div>
+          <div style="font-size:36px;font-weight:700;color:#0c1a32;margin-bottom:4px;">15€<span style="font-size:14px;font-weight:400;color:#8b90a0;">/mois</span></div>
+          <div style="font-size:12px;color:#8b90a0;margin-bottom:24px;">ou 12€/mois (annuel)</div>
+          <div style="display:flex;flex-direction:column;gap:10px;flex:1;margin-bottom:24px;">
+            <div style="font-size:13px;color:#4a5068;">✓ Emails illimités</div>
+            <div style="font-size:13px;color:#4a5068;">✓ Kyrra Recap quotidien</div>
+            <div style="font-size:13px;color:#4a5068;">✓ Scores de confiance</div>
+            <div style="font-size:13px;color:#4a5068;">✓ Résumé par email</div>
+            <div style="font-size:13px;color:#4a5068;">✓ 3 modes d'exposition</div>
+          </div>
+          <div style="padding:10px;background:#0c1a32;text-align:center;font-size:13px;font-weight:500;color:white;">Essai gratuit 14 jours</div>
+        </div>
+        <!-- Team -->
+        <div style="background:white;border:1px solid #e4e6ed;padding:32px 24px;display:flex;flex-direction:column;">
+          <div class="mono" style="font-size:10px;color:#8b90a0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Team</div>
+          <div style="font-size:36px;font-weight:700;color:#0c1a32;margin-bottom:4px;">19€<span style="font-size:14px;font-weight:400;color:#8b90a0;">/user/mois</span></div>
+          <div style="font-size:12px;color:#8b90a0;margin-bottom:24px;">ou 15€/user (annuel)</div>
+          <div style="display:flex;flex-direction:column;gap:10px;flex:1;margin-bottom:24px;">
+            <div style="font-size:13px;color:#4a5068;">✓ Tout Pro inclus</div>
+            <div style="font-size:13px;color:#4a5068;">✓ Multi-utilisateurs</div>
+            <div style="font-size:13px;color:#4a5068;">✓ Admin équipe</div>
+            <div style="font-size:13px;color:#4a5068;">✓ Whitelist partagée</div>
+            <div style="font-size:13px;color:#4a5068;">✓ Support SLA 4h</div>
+          </div>
+          <div style="padding:10px;border:1px solid #e4e6ed;text-align:center;font-size:13px;font-weight:500;color:#0c1a32;">Essai gratuit 14 jours</div>
+        </div>
+      </div>
+      <!-- Trust badges inline -->
+      <div style="display:flex;justify-content:center;gap:16px;margin-top:24px;">
+        <div class="mono" style="font-size:9px;color:#8b90a0;display:flex;align-items:center;gap:4px;">
+          <div style="width:3px;height:3px;background:#2dd881;border-radius:50%;"></div> RGPD conforme
+        </div>
+        <div class="mono" style="font-size:9px;color:#8b90a0;display:flex;align-items:center;gap:4px;">
+          <div style="width:3px;height:3px;background:#2dd881;border-radius:50%;"></div> Hébergement UE
+        </div>
+        <div class="mono" style="font-size:9px;color:#8b90a0;display:flex;align-items:center;gap:4px;">
+          <div style="width:3px;height:3px;background:#2dd881;border-radius:50%;"></div> Zero data retention
+        </div>
+        <div class="mono" style="font-size:9px;color:#8b90a0;display:flex;align-items:center;gap:4px;">
+          <div style="width:3px;height:3px;background:#2dd881;border-radius:50%;"></div> Chiffrement E2E
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 14px;background:#f0f8f0;border-top:1px solid #e4e6ed;">
+      <span style="font-size:11px;color:#1a7a4a;">✓ Cards verticales standard SaaS. Pro en avant (border-top 3px + badge "Populaire"). Trust badges RGPD/UE intégrés en bas (plus de section sovereignty séparée).</span>
+    </div>
+  </div>
+
+  <!-- SECTION 4: CTA FINAL -->
+  <div style="border:1px solid #e4e6ed;margin-bottom:32px;overflow:hidden;">
+    <div style="background:#f5f6f9;padding:8px 14px;border-bottom:1px solid #e4e6ed;display:flex;justify-content:space-between;">
+      <span class="mono" style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#8b90a0;">Section 4 — CTA Final</span>
+      <span class="mono" style="font-size:10px;color:#8b90a0;">navy · compact</span>
+    </div>
+    <div style="background:#0c1a32;padding:48px 40px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div class="serif" style="font-size:28px;color:white;">Prêt pour le calme ?</div>
+        <div class="mono" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">14 jours gratuits · sans carte bancaire</div>
+      </div>
+      <div style="padding:12px 32px;background:white;color:#0c1a32;font-size:14px;font-weight:600;">Essayer Kyrra →</div>
+    </div>
+    <div style="padding:12px 14px;background:#f0f8f0;border-top:1px solid #e4e6ed;">
+      <span style="font-size:11px;color:#1a7a4a;">✓ Simple, direct, pas de section sovereignty séparée.</span>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div style="background:#0c1a32;padding:32px;margin-bottom:40px;">
+    <div class="mono" style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:16px;">Résumé des changements</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:white;margin-bottom:8px;">Sections supprimées</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.8;">
+          ✕ Stats section séparée → intégré dans "Comment ça marche"<br>
+          ✕ Sovereignty section → trust badges sous le pricing<br>
+          ✕ Testimonials → supprimé (pas de vrais avis)<br>
+          ✕ 8 sections → 4 sections
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:white;margin-bottom:8px;">Améliorations</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.8;">
+          ✓ Hero full-screen avec preview email à droite<br>
+          ✓ How-it-works dans des CARDS avec icônes<br>
+          ✓ Pricing verticales standard SaaS, fond surface<br>
+          ✓ Trust badges RGPD/UE intégrés, pas une section<br>
+          ✓ Beaucoup moins de texte, plus aéré
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

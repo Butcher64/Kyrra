@@ -1,0 +1,294 @@
+[     143ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[     166ms] [LOG] [HMR] connected @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[  432176ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[  432217ms] [LOG] [Fast Refresh] done in 89ms @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[  523149ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[  523362ms] [WARNING] %c%s%c ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3333". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase background: #e6e6e6;background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.25));color: #000000;color: light-dark(#000000, #ffffff);border-radius: 2px  Server   @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[  523392ms] [LOG] [Fast Refresh] done in 92ms @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[  564033ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[  564259ms] [WARNING] %c%s%c ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3333". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase background: #e6e6e6;background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.25));color: #000000;color: light-dark(#000000, #ffffff);border-radius: 2px  Server   @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[  564260ms] [LOG] [Fast Refresh] done in 109ms @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 1003527ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 1003626ms] [LOG] [Fast Refresh] done in 211ms @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2399816ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2400584ms] [LOG] [Fast Refresh] done in 872ms @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2400879ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2401180ms] [LOG] [Fast Refresh] done in 404ms @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2401402ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2401459ms] [LOG] [Fast Refresh] done in 160ms @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2404628ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2404775ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:3272
+[ 2404895ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:3272
+[ 2404941ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2423197ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2423446ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:3272
+[ 2423550ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:3272
+[ 2423666ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2424148ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:3272
+[ 2424240ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:3272
+[ 2424347ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2424793ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:3272
+[ 2425067ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3333/?_rsc=1i9ea:0
+[ 2425150ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3333/?_rsc=1i9ea:0
+[ 2425200ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2425225ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3333/:0
+[ 2425476ms] [ERROR] Refused to execute script from 'http://localhost:3333/_next/static/development/_clientMiddlewareManifest.js' because its MIME type ('application/json') is not executable, and strict MIME type checking is enabled. @ http://localhost:3333/:0
+[ 2425532ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3333/_next/static/chunks/0p2h_react-dom_0vsf22y._.js:15305
+[ 2425638ms] Error: ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+    at <unknown> (Error: ./apps/web/app/(marketing)/page.tsx:3:1)
+    at Object.getCompilationErrors (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1189:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\dev\next-dev-server.js:719:42)
+    at DevServer.findPageComponents (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\dev\next-dev-server.js:689:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\base-server.js:1745:26)
+[ 2425626ms] [LOG] [HMR] connected @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1226
+[ 2425633ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1945
+[ 2425685ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1945
+[ 2426713ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1945
+[ 2426768ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1226
+[ 2451126ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1226
+[ 2451385ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1945
+[ 2451516ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1945
+[ 2451556ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3333/:0
+[ 2451613ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3333/_next/static/chunks/0p2h_react-dom_0vsf22y._.js:15305
+[ 2451626ms] Error: ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+    at <unknown> (Error: ./apps/web/app/(marketing)/page.tsx:3:1)
+    at Object.getCompilationErrors (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1189:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\dev\next-dev-server.js:719:42)
+    at DevServer.findPageComponents (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\dev\next-dev-server.js:689:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\Thomas\Documents\CLAUDE\Kyrra\node_modules\.pnpm\next@16.2.0_@playwright+tes_ff29980dcc00cf33a34a7f118429694d\node_modules\next\dist\server\base-server.js:1745:26)
+[ 2451632ms] [LOG] [HMR] connected @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1226
+[ 2451644ms] [ERROR] Refused to execute script from 'http://localhost:3333/_next/static/development/_clientMiddlewareManifest.js' because its MIME type ('application/json') is not executable, and strict MIME type checking is enabled. @ http://localhost:3333/:0
+[ 2451666ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1945
+[ 2451715ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1945
+[ 2451795ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1945
+[ 2451845ms] [ERROR] ./apps/web/app/(marketing)/page.tsx:3:1
+Export StatsSection doesn't exist in target module
+  1 | import type { Metadata } from 'next'
+  2 | import { HeroSection } from '@/components/marketing/HeroSection'
+> 3 | import { StatsSection } from '@/components/marketing/StatsSection'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { HowItWorks } from '@/components/marketing/HowItWorks'
+  5 | import { SecuritySection } from '@/components/marketing/SecuritySection'
+  6 | import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
+
+The export StatsSection was not found in module [project]/apps/web/components/marketing/StatsSection.tsx [app-rsc] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1945
+[ 2451913ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1226
+[ 2464102ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1226
+[ 2464311ms] [LOG] [Fast Refresh] done in 308ms @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1226
+[ 2464487ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1226
+[ 2464846ms] [LOG] [Fast Refresh] done in 466ms @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_13e1snx._.js:1226
+[ 2465078ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2465159ms] [LOG] [HMR] connected @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431
+[ 2465170ms] [WARNING] %c%s%c ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3333". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase background: #e6e6e6;background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.25));color: #000000;color: light-dark(#000000, #ffffff);border-radius: 2px  Server   @ http://localhost:3333/_next/static/chunks/0dkq_next_dist_11_x3u_._.js:2431

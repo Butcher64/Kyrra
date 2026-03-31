@@ -1,0 +1,305 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "Kyrra." [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link "Solutions" [ref=e6] [cursor=pointer]:
+          - /url: "#features"
+        - link "Sécurité" [ref=e7] [cursor=pointer]:
+          - /url: "#security"
+        - link "Tarifs" [ref=e8] [cursor=pointer]:
+          - /url: "#pricing"
+        - link "Comment ça marche" [ref=e9] [cursor=pointer]:
+          - /url: "#how-it-works"
+      - generic [ref=e10]:
+        - link "Connexion" [ref=e11] [cursor=pointer]:
+          - /url: /login
+        - link "Démonstration" [ref=e12] [cursor=pointer]:
+          - /url: /login
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]: Pare-feu cognitif IA
+      - heading "Faites taire le bruit. Gardez l'essentiel." [level=1] [ref=e17]:
+        - generic [ref=e18]: Faites taire le bruit.
+        - generic [ref=e19]: Gardez l'essentiel.
+      - paragraph [ref=e20]: Kyrra filtre les emails de prospection par IA. Votre boîte ne garde que ce qui compte. Classification intelligente, zéro données stockées.
+      - generic [ref=e21]:
+        - link "Commencer l'essai gratuit" [ref=e23] [cursor=pointer]:
+          - /url: /login
+        - link "Voir comment ça marche" [ref=e24] [cursor=pointer]:
+          - /url: "#how-it-works"
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - generic [ref=e29]: 0+
+          - text: dirigeants
+        - generic [ref=e30]: Utilisent Kyrra au quotidien
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]: 0.0%
+          - text: précision
+        - generic [ref=e34]: De filtrage IA certifié
+      - generic [ref=e35]:
+        - generic [ref=e36]: 0 faux positifs
+        - generic [ref=e37]: Garanti par nos algorithmes
+    - generic [ref=e38]:
+      - heading "Le coût caché du bruit numérique." [level=2] [ref=e40]
+      - generic [ref=e42]:
+        - generic [ref=e44]:
+          - img [ref=e46]
+          - heading "Fatigue Décisionnelle" [level=3] [ref=e51]
+          - paragraph [ref=e52]: 18 à 22 emails de prospection par jour saturent votre attention de dirigeant.
+        - generic [ref=e54]:
+          - img [ref=e56]
+          - heading "Temps Perdu" [level=3] [ref=e60]
+          - paragraph [ref=e61]: 2,5h/jour perdues à trier prospection, spam et emails légitimes.
+        - generic [ref=e63]:
+          - img [ref=e65]
+          - heading "Risque Critique" [level=3] [ref=e67]
+          - paragraph [ref=e68]: Un email client critique noyé dans 50 sollicitations = contrat perdu.
+    - generic [ref=e70]:
+      - generic [ref=e71]:
+        - heading "Une intégration, trois étapes." [level=2] [ref=e72]
+        - paragraph [ref=e73]: Simplicité. Puissance. Souveraineté.
+      - generic [ref=e74]:
+        - generic [ref=e77]:
+          - generic [ref=e78]: "1"
+          - heading "Connectez Gmail" [level=4] [ref=e79]
+          - paragraph [ref=e80]: OAuth en 1 clic, scan automatique de vos 6 derniers mois d'envois.
+        - generic [ref=e82]:
+          - generic [ref=e83]: "2"
+          - heading "Kyrra classe" [level=4] [ref=e84]
+          - paragraph [ref=e85]: "Dual-engine IA : fingerprint rapide + LLM pour les cas ambigus, en moins de 2 minutes."
+        - generic [ref=e87]:
+          - generic [ref=e88]: "3"
+          - heading "3 labels Gmail" [level=4] [ref=e89]
+          - paragraph [ref=e90]: À voir, Filtré, Bloqué. Plus un Recap quotidien par email chaque matin.
+    - generic [ref=e91]:
+      - generic [ref=e93]:
+        - generic [ref=e94]: Technologie Exclusive
+        - heading "Le filtrage sémantique nouvelle génération." [level=2] [ref=e95]
+        - list [ref=e96]:
+          - listitem [ref=e97]:
+            - generic [ref=e99]:
+              - heading "Analyse Contextuelle IA" [level=5] [ref=e100]
+              - paragraph [ref=e101]: Comprend le sens profond des messages, pas seulement les mots-clés.
+          - listitem [ref=e102]:
+            - generic [ref=e104]:
+              - heading "Priorisation Dynamique" [level=5] [ref=e105]
+              - paragraph [ref=e106]: Adapte le niveau de filtrage selon l'urgence de vos dossiers actuels.
+          - listitem [ref=e107]:
+            - generic [ref=e109]:
+              - heading "Interface Zéro-Bruit" [level=5] [ref=e110]
+              - paragraph [ref=e111]: Un tableau de bord épuré conçu pour la concentration profonde.
+      - generic [ref=e115]:
+        - generic [ref=e121]: KYRRA_CLASSIFIER_V4.0
+        - generic [ref=e122]:
+          - generic [ref=e123]:
+            - generic [ref=e124]:
+              - generic [ref=e125]: À voir
+              - generic [ref=e126]: À l'instant
+            - generic [ref=e127]: "Rapport de fusion trimestriel : Action requise avant 18h."
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - generic [ref=e130]: Filtré
+              - generic [ref=e131]: Il y a 5 min
+            - generic [ref=e132]: Mise à jour hebdomadaire de la newsletter interne...
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - generic [ref=e135]: Bloqué
+              - generic [ref=e136]: Il y a 12 min
+            - generic [ref=e137]: Promotion exceptionnelle sur les fournitures...
+    - generic [ref=e139]:
+      - heading "La sécurité au cœur de notre architecture." [level=2] [ref=e140]
+      - generic [ref=e141]:
+        - generic [ref=e143]:
+          - img [ref=e144]
+          - heading "Chiffrement de bout en bout" [level=4] [ref=e147]
+          - paragraph [ref=e148]: Vos données ne sont jamais lues par des humains.
+        - generic [ref=e150]:
+          - img [ref=e151]
+          - heading "Hébergement Souverain" [level=4] [ref=e154]
+          - paragraph [ref=e155]: Données stockées exclusivement sur serveurs européens.
+        - generic [ref=e157]:
+          - img [ref=e158]
+          - heading "Contrôle Total" [level=4] [ref=e161]
+          - paragraph [ref=e162]: Audit de sécurité régulier et transparence algorithmique.
+      - generic [ref=e163]:
+        - generic [ref=e164]: RGPD Conforme
+        - generic [ref=e165]: Hébergement EU
+        - generic [ref=e166]: Zéro Data Retention
+    - generic [ref=e168]:
+      - generic [ref=e169]:
+        - generic [ref=e170]: "0"
+        - generic [ref=e171]: Emails filtrés par semaine en moyenne
+      - generic [ref=e172]:
+        - generic [ref=e174]: 0 min
+        - generic [ref=e175]: Gagnées par jour par dirigeant
+      - generic [ref=e176]:
+        - generic [ref=e178]: <0 min
+        - generic [ref=e179]: Setup complet avec Gmail
+    - generic [ref=e181]:
+      - generic [ref=e182]:
+        - generic [ref=e183]: Témoignages
+        - heading "Ils nous font confiance" [level=2] [ref=e184]
+      - generic [ref=e185]:
+        - blockquote [ref=e186]:
+          - paragraph [ref=e187]: "\"Kyrra m'a fait gagner 45 minutes par jour. Je ne vois plus que les emails qui comptent.\""
+          - generic [ref=e188]:
+            - generic [ref=e189]: TB
+            - generic [ref=e190]:
+              - paragraph [ref=e191]: Thomas B.
+              - paragraph [ref=e192]: CEO, TechStartup
+        - button "Précédent" [ref=e193] [cursor=pointer]:
+          - img [ref=e194]
+        - button "Suivant" [ref=e196] [cursor=pointer]:
+          - img [ref=e197]
+      - generic [ref=e199]:
+        - button "Témoignage 1" [ref=e200] [cursor=pointer]
+        - button "Témoignage 2" [ref=e201] [cursor=pointer]
+        - button "Témoignage 3" [ref=e202] [cursor=pointer]
+        - button "Témoignage 4" [ref=e203] [cursor=pointer]
+    - generic [ref=e204]:
+      - generic [ref=e205]:
+        - heading "Un investissement pour votre esprit." [level=2] [ref=e206]
+        - generic [ref=e207]:
+          - generic [ref=e208]: Mensuel
+          - button "Toggle billing period" [ref=e209] [cursor=pointer]
+          - generic [ref=e211]: Annuel (-20%)
+      - generic [ref=e212]:
+        - generic [ref=e213]:
+          - generic [ref=e214]:
+            - heading "Gratuit" [level=4] [ref=e215]
+            - generic [ref=e217]: Gratuit
+          - list [ref=e218]:
+            - listitem [ref=e219]:
+              - img [ref=e220]
+              - text: 30 emails/jour
+            - listitem [ref=e223]:
+              - img [ref=e224]
+              - text: Classification de base
+            - listitem [ref=e227]:
+              - img [ref=e228]
+              - text: 1 compte Gmail
+            - listitem [ref=e231]:
+              - img [ref=e232]
+              - text: Dashboard simple
+          - link "Commencer gratuitement" [ref=e235] [cursor=pointer]:
+            - /url: /login
+        - generic [ref=e236]:
+          - generic [ref=e237]: Recommandé
+          - generic [ref=e238]:
+            - heading "Pro" [level=4] [ref=e239]
+            - generic [ref=e241]: 12€/mois
+          - list [ref=e242]:
+            - listitem [ref=e243]:
+              - img [ref=e244]
+              - text: Emails illimités
+            - listitem [ref=e247]:
+              - img [ref=e248]
+              - text: Kyrra Recap quotidien
+            - listitem [ref=e251]:
+              - img [ref=e252]
+              - text: Scores de confiance
+            - listitem [ref=e255]:
+              - img [ref=e256]
+              - text: Résumé 1 ligne par email
+            - listitem [ref=e259]:
+              - img [ref=e260]
+              - text: 3 modes d'exposition
+          - link "Essai gratuit 14 jours" [ref=e263] [cursor=pointer]:
+            - /url: /login
+        - generic [ref=e264]:
+          - generic [ref=e265]:
+            - heading "Team" [level=4] [ref=e266]
+            - generic [ref=e268]: 15€/mois
+          - list [ref=e269]:
+            - listitem [ref=e270]:
+              - img [ref=e271]
+              - text: Tout Pro inclus
+            - listitem [ref=e274]:
+              - img [ref=e275]
+              - text: Multi-utilisateurs
+            - listitem [ref=e278]:
+              - img [ref=e279]
+              - text: Tableau admin équipe
+            - listitem [ref=e282]:
+              - img [ref=e283]
+              - text: Whitelist partagée
+            - listitem [ref=e286]:
+              - img [ref=e287]
+              - text: Support prioritaire (SLA 4h)
+          - link "Essai gratuit 14 jours" [ref=e290] [cursor=pointer]:
+            - /url: /login
+    - generic [ref=e292]:
+      - heading "Redécouvrez le plaisir d'un travail ininterrompu." [level=2] [ref=e294]
+      - generic [ref=e296]:
+        - generic [ref=e297]:
+          - generic [ref=e298]: TB
+          - generic [ref=e299]: ML
+          - generic [ref=e300]: PD
+        - paragraph [ref=e301]: Rejoignez 2,000+ innovateurs
+      - link "Essai Gratuit de 14 jours" [ref=e304] [cursor=pointer]:
+        - /url: /login
+      - paragraph [ref=e305]: Aucune carte de crédit requise • Annulation à tout moment
+  - contentinfo [ref=e306]:
+    - generic [ref=e307]:
+      - generic [ref=e308]:
+        - generic [ref=e309]: Kyrra.
+        - paragraph [ref=e310]: La plateforme de filtrage intelligent pour une souveraineté numérique retrouvée.
+        - generic [ref=e311]:
+          - link "Partager" [ref=e312] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e313]
+          - link "Email" [ref=e319] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e320]
+      - generic [ref=e323]:
+        - heading "Produit" [level=5] [ref=e324]
+        - list [ref=e325]:
+          - listitem [ref=e326]:
+            - link "Fonctionnalités" [ref=e327] [cursor=pointer]:
+              - /url: "#features"
+          - listitem [ref=e328]:
+            - link "Intégrations" [ref=e329] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e330]:
+            - link "Sécurité" [ref=e331] [cursor=pointer]:
+              - /url: "#security"
+          - listitem [ref=e332]:
+            - link "Roadmap" [ref=e333] [cursor=pointer]:
+              - /url: "#"
+      - generic [ref=e334]:
+        - heading "Ressources" [level=5] [ref=e335]
+        - list [ref=e336]:
+          - listitem [ref=e337]:
+            - link "Blog" [ref=e338] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e339]:
+            - link "Centre d'aide" [ref=e340] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e341]:
+            - link "API Docs" [ref=e342] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e343]:
+            - link "Statut Système" [ref=e344] [cursor=pointer]:
+              - /url: "#"
+      - generic [ref=e345]:
+        - heading "Légal" [level=5] [ref=e346]
+        - list [ref=e347]:
+          - listitem [ref=e348]:
+            - link "Confidentialité" [ref=e349] [cursor=pointer]:
+              - /url: /legal/privacy
+          - listitem [ref=e350]:
+            - link "CGU" [ref=e351] [cursor=pointer]:
+              - /url: /legal/cgu
+          - listitem [ref=e352]:
+            - link "Cookies" [ref=e353] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e354]:
+            - link "Mentions Légales" [ref=e355] [cursor=pointer]:
+              - /url: "#"
+    - generic [ref=e356]:
+      - paragraph [ref=e357]: © 2026 Kyrra AI. Souveraineté Numérique.
+      - generic [ref=e360]: Systèmes Opérationnels

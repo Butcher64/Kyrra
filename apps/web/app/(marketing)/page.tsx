@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
 import { HeroSection } from '@/components/marketing/HeroSection'
-import { StatsSection } from '@/components/marketing/StatsSection'
 import { HowItWorks } from '@/components/marketing/HowItWorks'
-import { SecuritySection } from '@/components/marketing/SecuritySection'
-import { TestimonialsSection } from '@/components/marketing/TestimonialsSection'
 import { PricingSection } from '@/components/marketing/PricingSection'
 import { CTASection } from '@/components/marketing/CTASection'
 
@@ -32,10 +29,7 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <StatsSection />
       <HowItWorks />
-      <SecuritySection />
-      <TestimonialsSection />
       <PricingSection />
       <CTASection />
     </>
