@@ -1,323 +1,140 @@
-import { Mail, ShieldCheck, Zap, ShieldAlert, ArrowRight, Bell, Search } from 'lucide-react'
+import { Mail, Clock, Filter, ArrowUpRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { StatCard } from '@/components/dashboard/StatCard'
-import { HelpKyrraLearnBanner } from '@/components/dashboard/HelpKyrraLearnBanner.client'
+
+const classificationStyles = {
+  A_VOIR: { label: 'À voir', bg: 'bg-[var(--color-a-voir)]/10', text: 'text-[var(--color-a-voir)]', border: 'border-[var(--color-a-voir)]/20' },
+  FILTRE: { label: 'Filtré', bg: 'bg-[var(--color-filtre)]/10', text: 'text-[var(--color-filtre)]', border: 'border-[var(--color-filtre)]/20' },
+  BLOQUE: { label: 'Bloqué', bg: 'bg-[var(--color-bloque)]/10', text: 'text-[var(--color-bloque)]', border: 'border-[var(--color-bloque)]/20' },
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "À l'instant"
+  if (mins < 60) return `Il y a ${mins} min`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `Il y a ${hours}h`
+  return `Il y a ${Math.floor(hours / 24)}j`
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    console.error('[DASHBOARD] No user found')
-    return <div className="p-12 text-center text-slate-400">Session expirée. <a href="/login" className="text-blue-400 underline">Reconnexion</a></div>
+    return <div className="p-12 text-center text-slate-400">Session expirée. <a href="/login" className="text-[var(--color-accent-cyan)] underline">Reconnexion</a></div>
   }
 
-  // All queries wrapped in try/catch — any failure shows fallback, not crash
   let filteredToday = 0
-  let alerts: Array<{ gmail_message_id: string; summary: string | null; confidence_score: number | null; created_at: string }> = []
-  let health: { mode: string } | null = null
-  let settings: { exposure_mode: string } | null = null
-  let labelSignalCount = 0
-  let firstSignalMessageId: string | null = null
-  let total7d = 0
-  let reclass7d = 0
+  let blockedToday = 0
+  let recentEmails: Array<{ gmail_message_id: string; classification_result: string; summary: string | null; created_at: string }> = []
 
   try {
     const today = new Date().toISOString().split('T')[0]
 
-    const [classRes, alertsRes, healthRes, settingsRes, total7dRes, reclass7dRes, signalsRes] = await Promise.all([
+    const [countRes, blockedRes, recentRes] = await Promise.all([
       supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', `${today}T00:00:00Z`),
-      supabase.from('email_classifications').select('gmail_message_id, summary, confidence_score, created_at').eq('user_id', user.id).eq('classification_result', 'A_VOIR').gte('created_at', `${today}T00:00:00Z`).order('created_at', { ascending: false }).limit(10),
-      supabase.from('user_pipeline_health').select('mode').eq('user_id', user.id).maybeSingle(),
-      supabase.from('user_settings').select('exposure_mode').eq('user_id', user.id).maybeSingle(),
-      supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', new Date(Date.now() - 7 * 86_400_000).toISOString()),
-      supabase.from('classification_feedback').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', new Date(Date.now() - 7 * 86_400_000).toISOString()),
-      supabase.from('label_change_signals').select('gmail_message_id').eq('user_id', user.id).eq('acknowledged', false).order('detected_at', { ascending: false }).limit(1),
+      supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('classification_result', 'BLOQUE').gte('created_at', `${today}T00:00:00Z`),
+      supabase.from('email_classifications').select('gmail_message_id, classification_result, summary, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
     ])
 
-    filteredToday = classRes.count ?? 0
-    alerts = (alertsRes.data ?? []) as typeof alerts
-    health = healthRes.data
-    settings = settingsRes.data
-    total7d = total7dRes.count ?? 0
-    reclass7d = reclass7dRes.count ?? 0
-    labelSignalCount = signalsRes.data?.length ?? 0
-    firstSignalMessageId = signalsRes.data?.[0]?.gmail_message_id ?? null
+    filteredToday = countRes.count ?? 0
+    blockedToday = blockedRes.count ?? 0
+    recentEmails = (recentRes.data ?? []) as typeof recentEmails
 
-    console.log('[DASHBOARD] Data loaded', { filteredToday, alertCount: alerts.length, health: health?.mode, settings: settings?.exposure_mode })
+    console.log('[DASHBOARD] Data loaded', { filteredToday, blockedToday, recentCount: recentEmails.length })
   } catch (error) {
     console.error('[DASHBOARD] Failed to load data:', error)
   }
-  const trustScore = total7d > 0
-    ? `${Math.round((1 - reclass7d / total7d) * 100)}%`
-    : '99.9%'
 
-  const exposureMode = settings?.exposure_mode ?? 'normal'
-  const modeLabel = exposureMode === 'strict' ? 'Strict'
-    : exposureMode === 'permissive' ? 'Permissif'
-    : 'Furtif'
-
-  const alertCount = alerts?.length ?? 0
-  const filtered = filteredToday ?? 0
-  const isPaused = health?.mode === 'paused'
-
-  const todayFormatted = new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date()).toUpperCase()
-
-  function getConfidenceColor(score: number | null | undefined) {
-    if (!score) return { bar: 'bg-slate-500', text: 'text-slate-400', width: '50%' }
-    if (score >= 0.8) return { bar: 'bg-cyan-400', text: 'text-cyan-400', width: `${Math.round(score * 100)}%` }
-    if (score >= 0.5) return { bar: 'bg-[var(--color-attention)]/60', text: 'text-[var(--color-attention)]/60', width: `${Math.round(score * 100)}%` }
-    return { bar: 'bg-red-400', text: 'text-[var(--destructive)]', width: `${Math.round(score * 100)}%` }
-  }
-
-  function formatTime(dateStr: string) {
-    return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(dateStr))
-  }
+  const timeSaved = Math.round(filteredToday * 0.75)
+  const firstName = user.user_metadata?.full_name?.split(' ')[0] ?? user.email?.split('@')[0] ?? 'vous'
 
   return (
     <>
-      {/* Page header */}
-      <header className="h-[120px] flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-3xl font-headline font-semibold tracking-tight text-slate-100">
-            Tableau de bord
-          </h2>
-          <div className="flex items-center gap-4">
-            <p className="text-xs font-label text-slate-500 tracking-wider">{todayFormatted}</p>
-            <span className="w-1 h-1 rounded-full bg-slate-600" />
-            <div className="flex items-center gap-1.5">
-              <span className="flex h-2 w-2 relative">
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isPaused ? 'bg-[var(--color-attention)]' : 'bg-[var(--color-accent-cyan)]'}`} />
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${isPaused ? 'bg-[var(--color-attention)]' : 'bg-[var(--color-accent-cyan)]'}`} />
-              </span>
-              <span className={`text-[10px] font-label tracking-[0.1em] uppercase ${isPaused ? 'text-[var(--color-attention)]' : 'text-[var(--color-accent-cyan)]'}`}>
-                Statut : {isPaused ? 'Pausé' : 'Protégé'}
-              </span>
+      <div className="mb-10">
+        <h1 className="text-2xl font-headline font-semibold text-slate-100 tracking-tight">
+          Bonjour, {firstName}
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Voici le résumé de votre boîte mail aujourd&apos;hui.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-[var(--color-accent-cyan)]/10">
+              <Filter size={18} className="text-[var(--color-accent-cyan)]" strokeWidth={1.5} />
             </div>
+            <span className="text-xs font-label text-slate-500 uppercase tracking-wider">Triés aujourd&apos;hui</span>
           </div>
+          <p className="text-3xl font-headline font-bold text-slate-100">{filteredToday}</p>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="h-10 px-4 glass rounded-lg flex items-center gap-3">
-            <Search size={16} className="text-[var(--color-accent-start)]/70" strokeWidth={1.5} />
-            <input
-              className="bg-transparent border-none text-xs focus:ring-0 placeholder:text-slate-600 w-48 font-body outline-none text-slate-200"
-              placeholder="Rechercher un email..."
-              type="text"
-              readOnly
-            />
-          </div>
-          <button className="h-10 w-10 glass rounded-lg flex items-center justify-center text-slate-500 hover:text-[var(--color-accent-start)] transition-colors">
-            <Bell size={18} strokeWidth={1.5} />
-          </button>
-        </div>
-      </header>
-
-      {/* Learn banner */}
-      <HelpKyrraLearnBanner signalCount={labelSignalCount} gmailMessageId={firstSignalMessageId} />
-
-      {/* Stats grid */}
-      <section className="grid grid-cols-4 gap-6 mb-12">
-        <StatCard
-          icon={Mail}
-          value={alertCount}
-          label="EN ATTENTE"
-          sublabel="À voir ce matin"
-          accent="attention"
-        />
-        <StatCard
-          icon={ShieldAlert}
-          value={filtered.toLocaleString('fr-FR')}
-          label="CE MOIS"
-          sublabel="Menaces filtrées"
-          accent="cyan"
-        />
-        <StatCard
-          icon={Zap}
-          value={modeLabel}
-          label="ACTIF"
-          sublabel="Mode de filtrage IA"
-          accent="brand"
-        />
-        <StatCard
-          icon={ShieldCheck}
-          value={trustScore}
-          label="RÉSEAU"
-          sublabel="Score de confiance"
-          accent="protected"
-        />
-      </section>
-
-      {/* Main content: alerts table + right panel */}
-      <section className="grid grid-cols-12 gap-8">
-        {/* Alerts table — col-span-8 */}
-        <div className="col-span-8">
-          <div className="glass rounded-2xl overflow-hidden border border-white/5">
-            <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center">
-              <h4 className="text-sm font-headline font-semibold text-slate-200 uppercase tracking-widest">
-                Alertes de Sécurité
-              </h4>
-              <div className="flex gap-2">
-                <span className="px-2 py-1 rounded bg-white/5 text-[10px] font-label text-slate-400 cursor-pointer hover:bg-white/10 transition-colors">
-                  FILTRER
-                </span>
-                <span className="px-2 py-1 rounded bg-white/5 text-[10px] font-label text-slate-400 cursor-pointer hover:bg-white/10 transition-colors">
-                  EXPORTER
-                </span>
-              </div>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-[var(--color-bloque)]/10">
+              <Mail size={18} className="text-[var(--color-bloque)]" strokeWidth={1.5} />
             </div>
-
-            {alerts && alerts.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-white/[0.03]">
-                      <th className="px-8 py-4 text-[10px] font-label text-slate-500 uppercase tracking-widest">
-                        Expéditeur
-                      </th>
-                      <th className="px-6 py-4 text-[10px] font-label text-slate-500 uppercase tracking-widest">
-                        Confiance IA
-                      </th>
-                      <th className="px-6 py-4 text-[10px] font-label text-slate-500 uppercase tracking-widest">
-                        Temps
-                      </th>
-                      <th className="px-8 py-4 text-right" />
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/[0.03]">
-                    {alerts.map((alert) => {
-                      const confidence = getConfidenceColor(alert.confidence_score)
-                      const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${alert.gmail_message_id}`
-                      const score = alert.confidence_score
-                        ? `${Math.round(alert.confidence_score * 100)}%`
-                        : '—'
-
-                      return (
-                        <tr key={alert.gmail_message_id} className="hover:bg-white/[0.02] transition-colors group">
-                          <td className="px-8 py-5">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-[var(--destructive)]/10 flex items-center justify-center text-[var(--destructive)] shrink-0">
-                                <Mail size={16} strokeWidth={1.5} />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-slate-200 truncate max-w-[220px]">
-                                  {alert.gmail_message_id.slice(0, 16)}…
-                                </p>
-                                <p className="text-[10px] text-slate-500 truncate max-w-[220px]">
-                                  {alert.summary ?? 'Email nécessitant votre attention'}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-5">
-                            <div className="flex items-center gap-2">
-                              <div className="w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full ${confidence.bar} rounded-full`}
-                                  style={{ width: confidence.width }}
-                                />
-                              </div>
-                              <span className={`text-xs font-label ${confidence.text}`}>{score}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-5">
-                            <span className="text-xs font-label text-slate-500">
-                              {formatTime(alert.created_at)}
-                            </span>
-                          </td>
-                          <td className="px-8 py-5 text-right">
-                            <a
-                              href={gmailLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 group-hover:text-[var(--color-accent-start)] transition-colors ml-auto no-underline"
-                            >
-                              <ArrowRight size={16} strokeWidth={1.5} />
-                            </a>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="py-16 flex flex-col items-center text-center px-8">
-                <ShieldCheck size={32} strokeWidth={1} className="text-[var(--color-accent-cyan)]/30 mb-3" />
-                <p className="text-sm text-slate-500">
-                  Aucune alerte aujourd&apos;hui. Kyrra surveille en temps réel.
-                </p>
-              </div>
-            )}
+            <span className="text-xs font-label text-slate-500 uppercase tracking-wider">Prospection bloquée</span>
           </div>
+          <p className="text-3xl font-headline font-bold text-slate-100">{blockedToday}</p>
         </div>
 
-        {/* Right panel — col-span-4 */}
-        <div className="col-span-4 space-y-6">
-          {/* Surveillance card */}
-          <div className="glass rounded-2xl p-8 flex flex-col items-center justify-center text-center min-h-[360px] relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-accent-start)]/5 to-transparent pointer-events-none" />
-            <div className="w-20 h-20 rounded-full bg-[var(--surface-container)] flex items-center justify-center mb-6 border border-white/5 relative z-10">
-              <ShieldCheck size={32} strokeWidth={1} className="text-[var(--color-accent-start)] animate-pulse" />
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-[var(--color-protected)]/10">
+              <Clock size={18} className="text-[var(--color-protected)]" strokeWidth={1.5} />
             </div>
-            <h5 className="text-base font-headline font-semibold text-slate-100 relative z-10">
-              Kyrra surveille votre boîte
-            </h5>
-            <p className="text-xs text-slate-500 mt-2 max-w-[180px] leading-relaxed relative z-10">
-              Aucune activité suspecte détectée dans les 30 dernières minutes. Le filtrage en temps réel est actif.
-            </p>
-            <a
-              href="https://mail.google.com/mail/u/0/#label/Kyrra"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 px-5 py-2 border border-white/10 rounded-full text-[10px] font-label text-slate-400 hover:border-[var(--color-accent-start)]/40 hover:text-[var(--color-accent-start)] transition-all relative z-10 uppercase tracking-widest no-underline"
-            >
-              Journal des logs
-            </a>
+            <span className="text-xs font-label text-slate-500 uppercase tracking-wider">Temps gagné</span>
           </div>
-
-          {/* AI updates card */}
-          <div className="glass rounded-2xl p-6">
-            <h6 className="text-[10px] font-label text-slate-500 uppercase tracking-widest mb-4">
-              Mises à jour IA
-            </h6>
-            <div className="space-y-4">
-              <div className="flex gap-3 items-start">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent-cyan)] mt-1.5 shrink-0" />
-                <p className="text-[11px] text-slate-300 leading-relaxed">
-                  Nouveaux patterns de prospection identifiés et bloqués automatiquement.
-                </p>
-              </div>
-              <div className="flex gap-3 items-start">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent-start)] mt-1.5 shrink-0" />
-                <p className="text-[11px] text-slate-300 leading-relaxed">
-                  Moteur de classification mis à jour. Précision accrue sur les emails B2B.
-                </p>
-              </div>
-            </div>
-          </div>
+          <p className="text-3xl font-headline font-bold text-slate-100">{timeSaved} <span className="text-base font-normal text-slate-500">min</span></p>
         </div>
-      </section>
+      </div>
 
-      {/* Footer */}
-      <footer className="mt-24 py-12 border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center gap-6">
-            <span className="text-sm font-bold text-slate-400 font-headline uppercase tracking-[0.2em]">KYRRA</span>
-            <p className="text-[10px] font-label text-slate-500">© 2026 Kyrra AI. Souveraineté Numérique.</p>
+      <div>
+        <h2 className="text-sm font-headline font-semibold text-slate-300 uppercase tracking-wider mb-4">
+          Derniers emails triés
+        </h2>
+
+        {recentEmails.length > 0 ? (
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] divide-y divide-[var(--border)]">
+            {recentEmails.map((email) => {
+              const style = classificationStyles[email.classification_result as keyof typeof classificationStyles] ?? classificationStyles.FILTRE
+              const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
+
+              return (
+                <div key={email.gmail_message_id} className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors group">
+                  <span className={`shrink-0 px-2.5 py-1 rounded-md text-[10px] font-label font-medium uppercase tracking-wider border ${style.bg} ${style.text} ${style.border}`}>
+                    {style.label}
+                  </span>
+                  <p className="flex-1 text-sm text-slate-300 truncate min-w-0">
+                    {email.summary ?? 'Email classifié'}
+                  </p>
+                  <span className="shrink-0 text-xs text-slate-500 font-label">
+                    {timeAgo(email.created_at)}
+                  </span>
+                  <a
+                    href={gmailLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 p-1.5 rounded-md text-slate-600 group-hover:text-[var(--color-accent-cyan)] transition-colors no-underline"
+                  >
+                    <ArrowUpRight size={14} strokeWidth={1.5} />
+                  </a>
+                </div>
+              )
+            })}
           </div>
-          <div className="flex gap-8">
-            <a href="/legal/privacy" className="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors no-underline">Confidentialité</a>
-            <a href="/legal/cgu" className="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors no-underline">CGU</a>
-            <a href="mailto:support@kyrra.ai" className="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors no-underline">Contact</a>
-            <a href="#" className="text-[10px] font-label text-slate-600 hover:text-slate-200 transition-colors no-underline">Statut Système</a>
+        ) : (
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] py-16 text-center">
+            <Mail size={28} strokeWidth={1} className="text-slate-600 mx-auto mb-3" />
+            <p className="text-sm text-slate-500">Aucun email trié pour le moment.</p>
+            <p className="text-xs text-slate-600 mt-1">Kyrra trie vos emails en arrière-plan.</p>
           </div>
-        </div>
-      </footer>
+        )}
+      </div>
     </>
   )
 }
