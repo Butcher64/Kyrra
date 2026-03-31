@@ -48,7 +48,8 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
     <>
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/20 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
+          style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
           onClick={onMobileClose}
         />
       )}
@@ -56,37 +57,40 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
       <aside
         className={cn(
           'fixed left-0 top-0 h-full w-[260px] flex flex-col z-50 transition-transform duration-200',
-          'bg-[#0c1a32] bg-noise',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         )}
+        style={{ backgroundColor: '#0c1a32' }}
       >
-        <div className="relative z-10 flex flex-col h-full">
+        <div className="flex flex-col h-full" style={{ position: 'relative', zIndex: 10 }}>
           {/* Logo */}
-          <div className="px-6 pt-6 pb-8">
+          <div style={{ padding: '24px 24px 32px' }}>
             <div className="flex items-center gap-3">
-              <div className="w-[22px] h-[22px] bg-white/[0.12] flex items-center justify-center">
-                <div className="w-[10px] h-[10px] border-[1.5px] border-white/70" />
+              <div
+                className="flex items-center justify-center"
+                style={{ width: 22, height: 22, backgroundColor: 'rgba(255,255,255,0.12)' }}
+              >
+                <div style={{ width: 10, height: 10, border: '1.5px solid rgba(255,255,255,0.7)' }} />
               </div>
-              <span className="text-[15px] font-bold text-white tracking-tighter">
+              <span style={{ fontSize: 15, fontWeight: 700, color: '#ffffff', letterSpacing: '-0.04em' }}>
                 Kyrra
               </span>
             </div>
-            <div className="flex items-center gap-2 mt-2.5 pl-[35px]">
-              <span className="w-[5px] h-[5px] bg-[#2dd881] rounded-full shadow-[0_0_6px_#2dd881]" />
-              <span className="font-mono text-[9px] text-white/50 tracking-wider">
+            <div className="flex items-center gap-2" style={{ marginTop: 10, paddingLeft: 35 }}>
+              <span style={{ width: 5, height: 5, backgroundColor: '#2dd881', borderRadius: '50%', boxShadow: '0 0 6px #2dd881', display: 'inline-block' }} />
+              <span className="font-mono" style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>
                 actif
               </span>
             </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3">
-            <div className="px-3 mb-3">
-              <span className="font-mono text-[8px] uppercase tracking-[0.14em] text-white/40">
+          <nav className="flex-1" style={{ padding: '0 12px' }}>
+            <div style={{ padding: '0 12px', marginBottom: 12 }}>
+              <span className="font-mono" style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.4)' }}>
                 Navigation
               </span>
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col" style={{ gap: 2 }}>
               {navItems.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
                 return (
@@ -94,12 +98,14 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
                     key={item.href}
                     href={item.href}
                     onClick={onMobileClose}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 text-[13px] transition-colors duration-150 no-underline',
-                      isActive
-                        ? 'bg-white/[0.06] text-white'
-                        : 'text-white/50 hover:bg-white/[0.06] hover:text-white/50',
-                    )}
+                    className="flex items-center gap-3 no-underline"
+                    style={{
+                      padding: '10px 12px',
+                      fontSize: 13,
+                      color: isActive ? '#ffffff' : 'rgba(255,255,255,0.5)',
+                      backgroundColor: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+                      transition: 'all 150ms',
+                    }}
                   >
                     <item.icon size={16} strokeWidth={1.5} className="shrink-0" />
                     <span>{item.label}</span>
@@ -110,44 +116,45 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
           </nav>
 
           {/* Pipeline status */}
-          <div className="px-3 border-t border-white/[0.06]">
-            <div className="px-3 pt-4 pb-2">
-              <span className="font-mono text-[8px] uppercase tracking-[0.14em] text-white/40">
+          <div style={{ padding: '0 12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ padding: '16px 12px 8px' }}>
+              <span className="font-mono" style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.4)' }}>
                 Pipeline
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 px-3 pb-4">
+            <div className="flex flex-col" style={{ gap: 6, padding: '0 12px 16px' }}>
               {pipelineRows.map((row) => (
                 <div key={row.label} className="flex items-center gap-2">
-                  <span className="w-[3px] h-[3px] bg-[#2dd881] rounded-full" />
-                  <span className="font-mono text-[10px] text-white/50">{row.label}</span>
-                  <span className="font-mono text-[9px] text-white/40 ml-auto">{row.status}</span>
+                  <span style={{ width: 4, height: 4, backgroundColor: '#2dd881', borderRadius: '50%', display: 'inline-block', flexShrink: 0 }} />
+                  <span className="font-mono" style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{row.label}</span>
+                  <span className="font-mono" style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginLeft: 'auto' }}>{row.status}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* User section */}
-          <div className="px-3 border-t border-white/[0.06]">
-            <div className="flex items-center gap-3 px-3 py-4">
+          <div style={{ padding: '0 12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="flex items-center gap-3" style={{ padding: '16px 12px' }}>
               <Link
                 href="/settings"
-                className="flex items-center gap-3 flex-1 min-w-0 no-underline group"
+                className="flex items-center gap-3 flex-1 min-w-0 no-underline"
               >
-                <div className="w-[28px] h-[28px] bg-white/[0.06] flex items-center justify-center text-[11px] font-medium text-white/50 group-hover:bg-white/[0.1] transition-colors">
+                <div
+                  className="flex items-center justify-center"
+                  style={{ width: 28, height: 28, backgroundColor: 'rgba(255,255,255,0.08)', fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.6)' }}
+                >
                   {userInitial}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] text-white/70 truncate group-hover:text-white/90 transition-colors">{displayName}</p>
-                  <p className="font-mono text-[9px] text-white/50 truncate">{user.email}</p>
+                  <p className="truncate" style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: 0 }}>{displayName}</p>
+                  <p className="font-mono truncate" style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', margin: 0 }}>{user.email}</p>
                 </div>
-                <span className="text-[12px] text-white/40 group-hover:text-white/40 transition-colors shrink-0">
-                  &#9881;
-                </span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>&#9881;</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="p-1.5 text-white/50 hover:text-white/50 transition-colors bg-transparent border-none cursor-pointer"
+                style={{ padding: 6, color: 'rgba(255,255,255,0.4)', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
                 aria-label="Déconnexion"
               >
                 <LogOut size={14} strokeWidth={1.5} />
