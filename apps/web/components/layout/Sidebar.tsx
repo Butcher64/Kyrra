@@ -64,8 +64,8 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
           {/* Logo */}
           <div className="px-6 pt-6 pb-8">
             <div className="flex items-center gap-3">
-              <div className="w-[22px] h-[22px] bg-white/[0.08] flex items-center justify-center">
-                <div className="w-[14px] h-[14px] border border-white/[0.12]" />
+              <div className="w-[22px] h-[22px] bg-white/[0.12] flex items-center justify-center">
+                <div className="w-[10px] h-[10px] border-[1.5px] border-white/70" />
               </div>
               <span className="text-[15px] font-bold text-white tracking-tighter">
                 Kyrra
@@ -73,7 +73,7 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
             </div>
             <div className="flex items-center gap-2 mt-2.5 pl-[35px]">
               <span className="w-[5px] h-[5px] bg-[#2dd881] rounded-full shadow-[0_0_6px_#2dd881]" />
-              <span className="font-mono text-[9px] text-white/30 tracking-wider">
+              <span className="font-mono text-[9px] text-white/50 tracking-wider">
                 actif
               </span>
             </div>
@@ -82,7 +82,7 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
           {/* Navigation */}
           <nav className="flex-1 px-3">
             <div className="px-3 mb-3">
-              <span className="font-mono text-[8px] uppercase tracking-[0.14em] text-white/15">
+              <span className="font-mono text-[8px] uppercase tracking-[0.14em] text-white/40">
                 Navigation
               </span>
             </div>
@@ -98,7 +98,7 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
                       'flex items-center gap-3 px-3 py-2.5 text-[13px] transition-colors duration-150 no-underline',
                       isActive
                         ? 'bg-white/[0.06] text-white'
-                        : 'text-white/30 hover:bg-white/[0.06] hover:text-white/50',
+                        : 'text-white/50 hover:bg-white/[0.06] hover:text-white/50',
                     )}
                   >
                     <item.icon size={16} strokeWidth={1.5} className="shrink-0" />
@@ -112,7 +112,7 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
           {/* Pipeline status */}
           <div className="px-3 border-t border-white/[0.06]">
             <div className="px-3 pt-4 pb-2">
-              <span className="font-mono text-[8px] uppercase tracking-[0.14em] text-white/15">
+              <span className="font-mono text-[8px] uppercase tracking-[0.14em] text-white/40">
                 Pipeline
               </span>
             </div>
@@ -120,8 +120,8 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
               {pipelineRows.map((row) => (
                 <div key={row.label} className="flex items-center gap-2">
                   <span className="w-[3px] h-[3px] bg-[#2dd881] rounded-full" />
-                  <span className="font-mono text-[10px] text-white/25">{row.label}</span>
-                  <span className="font-mono text-[9px] text-white/15 ml-auto">{row.status}</span>
+                  <span className="font-mono text-[10px] text-white/50">{row.label}</span>
+                  <span className="font-mono text-[9px] text-white/40 ml-auto">{row.status}</span>
                 </div>
               ))}
             </div>
@@ -139,15 +139,15 @@ export function Sidebar({ user, pipelineStatus, mobileOpen, onMobileClose }: Sid
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] text-white/70 truncate group-hover:text-white/90 transition-colors">{displayName}</p>
-                  <p className="font-mono text-[9px] text-white/25 truncate">{user.email}</p>
+                  <p className="font-mono text-[9px] text-white/50 truncate">{user.email}</p>
                 </div>
-                <span className="text-[12px] text-white/20 group-hover:text-white/40 transition-colors shrink-0">
+                <span className="text-[12px] text-white/40 group-hover:text-white/40 transition-colors shrink-0">
                   &#9881;
                 </span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="p-1.5 text-white/25 hover:text-white/50 transition-colors bg-transparent border-none cursor-pointer"
+                className="p-1.5 text-white/50 hover:text-white/50 transition-colors bg-transparent border-none cursor-pointer"
                 aria-label="Déconnexion"
               >
                 <LogOut size={14} strokeWidth={1.5} />
