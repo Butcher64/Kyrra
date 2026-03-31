@@ -11,6 +11,7 @@ const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const GMAIL_SCOPES = [
   'https://www.googleapis.com/auth/gmail.modify',
   'https://www.googleapis.com/auth/gmail.readonly',
+  'https://www.googleapis.com/auth/userinfo.email',
 ].join(' ')
 
 function getPublicOrigin(request: Request): string {
@@ -94,11 +95,34 @@ export async function GET(request: Request) {
 
     const tokens = await tokenResponse.json()
 
-    // Get the Gmail email address for this token
+    // Get the Gmail email address — try userinfo API, fallback to Gmail profile, then Supabase user
+    let gmailEmail: string | null = null
+
     const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${tokens.access_token}` },
     })
-    const userInfo = await userInfoResponse.json()
+    if (userInfoResponse.ok) {
+      const userInfo = await userInfoResponse.json()
+      gmailEmail = userInfo.email ?? null
+    }
+
+    if (!gmailEmail) {
+      // Fallback: get email from Gmail API profile
+      const profileResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile', {
+        headers: { Authorization: `Bearer ${tokens.access_token}` },
+      })
+      if (profileResponse.ok) {
+        const profile = await profileResponse.json()
+        gmailEmail = profile.emailAddress ?? null
+      }
+    }
+
+    // Last fallback: use Supabase auth email
+    if (!gmailEmail) {
+      gmailEmail = user.email ?? 'unknown@gmail.com'
+    }
+
+    console.log('[AUTH GMAIL] Resolved email:', gmailEmail)
 
     // Store tokens encrypted (AES-256-GCM) in user_integrations
     const { error: insertError } = await supabase
@@ -106,7 +130,7 @@ export async function GET(request: Request) {
       .upsert({
         user_id: user.id,
         provider: 'gmail',
-        email: userInfo.email,
+        email: gmailEmail,
         access_token: encrypt(tokens.access_token),
         refresh_token: encrypt(tokens.refresh_token),
         expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
@@ -122,7 +146,7 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/connect-gmail?error=storage_failed`)
     }
 
-    console.log('[AUTH GMAIL] Tokens stored, integration active for:', userInfo.email)
+    console.log('[AUTH GMAIL] Tokens stored, integration active for:', gmailEmail)
 
     // Initialize pipeline health for this user
     await supabase
