@@ -21,11 +21,11 @@ export function ClassificationCard({ summary, gmailMessageId, confidenceScore }:
       <Badge variant="a-voir" className="shrink-0">
         À voir
       </Badge>
-      <span className="text-[13px] text-(--card-foreground) flex-1 truncate">
+      <span className="text-[13px] font-mono text-(--card-foreground) flex-1 truncate">
         {summary}
       </span>
       {confidenceScore !== undefined && confidenceScore < 0.75 && (
-        <span className="text-[11px] text-(--muted-foreground) shrink-0">
+        <span className="text-[11px] font-mono text-(--muted-foreground) shrink-0">
           {Math.round(confidenceScore * 100)}%
         </span>
       )}

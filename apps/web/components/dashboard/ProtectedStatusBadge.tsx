@@ -34,7 +34,7 @@ export function ProtectedStatusBadge({ status, alertCount }: ProtectedStatusBadg
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={transitions.fast}
-        className="flex items-center gap-2 text-[13px] text-(--muted-foreground)"
+        className="flex items-center gap-2 text-[13px] font-mono text-(--muted-foreground) border border-(--border) px-3 py-1.5"
       >
         <span
           className={cn('size-[7px] rounded-full shrink-0', config.dotClass)}

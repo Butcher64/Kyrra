@@ -63,7 +63,7 @@ export function DeleteAccountDialog() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={transitions.normal}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm bg-(--card) rounded-xl border border-(--border) shadow-lg p-6"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm bg-(--card) border border-(--border) p-6"
             >
               <h2 className="text-sm font-semibold text-(--foreground)">
                 Supprimer votre compte
@@ -87,7 +87,7 @@ export function DeleteAccountDialog() {
                   onChange={(e) => setConfirmText(e.target.value)}
                   disabled={isPending}
                   autoComplete="off"
-                  className="w-full rounded-md border border-(--border) bg-transparent px-3 py-2 text-[13px] text-(--foreground) outline-none focus:border-red-400 transition-colors"
+                  className="w-full border border-(--border) bg-transparent px-3 py-2 text-[13px] font-mono text-(--foreground) outline-none focus:border-red-400 transition-colors"
                 />
               </div>
 
@@ -95,14 +95,14 @@ export function DeleteAccountDialog() {
                 <button
                   onClick={() => { setOpen(false); setConfirmText('') }}
                   disabled={isPending}
-                  className="rounded-md px-3 py-1.5 text-[12px] font-medium text-(--muted-foreground) bg-transparent border border-(--border) cursor-pointer transition-colors hover:bg-(--muted)"
+                  className="px-3 py-1.5 text-[12px] font-mono font-medium text-(--muted-foreground) bg-transparent border border-(--border) cursor-pointer transition-colors hover:bg-(--muted)"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={!canConfirm || isPending}
-                  className="rounded-md px-3 py-1.5 text-[12px] font-medium text-white bg-red-600 border-none cursor-pointer transition-colors hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 text-[12px] font-mono font-medium text-white bg-red-600 border-none cursor-pointer transition-colors hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isPending ? 'Suppression...' : 'Supprimer définitivement'}
                 </button>

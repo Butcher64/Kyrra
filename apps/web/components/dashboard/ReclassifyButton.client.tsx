@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { reclassifyEmail } from '@/app/(dashboard)/actions/classification'
 import { addToWhitelist } from '@/app/(dashboard)/actions/whitelist'
@@ -87,14 +86,12 @@ export function ReclassifyButton({ gmailMessageId, senderEmail, onReclassified }
             exit={{ opacity: 0, scale: 0.95 }}
             transition={transitions.fast}
           >
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
               onClick={handleReclassify}
-              className="text-[11px] text-(--muted-foreground)"
+              className="px-3 py-1.5 text-[11px] font-mono bg-[#0c1a32] text-white border-none cursor-pointer transition-colors duration-150 hover:bg-[#162a4a]"
             >
               Ce n&apos;est pas de la prospection
-            </Button>
+            </button>
           </motion.div>
         )}
 
@@ -104,12 +101,12 @@ export function ReclassifyButton({ gmailMessageId, senderEmail, onReclassified }
             initial={{ scale: 0.95 }}
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 0.15 }}
-            className="h-8 px-3 flex items-center text-[11px] font-medium text-[var(--color-protected)]"
+            className="h-8 px-3 flex items-center text-[11px] font-mono font-medium text-[var(--color-protected)]"
           >
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="inline-block size-2 rounded-full bg-[var(--color-protected)] mr-1.5"
+              className="inline-block size-2 bg-[var(--color-protected)] mr-1.5"
             />
           </motion.div>
         )}
@@ -120,7 +117,7 @@ export function ReclassifyButton({ gmailMessageId, senderEmail, onReclassified }
             initial={{ opacity: 0, y: 2 }}
             animate={{ opacity: 1, y: 0 }}
             transition={transitions.fast}
-            className="h-8 px-3 flex items-center text-[11px] font-medium text-[var(--color-protected)]"
+            className="h-8 px-3 flex items-center text-[11px] font-mono font-medium text-[var(--color-protected)]"
           >
             &#x2713; Compris
           </motion.div>

@@ -19,7 +19,7 @@ export function DegradedModeBanner({ visible }: DegradedModeBannerProps) {
           transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
           className="overflow-hidden"
         >
-          <div className="py-3 px-5 bg-[oklch(0.666_0.179_58.318/0.12)] border-b border-[oklch(0.666_0.179_58.318/0.25)] text-[13px] text-[var(--color-attention)] text-center">
+          <div className="py-3 px-5 bg-amber-50 border-l-[3px] border-amber-500 text-[13px] font-mono text-[var(--color-attention)]">
             Kyrra fonctionne en mode simplifié. Vos emails sont filtrés avec une confiance légèrement réduite.
           </div>
         </motion.div>

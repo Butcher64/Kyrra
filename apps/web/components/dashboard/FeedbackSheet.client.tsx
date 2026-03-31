@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { transitions } from '@/lib/motion'
 import { submitFeedback } from '@/app/(dashboard)/actions/feedback'
@@ -103,7 +102,7 @@ export function FeedbackSheet() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={transitions.spring}
-            className="fixed top-0 right-0 h-full w-full max-w-sm bg-(--card) z-50 shadow-lg border-l border-(--border) p-6 flex flex-col"
+            className="fixed top-0 right-0 h-full w-full max-w-sm bg-(--card) z-50 border-l border-(--border) p-6 flex flex-col"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-sm font-medium text-(--foreground)">Aidez Kyrra à apprendre</h2>
@@ -125,10 +124,10 @@ export function FeedbackSheet() {
                     key={option.id}
                     onClick={() => handleSelect(option.id)}
                     disabled={isPending}
-                    className="text-left p-3 rounded-lg border border-(--border) bg-transparent cursor-pointer transition-colors hover:bg-(--muted) disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-left p-3 border border-(--border) bg-transparent cursor-pointer transition-colors hover:bg-(--muted) disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <div className="text-[13px] font-medium text-(--foreground)">{option.label}</div>
-                    <div className="text-[11px] text-(--muted-foreground) mt-0.5">{option.description}</div>
+                    <div className="text-[13px] font-mono font-medium text-(--foreground)">{option.label}</div>
+                    <div className="text-[11px] font-mono text-(--muted-foreground) mt-0.5">{option.description}</div>
                   </button>
                 ))}
               </div>

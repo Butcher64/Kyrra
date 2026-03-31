@@ -33,7 +33,7 @@ export function ExposureModePills({ currentMode, onModeChange }: ExposureModePil
 
   return (
     <div role="radiogroup" aria-label="Mode d'exposition">
-      <div className="flex gap-1 bg-(--muted) rounded-full p-[3px]">
+      <div className="flex gap-0">
         {MODES.map((mode) => (
           <button
             key={mode.id}
@@ -41,16 +41,16 @@ export function ExposureModePills({ currentMode, onModeChange }: ExposureModePil
             aria-checked={selected === mode.id}
             onClick={() => handleSelect(mode.id)}
             className={cn(
-              'relative flex-1 py-2 px-3 border-none rounded-full text-xs font-medium cursor-pointer transition-colors duration-150',
+              'relative flex-1 py-2 px-3 text-xs font-mono font-medium cursor-pointer transition-colors duration-150',
               selected === mode.id
-                ? 'text-(--foreground)'
-                : 'text-(--muted-foreground) bg-transparent',
+                ? 'bg-[#0c1a32] text-white border border-[#0c1a32]'
+                : 'bg-transparent text-[#4a5068] border border-[#e4e6ed]',
             )}
           >
             {selected === mode.id && (
               <motion.span
                 layoutId="mode-pill"
-                className="absolute inset-0 bg-(--card) rounded-full shadow-[0_1px_3px_oklch(0_0_0/0.08)]"
+                className="absolute inset-0 bg-[#0c1a32]"
                 transition={transitions.spring}
               />
             )}
