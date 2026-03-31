@@ -76,11 +76,11 @@ export default async function LoginPage({
       </section>
 
       {/* ── RIGHT PANEL: Login Form (50%) ── */}
-      <section className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 relative bg-[var(--surface-darkest)]">
+      <section className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 relative bg-white">
 
         {/* Mobile logo */}
         <div className="lg:hidden absolute top-12 flex items-center gap-2">
-          <span className="text-2xl font-extrabold tracking-tighter text-[var(--foreground)] font-headline">Kyrra</span>
+          <span className="text-2xl font-extrabold tracking-tighter text-slate-800 font-headline">Kyrra</span>
         </div>
 
         {/* Login container */}
@@ -88,10 +88,10 @@ export default async function LoginPage({
 
           {/* Header */}
           <div className="space-y-3">
-            <h1 className="text-4xl font-semibold tracking-tight text-[var(--foreground)] font-headline">
+            <h1 className="text-4xl font-semibold tracking-tight text-slate-800 font-headline">
               Bienvenue
             </h1>
-            <p className="text-[var(--muted-foreground)]">
+            <p className="text-slate-500">
               Connectez-vous ou créez votre compte en un clic.
             </p>
           </div>
@@ -108,10 +108,10 @@ export default async function LoginPage({
             <input type="hidden" name="next" value="/connect-gmail" />
             <button
               type="submit"
-              className="w-full group flex items-center justify-center gap-4 py-3.5 px-6 rounded-xl bg-[var(--surface-high)] hover:bg-[var(--surface-highest)] transition-all duration-300 border border-white/[0.08] shadow-xl cursor-pointer"
+              className="w-full group flex items-center justify-center gap-4 py-3.5 px-6 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-all duration-300 shadow-xl cursor-pointer"
             >
               <GoogleIcon className="w-5 h-5 shrink-0" />
-              <span className="text-sm font-medium tracking-wide text-[var(--foreground)]">
+              <span className="text-sm font-medium tracking-wide text-slate-700">
                 Se connecter avec Google
               </span>
             </button>
@@ -119,34 +119,34 @@ export default async function LoginPage({
 
           {/* Divider */}
           <div className="relative flex items-center justify-center">
-            <div className="w-full h-px bg-white/[0.12]" />
-            <span className="absolute px-4 bg-[var(--surface-darkest)] text-[10px] font-label uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
+            <div className="w-full h-px bg-slate-200" />
+            <span className="absolute px-4 bg-white text-[10px] font-label uppercase tracking-[0.2em] text-slate-400">
               ou via email
             </span>
           </div>
 
           {/* Email / password fields — visual only, not wired */}
           <div className="relative space-y-6">
-            <div className="absolute -top-3 left-3 px-2 bg-[var(--surface-darkest)] text-[10px] font-label uppercase tracking-widest text-[var(--muted-foreground)]/50">
+            <div className="absolute -top-3 left-3 px-2 bg-white text-[10px] font-label uppercase tracking-widest text-slate-400">
               Bientôt disponible
             </div>
             <div className="space-y-2">
-              <label className="block font-label text-[10px] uppercase tracking-widest text-[var(--muted-foreground)] ml-1">
+              <label className="block font-label text-[10px] uppercase tracking-widest text-slate-500 ml-1">
                 Adresse Email
               </label>
               <input
                 type="email"
                 placeholder="nom@entreprise.com"
                 disabled
-                className="w-full bg-[var(--surface-low)] border border-white/[0.07] rounded-xl px-4 py-3.5 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/40 outline-none opacity-50 cursor-not-allowed"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 placeholder:text-slate-300 outline-none opacity-50 cursor-not-allowed"
               />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center px-1">
-                <label className="block font-label text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
+                <label className="block font-label text-[10px] uppercase tracking-widest text-slate-500">
                   Mot de passe
                 </label>
-                <span className="text-[10px] font-label uppercase tracking-widest text-[var(--color-accent-start)]/50">
+                <span className="text-[10px] font-label uppercase tracking-widest text-[var(--primary)]/50">
                   Oublié ?
                 </span>
               </div>
@@ -154,7 +154,7 @@ export default async function LoginPage({
                 type="password"
                 placeholder="••••••••"
                 disabled
-                className="w-full bg-[var(--surface-low)] border border-white/[0.07] rounded-xl px-4 py-3.5 text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/40 outline-none opacity-50 cursor-not-allowed"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 placeholder:text-slate-300 outline-none opacity-50 cursor-not-allowed"
               />
             </div>
             <button
@@ -167,25 +167,25 @@ export default async function LoginPage({
           </div>
 
           {/* Sign-up link */}
-          <p className="text-center text-sm text-[var(--muted-foreground)]">
+          <p className="text-center text-sm text-slate-500">
             Pas encore de compte ?{' '}
-            <a href="/login" className="text-[var(--color-accent-start)] font-medium hover:underline underline-offset-4">
+            <a href="/login" className="text-[var(--primary)] font-medium hover:underline underline-offset-4">
               Commencer l&apos;essai
             </a>
           </p>
         </div>
 
         {/* Footer links */}
-        <div className="absolute bottom-12 left-8 right-8 lg:left-auto lg:right-auto w-auto lg:w-full lg:max-w-[380px] flex justify-between items-center text-[10px] font-label uppercase tracking-widest text-[var(--muted-foreground)]">
-          <a href="/legal/privacy" className="hover:text-slate-100 transition-colors">Confidentialité</a>
-          <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
-          <a href="/legal/cgu" className="hover:text-slate-100 transition-colors">Conditions</a>
-          <span className="w-1 h-1 rounded-full bg-[var(--border)]" />
-          <a href="mailto:support@kyrra.ai" className="hover:text-slate-100 transition-colors">Support</a>
+        <div className="absolute bottom-12 left-8 right-8 lg:left-auto lg:right-auto w-auto lg:w-full lg:max-w-[380px] flex justify-between items-center text-[10px] font-label uppercase tracking-widest text-slate-400">
+          <a href="/legal/privacy" className="hover:text-slate-700 transition-colors">Confidentialité</a>
+          <span className="w-1 h-1 rounded-full bg-slate-300" />
+          <a href="/legal/cgu" className="hover:text-slate-700 transition-colors">Conditions</a>
+          <span className="w-1 h-1 rounded-full bg-slate-300" />
+          <a href="mailto:support@kyrra.ai" className="hover:text-slate-700 transition-colors">Support</a>
         </div>
 
         {/* Branding subtle footer */}
-        <div className="absolute bottom-4 text-[9px] font-label text-[var(--muted-foreground)]/30 tracking-[0.3em]">
+        <div className="absolute bottom-4 text-[9px] font-label text-slate-300 tracking-[0.3em]">
           KYRRA AI SOUVERAINETÉ NUMÉRIQUE © 2026
         </div>
       </section>
