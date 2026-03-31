@@ -125,6 +125,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
     let confidence: number
     let summary = ''
     let source: 'fingerprint' | 'llm' = 'fingerprint'
+    let llmUsage: { inputTokens: number; outputTokens: number; costUsd: number; model: string } | null = null
 
     if (fpResult) {
       // Apply safety rules to fingerprint result
@@ -147,6 +148,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
           confidence = llmResult.confidence
           summary = stripPIIFromSummary(llmResult.summary)
           source = 'llm'
+          if (llmResult._usage) llmUsage = llmResult._usage
         } else {
           // LLM failed — use fingerprint result with downgrade
           finalResult = 'FILTRE' // Downgrade BLOQUE to FILTRE on LLM failure
@@ -175,6 +177,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
         confidence = llmResult.confidence
         summary = stripPIIFromSummary(llmResult.summary)
         source = 'llm'
+        if (llmResult._usage) llmUsage = llmResult._usage
       } else {
         // Both fingerprint and LLM failed — classify as A_VOIR (doubt promotes)
         finalResult = 'A_VOIR'
@@ -212,6 +215,24 @@ export async function classificationLoop(supabase: any): Promise<void> {
       processing_time_ms: processingTimeMs,
       idempotency_key: job.gmail_message_id,
     })
+
+    // Log LLM usage for cost tracking
+    if (source === 'llm') {
+      const inputTokens = llmUsage?.inputTokens ?? 0
+      const outputTokens = llmUsage?.outputTokens ?? 0
+      const costUsd = llmUsage?.costUsd ?? 0.001
+      await supabase.from('llm_usage_logs').insert({
+        user_id: job.user_id,
+        gmail_message_id: job.gmail_message_id,
+        model: llmUsage?.model ?? 'gpt-4o-mini',
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        cost_usd: costUsd,
+        latency_ms: processingTimeMs,
+        classification_result: finalResult,
+      })
+      console.log(`[COST] LLM: ${inputTokens}+${outputTokens} tokens, $${costUsd.toFixed(6)} (${finalResult})`)
+    }
 
     // Apply Gmail label (Story 2.6)
     try {

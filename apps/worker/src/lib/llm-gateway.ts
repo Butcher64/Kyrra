@@ -14,6 +14,7 @@ export interface LLMClassificationResult {
   result: ClassificationResult
   confidence: number
   summary: string
+  _usage?: { inputTokens: number; outputTokens: number; costUsd: number; model: string; latencyMs: number }
 }
 
 export interface EmailContent {
@@ -104,6 +105,7 @@ ${email.tail}
 --- End ---`
 
   try {
+    const llmStartTime = Date.now()
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS)
 
@@ -135,6 +137,7 @@ ${email.tail}
 
     const data = await response.json()
     const content = data.choices?.[0]?.message?.content
+    const usage = data.usage
 
     if (!content) return null
 
@@ -152,14 +155,20 @@ ${email.tail}
       return null
     }
 
+    // Compute cost from actual token usage
+    const inputTokens = usage?.prompt_tokens ?? 0
+    const outputTokens = usage?.completion_tokens ?? 0
+    // GPT-4o-mini pricing: $0.15/1M input, $0.60/1M output
+    const costUsd = (inputTokens * 0.15 + outputTokens * 0.60) / 1_000_000
+
     // Record metrics for circuit breaker
-    const estimatedCost = 0.001 // ~$0.001 per GPT-4o-mini call
-    await recordMetrics(supabase, estimatedCost, true)
+    await recordMetrics(supabase, costUsd, true)
 
     return {
       result: parsed.category as ClassificationResult,
       confidence: parsed.confidence,
       summary: typeof parsed.summary === 'string' ? parsed.summary.slice(0, 200) : '',
+      _usage: { inputTokens, outputTokens, costUsd, model: 'gpt-4o-mini', latencyMs: Date.now() - llmStartTime },
     }
   } catch (error) {
     if ((error as Error).name === 'AbortError') {
