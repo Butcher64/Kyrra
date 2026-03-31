@@ -50,27 +50,17 @@ export default function OnboardingProgressPage() {
 
   return (
     <main
-      className="relative flex min-h-screen flex-col items-center justify-between overflow-hidden"
-      style={{ background: '#0b0b10' }}
+      className="relative flex min-h-screen flex-col items-center justify-between overflow-hidden bg-[#0c1a32]"
     >
       {/* Grid pattern overlay */}
       <div className="bg-grid absolute inset-0 opacity-[0.06]" />
 
-      {/* Ambient glow */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 70% 50% at 50% 40%, oklch(0.55 0.20 265 / 0.12) 0%, transparent 70%)',
-        }}
-      />
-
       {/* Header */}
       <header className="relative z-10 flex flex-col items-center pt-12 pb-4">
-        <span className="font-headline text-2xl font-bold tracking-tight text-white">
+        <span className="font-mono text-2xl font-bold tracking-tight text-white">
           Kyrra
         </span>
-        <span className="mt-1 font-label text-[10px] tracking-[0.25em] uppercase text-white/30">
+        <span className="mt-1 font-mono text-[10px] tracking-[0.25em] uppercase text-white/30">
           Souverainet&eacute; Num&eacute;rique
         </span>
       </header>
@@ -79,18 +69,11 @@ export default function OnboardingProgressPage() {
       <div className="relative z-10 w-full max-w-[600px] mx-4">
         {!isComplete ? (
           <div
-            className="rounded-2xl p-10 text-center"
-            style={{
-              background: 'oklch(1 0 0 / 4%)',
-              border: '1px solid oklch(1 0 0 / 10%)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-            }}
+            className="p-10 text-center border border-white/10 bg-white/[0.04]"
           >
             {/* Shield icon */}
             <div
-              className="mx-auto mb-8 flex size-16 items-center justify-center rounded-full"
-              style={{ background: 'oklch(1 0 0 / 8%)' }}
+              className="mx-auto mb-8 flex size-16 items-center justify-center bg-white/[0.08]"
             >
               <svg
                 className="size-7 text-white/80 animate-pulse"
@@ -107,7 +90,7 @@ export default function OnboardingProgressPage() {
             </div>
 
             {/* Title */}
-            <h1 className="font-headline text-2xl font-bold text-white mb-2">
+            <h1 className="font-mono text-2xl font-bold text-white mb-2">
               Kyrra analyse votre bo&icirc;te...
             </h1>
             <p className="text-sm text-white/45 mb-8">
@@ -117,23 +100,20 @@ export default function OnboardingProgressPage() {
             {/* Progress section */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-label text-[10px] tracking-[0.2em] uppercase text-white/40">
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-white/40">
                   Indexation IA
                 </span>
-                <span className="font-label text-sm font-semibold text-white/70 tabular-nums">
+                <span className="font-mono text-sm font-semibold text-white/70 tabular-nums">
                   {Math.max(progress, 0)}%
                 </span>
               </div>
               <div
-                className="w-full h-1.5 rounded-full overflow-hidden"
-                style={{ background: 'oklch(1 0 0 / 8%)' }}
+                className="w-full h-1.5 overflow-hidden bg-white/[0.08]"
               >
                 <div
-                  className="h-full rounded-full transition-[width] duration-700 ease-out"
+                  className="h-full bg-white transition-[width] duration-700 ease-out"
                   style={{
                     width: `${Math.max(progress, 3)}%`,
-                    background:
-                      'linear-gradient(90deg, oklch(0.55 0.20 265), oklch(0.72 0.19 195))',
                   }}
                 />
               </div>
@@ -143,54 +123,36 @@ export default function OnboardingProgressPage() {
             <div className="grid grid-cols-3 gap-3 mb-6">
               {/* Emails analysés */}
               <div
-                className="rounded-xl py-4 px-3 flex flex-col items-center"
-                style={{
-                  background: 'oklch(1 0 0 / 5%)',
-                  border: '1px solid oklch(1 0 0 / 8%)',
-                }}
+                className="py-4 px-3 flex flex-col items-center border border-white/10 bg-white/[0.05]"
               >
-                <span className="font-headline text-2xl font-bold text-white tabular-nums">
+                <span className="font-mono text-2xl font-bold text-white tabular-nums">
                   {(scan?.emails_processed ?? 0).toLocaleString('fr-FR')}
                 </span>
-                <span className="font-label text-[9px] tracking-[0.18em] uppercase text-white/35 mt-1">
+                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-white/35 mt-1">
                   Emails analys&eacute;s
                 </span>
               </div>
 
               {/* Contacts */}
               <div
-                className="rounded-xl py-4 px-3 flex flex-col items-center"
-                style={{
-                  background: 'oklch(1 0 0 / 5%)',
-                  border: '1px solid oklch(1 0 0 / 8%)',
-                }}
+                className="py-4 px-3 flex flex-col items-center border border-white/10 bg-white/[0.05]"
               >
-                <span className="font-headline text-2xl font-bold text-white tabular-nums">
+                <span className="font-mono text-2xl font-bold text-white tabular-nums">
                   {(scan?.contacts_found ?? 0).toLocaleString('fr-FR')}
                 </span>
-                <span className="font-label text-[9px] tracking-[0.18em] uppercase text-white/35 mt-1">
+                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-white/35 mt-1">
                   Contacts
                 </span>
               </div>
 
-              {/* Prospections — cyan accent */}
+              {/* Prospections */}
               <div
-                className="rounded-xl py-4 px-3 flex flex-col items-center"
-                style={{
-                  background: 'oklch(0.72 0.19 195 / 8%)',
-                  border: '1px solid oklch(0.72 0.19 195 / 20%)',
-                }}
+                className="py-4 px-3 flex flex-col items-center border border-white/20 bg-white/[0.08]"
               >
-                <span
-                  className="font-headline text-2xl font-bold tabular-nums"
-                  style={{ color: 'oklch(0.72 0.19 195)' }}
-                >
+                <span className="font-mono text-2xl font-bold text-white tabular-nums">
                   {(scan?.prospecting_found ?? 0).toLocaleString('fr-FR')}
                 </span>
-                <span
-                  className="font-label text-[9px] tracking-[0.18em] uppercase mt-1"
-                  style={{ color: 'oklch(0.72 0.19 195 / 60%)' }}
-                >
+                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-white/40 mt-1">
                   Prospections
                 </span>
               </div>
@@ -215,17 +177,10 @@ export default function OnboardingProgressPage() {
         ) : (
           /* Completed state */
           <div
-            className="rounded-2xl p-10 text-center"
-            style={{
-              background: 'oklch(1 0 0 / 4%)',
-              border: '1px solid oklch(1 0 0 / 10%)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-            }}
+            className="p-10 text-center border border-white/10 bg-white/[0.04]"
           >
             <div
-              className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full"
-              style={{ background: 'oklch(0.627 0.194 149.214 / 15%)' }}
+              className="mx-auto mb-6 flex size-16 items-center justify-center bg-[var(--color-protected)]/15"
             >
               <svg
                 className="size-8"
@@ -242,7 +197,7 @@ export default function OnboardingProgressPage() {
               </svg>
             </div>
 
-            <h1 className="font-headline text-2xl font-bold text-white mb-2">
+            <h1 className="font-mono text-2xl font-bold text-white mb-2">
               Scan termin&eacute;
             </h1>
             <p className="text-sm text-white/50 leading-relaxed mb-8">
@@ -253,11 +208,7 @@ export default function OnboardingProgressPage() {
 
             <a
               href="/dashboard"
-              className="inline-flex items-center justify-center h-11 px-8 rounded-lg font-medium text-sm transition-opacity hover:opacity-90"
-              style={{
-                background: 'linear-gradient(135deg, oklch(0.55 0.20 265), oklch(0.72 0.19 195))',
-                color: 'white',
-              }}
+              className="inline-flex items-center justify-center h-11 px-8 bg-white text-[#0c1a32] font-mono font-medium text-sm transition-opacity hover:opacity-90"
             >
               Voir votre tableau de bord &rarr;
             </a>
@@ -282,7 +233,7 @@ export default function OnboardingProgressPage() {
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
-          <span className="font-label text-[10px] tracking-[0.2em] uppercase text-white/30">
+          <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-white/30">
             Chiffrement AES-256 Actif
           </span>
         </div>
@@ -294,8 +245,7 @@ export default function OnboardingProgressPage() {
             {[1, 2].map((i) => (
               <div
                 key={i}
-                className="flex size-6 items-center justify-center rounded-full border border-white/10 text-[9px] font-semibold text-white"
-                style={{ background: i === 1 ? 'oklch(0.55 0.20 265)' : 'oklch(0.45 0.18 280)' }}
+                className="flex size-6 items-center justify-center border border-white/10 text-[9px] font-mono font-semibold text-white bg-white/10"
               >
                 {i === 1 ? 'M' : 'A'}
               </div>
@@ -310,7 +260,7 @@ export default function OnboardingProgressPage() {
       {/* Footer */}
       <footer className="relative z-10 w-full border-t border-white/5 px-8 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <span className="font-headline text-xs font-semibold text-white/40">
+          <span className="font-mono text-xs font-semibold text-white/40">
             Kyrra AI
           </span>
           <nav className="hidden sm:flex items-center gap-4">

@@ -64,10 +64,10 @@ export default function ReclassificationPendingPage() {
               >
                 &#x2713;
               </motion.span>
-              <p className="text-[15px] font-medium text-(--foreground)">
+              <p className="text-[15px] font-mono font-medium text-(--foreground)">
                 Email reclassifié. Kyrra a appris.
               </p>
-              <p className="text-[11px] text-(--muted-foreground)">
+              <p className="text-[11px] font-mono text-(--muted-foreground)">
                 Redirection vers le tableau de bord...
               </p>
             </motion.div>
@@ -79,12 +79,12 @@ export default function ReclassificationPendingPage() {
               transition={transitions.fast}
               className="flex flex-col items-center gap-4"
             >
-              <p className="text-[15px] text-(--muted-foreground)">
+              <p className="text-[15px] font-mono text-(--muted-foreground)">
                 La reclassification a échoué.
               </p>
               <a
                 href="/dashboard"
-                className="text-[13px] text-[var(--color-a-voir)] no-underline font-medium transition-opacity hover:opacity-70"
+                className="text-[13px] font-mono text-[var(--color-a-voir)] no-underline font-medium transition-opacity hover:opacity-70"
               >
                 Ouvrir le tableau de bord &rarr;
               </a>
@@ -100,9 +100,9 @@ export default function ReclassificationPendingPage() {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                className="size-6 rounded-full border-2 border-(--border) border-t-[var(--color-a-voir)]"
+                className="size-6 border-2 border-(--border) border-t-[var(--color-a-voir)]"
               />
-              <p className="text-[13px] text-(--muted-foreground)">
+              <p className="text-[13px] font-mono text-(--muted-foreground)">
                 Reclassification en cours...
               </p>
             </motion.div>

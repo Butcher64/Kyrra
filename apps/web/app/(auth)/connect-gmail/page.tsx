@@ -14,7 +14,7 @@ export default async function ConnectGmailPage() {
   return (
     <main className="flex min-h-screen">
       {/* Left panel: brand showcase — hidden on mobile */}
-      <div className="hidden lg:flex w-1/2 bg-brand-gradient relative overflow-hidden flex-col justify-between p-12">
+      <div className="hidden lg:flex w-1/2 bg-[#0c1a32] relative overflow-hidden flex-col justify-between p-12">
         <div className="bg-grid absolute inset-0 opacity-20" />
         <div className="relative z-10">
           <Logo variant="white" />
@@ -35,11 +35,11 @@ export default async function ConnectGmailPage() {
         <div className="w-full max-w-[440px]">
           <Logo className="mb-10 lg:hidden" />
 
-          {/* Glass card */}
-          <div className="rounded-xl border border-(--border) bg-(--card) p-8">
+          {/* Card */}
+          <div className="border border-(--border) bg-(--card) p-8">
             {/* Header */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="size-11 rounded-full bg-brand-gradient flex items-center justify-center shrink-0">
+              <div className="size-11 bg-[#0c1a32] flex items-center justify-center shrink-0">
                 <svg className="size-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
@@ -55,7 +55,7 @@ export default async function ConnectGmailPage() {
             </div>
 
             {/* What Kyrra does */}
-            <div className="rounded-lg border border-(--border) bg-(--background) p-4 mb-3">
+            <div className="border border-(--border) bg-(--background) p-4 mb-3">
               <h2 className="text-xs font-semibold text-[var(--color-protected)] mb-3 uppercase tracking-wider">
                 Ce que Kyrra fait
               </h2>
@@ -72,7 +72,7 @@ export default async function ConnectGmailPage() {
             </div>
 
             {/* What Kyrra NEVER does */}
-            <div className="rounded-lg border border-(--border) bg-(--background) p-4 mb-6">
+            <div className="border border-(--border) bg-(--background) p-4 mb-6">
               <h2 className="text-xs font-semibold text-[var(--color-attention)] mb-3 uppercase tracking-wider">
                 Ce que Kyrra ne fait jamais
               </h2>

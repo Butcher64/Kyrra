@@ -46,17 +46,17 @@ function Checkbox({
         aria-required={required}
         onClick={() => onChange(!checked)}
         className={`
-          mt-0.5 flex-shrink-0 size-5 rounded border-2 flex items-center justify-center
+          mt-0.5 flex-shrink-0 size-5 border-2 flex items-center justify-center
           transition-all duration-200
           ${checked
-            ? 'bg-brand-gradient border-transparent text-white scale-105'
+            ? 'bg-[#0c1a32] border-[#0c1a32] text-white'
             : 'border-(--muted-foreground) bg-transparent group-hover:border-(--foreground)'
           }
         `}
       >
         {checked && <CheckIcon className="size-3" />}
       </button>
-      <span className="text-sm text-(--foreground) leading-relaxed select-none">
+      <span className="text-sm font-mono text-(--foreground) leading-relaxed select-none">
         {label}
       </span>
     </label>
@@ -137,8 +137,8 @@ export function ConsentForm() {
       {/* Connect button */}
       <button
         className={`
-          mt-6 w-full h-11 rounded-lg bg-brand-gradient text-white font-medium text-sm
-          flex items-center justify-center gap-2 glow-brand
+          mt-6 w-full h-11 bg-[#0c1a32] text-white font-mono font-medium text-sm
+          flex items-center justify-center gap-2
           transition-opacity cursor-pointer
           ${(!classifyConsent || isPending) ? 'opacity-40 pointer-events-none' : 'hover:opacity-90'}
         `}
