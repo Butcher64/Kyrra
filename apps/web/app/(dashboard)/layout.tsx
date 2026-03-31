@@ -19,7 +19,7 @@ export default async function DashboardLayout({
     .from('user_pipeline_health')
     .select('mode')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   return (
     <DashboardProviders>
