@@ -207,8 +207,8 @@ export default function ConfigureLabelsPage() {
           </p>
         </div>
 
-        {/* Labels grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+        {/* Labels grid — 2 columns on desktop, 1 on mobile */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '24px' }}>
           {labels.map((label, index) => (
             <LabelCard
               key={`${label.name}-${index}`}

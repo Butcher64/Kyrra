@@ -45,5 +45,5 @@ export function resolveLabelByName(
   const ciMatch = userLabels.find((l) => l.name.toLowerCase() === labelName.toLowerCase())
   if (ciMatch) return ciMatch
 
-  return userLabels.sort((a, b) => a.position - b.position)[0]!
+  return [...userLabels].sort((a, b) => a.position - b.position)[0]!
 }

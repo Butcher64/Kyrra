@@ -30,15 +30,6 @@ const ROLES = [
   { value: 'AUTRE', label: 'Autre' },
 ]
 
-const PROSPECTION_EXEMPLES_UTILES = [
-  'Outils SaaS pour mon métier',
-  'Prestataires dans mon secteur',
-  'Événements / conférences professionnelles',
-  'Offres de formation',
-  'Partenariats stratégiques',
-  'Solutions de financement',
-]
-
 const PROSPECTION_EXEMPLES_NON = [
   'Cold emails de commerciaux inconnus',
   'Offres de SEO / création de site web',
@@ -75,13 +66,12 @@ const hintStyle = {
 export default function ConfigureProfilePage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [role, setRole] = useState('CEO')
   const [sector, setSector] = useState('')
   const [companyDesc, setCompanyDesc] = useState('')
-  const [prospectionUtile, setProspectionUtile] = useState('')
   const [prospectionNon, setProspectionNon] = useState('')
   const [interests, setInterests] = useState('')
-  const [selectedUtiles, setSelectedUtiles] = useState<Set<string>>(new Set())
   const [selectedNon, setSelectedNon] = useState<Set<string>>(new Set())
 
   function toggleChip(set: Set<string>, value: string, setter: (s: Set<string>) => void) {
@@ -93,16 +83,15 @@ export default function ConfigureProfilePage() {
 
   async function handleSave() {
     setSaving(true)
+    setError(null)
 
-    // Combine chips + text for prospection descriptions
-    const utilesFull = [...selectedUtiles, prospectionUtile].filter(Boolean).join('. ')
     const nonFull = [...selectedNon, prospectionNon].filter(Boolean).join('. ')
 
     const result = await saveProfile({
       user_role: role,
       sector,
       company_description: companyDesc,
-      prospection_utile: utilesFull,
+      prospection_utile: '',
       prospection_non_sollicitee: nonFull,
       interests,
     })
@@ -110,6 +99,7 @@ export default function ConfigureProfilePage() {
     if (result.success) {
       router.push('/configure-labels')
     } else {
+      setError(result.error || 'Une erreur est survenue. Réessayez.')
       setSaving(false)
     }
   }
@@ -161,35 +151,6 @@ export default function ConfigureProfilePage() {
             <p style={hintStyle}>L'IA utilise cette info pour juger la pertinence des emails commerciaux.</p>
           </div>
 
-          {/* Prospection utile */}
-          <div>
-            <label style={labelStyle}>Quels types de prospection pourraient vous intéresser ?</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-              {PROSPECTION_EXEMPLES_UTILES.map((ex) => (
-                <button
-                  key={ex}
-                  onClick={() => toggleChip(selectedUtiles, ex, setSelectedUtiles)}
-                  style={{
-                    padding: '5px 12px',
-                    fontSize: '12px',
-                    border: selectedUtiles.has(ex) ? '1px solid #2e7d32' : '1px solid #ddd',
-                    background: selectedUtiles.has(ex) ? '#e8f5e9' : 'white',
-                    color: selectedUtiles.has(ex) ? '#2e7d32' : '#666',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {ex}
-                </button>
-              ))}
-            </div>
-            <input
-              value={prospectionUtile}
-              onChange={(e) => setProspectionUtile(e.target.value)}
-              placeholder="Autre chose ? Décrivez librement..."
-              style={fieldStyle}
-            />
-          </div>
-
           {/* Prospection non sollicitée */}
           <div>
             <label style={labelStyle}>Quels types de prospection vous agacent ?</label>
@@ -232,8 +193,15 @@ export default function ConfigureProfilePage() {
           </div>
         </div>
 
+        {/* Error */}
+        {error && (
+          <p style={{ color: '#c62828', fontSize: '13px', textAlign: 'center', marginTop: '16px' }}>
+            {error}
+          </p>
+        )}
+
         {/* Save */}
-        <div style={{ textAlign: 'center', marginTop: '32px' }}>
+        <div style={{ textAlign: 'center', marginTop: '16px' }}>
           <button
             onClick={handleSave}
             disabled={saving || !sector}

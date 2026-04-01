@@ -298,6 +298,14 @@ export async function inboxScanLoop(supabase: any): Promise<void> {
 
       console.log(`Inbox scan: queued ${totalQueued} emails for classification`)
     }
+
+    // Mark onboarding as fully done — prevents re-scanning
+    await supabase
+      .from('onboarding_scans')
+      .update({ status: 'active', updated_at: new Date().toISOString() })
+      .eq('id', scan.id)
+
+    console.log(`Onboarding fully complete for user ${scan.user_id}`)
   } catch (error) {
     console.error(`Inbox scan failed for user ${scan.user_id}:`, (error as Error).message)
   }

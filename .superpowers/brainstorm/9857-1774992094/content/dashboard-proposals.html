@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kyrra — Dashboard Proposals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0c1a32;
+    --ink: #1a1f36;
+    --slate: #4a5068;
+    --muted: #8b90a0;
+    --subtle: #c4c7d4;
+    --line: #e4e6ed;
+    --surface: #f5f6f9;
+    --white: #ffffff;
+    --tag-blue-bg: #e8edf8;
+    --tag-blue: #2d4a8a;
+    --tag-gray-bg: #edeef2;
+    --tag-gray: #5c6070;
+    --tag-red-bg: #f8e8e8;
+    --tag-red: #8a2d2d;
+    --green: #1a7a4a;
+    --green-dot: #2dd881;
+    --red: #c23a3a;
+    --accent: #3a5bc7;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:#08080b; color:#e8e8ec; padding:40px; }
+  .mono { font-family:'IBM Plex Mono',monospace; }
+  .serif { font-family:'Instrument Serif',serif; }
+
+  .proposal { margin-bottom:56px; }
+  .proposal-label {
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--muted); margin-bottom:12px; padding-bottom:8px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .frame {
+    border:1px solid rgba(255,255,255,0.08);
+    overflow:hidden;
+  }
+  .frame-header {
+    background:rgba(255,255,255,0.03);
+    padding:6px 12px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9px; text-transform:uppercase; letter-spacing:0.1em;
+    color:var(--muted);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    display:flex; justify-content:space-between;
+  }
+  .rationale {
+    margin-top:12px; padding:12px 16px;
+    background:rgba(255,255,255,0.02);
+    border:1px solid rgba(255,255,255,0.04);
+    font-size:12px; color:var(--muted); line-height:1.7;
+  }
+</style>
+</head>
+<body>
+
+<h1 class="serif" style="font-size:36px;color:white;margin-bottom:6px;">Dashboard Kyrra</h1>
+<p style="font-size:14px;color:var(--muted);margin-bottom:48px;max-width:600px;">
+  Deux propositions. L'une centrée sur les emails (le dashboard EST la boîte mail triée).
+  L'autre plus structurée avec des zones claires. Clique sur celle qui te parle.
+</p>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PROPOSAL A: Email-first -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="proposal">
+  <div class="proposal-label">Proposition A — Email-first</div>
+  <div class="frame" data-choice="a" onclick="toggleSelect(this)" style="cursor:pointer;">
+    <div class="frame-header">
+      <span>dashboard · 1440×900</span>
+      <span>email-first layout</span>
+    </div>
+    <div style="display:flex;background:var(--surface);min-height:520px;">
+
+      <!-- Sidebar -->
+      <div style="width:220px;background:var(--navy);padding:20px 14px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background-image:url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.03%22/%3E%3C/svg%3E');pointer-events:none;"></div>
+        <div style="position:relative;z-index:1;display:flex;flex-direction:column;flex:1;">
+          <!-- Logo -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:28px;">
+            <div style="width:22px;height:22px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.6);"></div>
+            </div>
+            <span style="font-size:15px;font-weight:700;color:white;letter-spacing:-0.04em;">Kyrra</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:4px;">
+              <div style="width:5px;height:5px;background:var(--green-dot);border-radius:50%;box-shadow:0 0 6px var(--green-dot);"></div>
+              <span class="mono" style="font-size:8px;color:rgba(255,255,255,0.3);">actif</span>
+            </div>
+          </div>
+          <!-- Nav -->
+          <div class="mono" style="font-size:8px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.12);margin-bottom:6px;padding:0 10px;">Menu</div>
+          <div style="display:flex;flex-direction:column;gap:1px;">
+            <div style="padding:8px 10px;background:rgba(255,255,255,0.06);font-size:13px;color:white;">📊 Tableau de bord</div>
+            <div style="padding:8px 10px;font-size:13px;color:rgba(255,255,255,0.25);">✉️ Mes emails</div>
+            <div style="padding:8px 10px;font-size:13px;color:rgba(255,255,255,0.25);">🏷️ Libellés</div>
+            <div style="padding:8px 10px;font-size:13px;color:rgba(255,255,255,0.25);">⚙️ Paramètres</div>
+          </div>
+          <!-- Spacer -->
+          <div style="flex:1;"></div>
+          <!-- User -->
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;background:rgba(255,255,255,0.06);font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-weight:600;">T</div>
+            <div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.6);">Thomas</div>
+              <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.2);">thomas@kyrra.ai</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div style="flex:1;padding:28px 32px;overflow:hidden;">
+        <!-- Header row -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+          <div>
+            <h1 style="font-size:22px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;">Bonjour, Thomas</h1>
+            <div class="mono" style="font-size:11px;color:var(--muted);margin-top:3px;">lun. 31 mars · 47 emails triés aujourd'hui</div>
+          </div>
+          <!-- Compact stats inline -->
+          <div style="display:flex;gap:20px;align-items:baseline;">
+            <div style="text-align:right;">
+              <div style="font-size:20px;font-weight:700;color:var(--navy);">18</div>
+              <div class="mono" style="font-size:8px;color:var(--muted);text-transform:uppercase;">bloqués</div>
+            </div>
+            <div style="width:1px;height:28px;background:var(--line);"></div>
+            <div style="text-align:right;">
+              <div style="font-size:20px;font-weight:700;color:var(--green);">23<span style="font-size:11px;font-weight:400;color:var(--muted);">min</span></div>
+              <div class="mono" style="font-size:8px;color:var(--muted);text-transform:uppercase;">gagnées</div>
+            </div>
+            <div style="width:1px;height:28px;background:var(--line);"></div>
+            <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--line);">
+              <div style="width:5px;height:5px;background:var(--green-dot);border-radius:50%;box-shadow:0 0 4px var(--green-dot);"></div>
+              <span class="mono" style="font-size:9px;color:var(--green);">protégé</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab filter bar -->
+        <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--line);">
+          <div style="padding:8px 16px;font-size:12px;font-weight:500;color:var(--navy);border-bottom:2px solid var(--navy);">Tous <span class="mono" style="font-size:10px;color:var(--muted);margin-left:4px;">47</span></div>
+          <div style="padding:8px 16px;font-size:12px;color:var(--muted);">À voir <span class="mono" style="font-size:10px;margin-left:4px;">12</span></div>
+          <div style="padding:8px 16px;font-size:12px;color:var(--muted);">Filtrés <span class="mono" style="font-size:10px;margin-left:4px;">17</span></div>
+          <div style="padding:8px 16px;font-size:12px;color:var(--muted);">Bloqués <span class="mono" style="font-size:10px;margin-left:4px;">18</span></div>
+        </div>
+
+        <!-- Email list — THE MAIN CONTENT -->
+        <div style="background:white;border:1px solid var(--line);">
+          <!-- Row 1 -->
+          <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;">
+            <div style="width:3px;height:32px;background:var(--tag-blue);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                <span style="font-size:13px;font-weight:600;color:var(--ink);">Marc Dupont</span>
+                <span class="mono" style="font-size:9px;color:var(--subtle);">marc@acme-corp.com</span>
+              </div>
+              <div style="font-size:13px;color:var(--ink);">Re: Contrat Q2 — signature requise avant vendredi</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">CEO souhaite finaliser le partenariat technique pour le prochain trimestre...</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
+              <span style="font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--tag-blue-bg);color:var(--tag-blue);">À voir</span>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">94% · 14:32</span>
+            </div>
+          </div>
+          <!-- Row 2 -->
+          <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;">
+            <div style="width:3px;height:32px;background:var(--tag-blue);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                <span style="font-size:13px;font-weight:600;color:var(--ink);">Sophie Martin</span>
+                <span class="mono" style="font-size:9px;color:var(--subtle);">s.martin@bpi.fr</span>
+              </div>
+              <div style="font-size:13px;color:var(--ink);">Invitation webinar — Transformation digitale PME</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Organisé par BPI France le 15 avril, inscription avant le 5 avril...</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
+              <span style="font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--tag-blue-bg);color:var(--tag-blue);">À voir</span>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">91% · 11:20</span>
+            </div>
+          </div>
+          <!-- Row 3 — filtered -->
+          <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;opacity:0.55;">
+            <div style="width:3px;height:32px;background:var(--subtle);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                <span style="font-size:13px;color:var(--slate);">Sales Navigator</span>
+                <span class="mono" style="font-size:9px;color:var(--subtle);">noreply@linkedin.com</span>
+              </div>
+              <div style="font-size:13px;color:var(--slate);">Découvrez nos solutions enterprise pour votre équipe</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
+              <span style="font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--tag-gray-bg);color:var(--tag-gray);">Filtré</span>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">87% · 10:45</span>
+            </div>
+          </div>
+          <!-- Row 4 — blocked -->
+          <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;opacity:0.3;">
+            <div style="width:3px;height:32px;background:#d4a0a0;flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                <span style="font-size:13px;color:var(--muted);text-decoration:line-through;">GrowthHack Pro</span>
+                <span class="mono" style="font-size:9px;color:var(--subtle);">team@growthhack.io</span>
+              </div>
+              <div style="font-size:13px;color:var(--muted);text-decoration:line-through;">Boostez votre pipeline B2B en 48h</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
+              <span style="font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--tag-red-bg);color:var(--tag-red);">Bloqué</span>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">99% · 09:12</span>
+            </div>
+          </div>
+          <!-- Row 5 — blocked -->
+          <div style="padding:14px 18px;display:flex;align-items:center;gap:14px;opacity:0.3;">
+            <div style="width:3px;height:32px;background:#d4a0a0;flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                <span style="font-size:13px;color:var(--muted);text-decoration:line-through;">Newsletter Weekly</span>
+                <span class="mono" style="font-size:9px;color:var(--subtle);">news@startupweekly.co</span>
+              </div>
+              <div style="font-size:13px;color:var(--muted);text-decoration:line-through;">Votre dose hebdomadaire d'actualités startup</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
+              <span style="font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:2px 7px;background:var(--tag-red-bg);color:var(--tag-red);">Bloqué</span>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">98% · 08:30</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="rationale">
+    <strong>Concept :</strong> Le dashboard EST la boîte mail triée. Le contenu principal = liste d'emails avec tabs de filtrage (Tous / À voir / Filtrés / Bloqués). Les stats sont compactes dans le header (pas des grosses cards). Chaque email montre l'expéditeur, l'objet, un extrait, le tag et la confiance. Ressemble à Gmail mais avec le tri Kyrra visible. Le dirigeant retrouve ses repères.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PROPOSAL B: Structured zones -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="proposal">
+  <div class="proposal-label">Proposition B — Zones structurées</div>
+  <div class="frame" data-choice="b" onclick="toggleSelect(this)" style="cursor:pointer;">
+    <div class="frame-header">
+      <span>dashboard · 1440×900</span>
+      <span>structured zones</span>
+    </div>
+    <div style="display:flex;background:var(--surface);min-height:520px;">
+
+      <!-- Sidebar (same) -->
+      <div style="width:220px;background:var(--navy);padding:20px 14px;display:flex;flex-direction:column;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background-image:url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.03%22/%3E%3C/svg%3E');pointer-events:none;"></div>
+        <div style="position:relative;z-index:1;display:flex;flex-direction:column;flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:28px;">
+            <div style="width:22px;height:22px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.6);"></div>
+            </div>
+            <span style="font-size:15px;font-weight:700;color:white;letter-spacing:-0.04em;">Kyrra</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:4px;">
+              <div style="width:5px;height:5px;background:var(--green-dot);border-radius:50%;box-shadow:0 0 6px var(--green-dot);"></div>
+              <span class="mono" style="font-size:8px;color:rgba(255,255,255,0.3);">actif</span>
+            </div>
+          </div>
+          <div class="mono" style="font-size:8px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.12);margin-bottom:6px;padding:0 10px;">Menu</div>
+          <div style="display:flex;flex-direction:column;gap:1px;">
+            <div style="padding:8px 10px;background:rgba(255,255,255,0.06);font-size:13px;color:white;">📊 Tableau de bord</div>
+            <div style="padding:8px 10px;font-size:13px;color:rgba(255,255,255,0.25);">✉️ Mes emails</div>
+            <div style="padding:8px 10px;font-size:13px;color:rgba(255,255,255,0.25);">🏷️ Libellés</div>
+            <div style="padding:8px 10px;font-size:13px;color:rgba(255,255,255,0.25);">⚙️ Paramètres</div>
+          </div>
+          <div style="flex:1;"></div>
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;background:rgba(255,255,255,0.06);font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-weight:600;">T</div>
+            <div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.6);">Thomas</div>
+              <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.2);">thomas@kyrra.ai</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div style="flex:1;padding:28px 32px;overflow:hidden;">
+        <!-- Header -->
+        <div style="margin-bottom:24px;">
+          <h1 style="font-size:22px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;">Bonjour, Thomas</h1>
+          <div class="mono" style="font-size:11px;color:var(--muted);margin-top:3px;">lun. 31 mars 2026</div>
+        </div>
+
+        <!-- Top row: 2 columns -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+          <!-- Left: overview card -->
+          <div style="background:white;border:1px solid var(--line);padding:20px;">
+            <div class="mono" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;">Aujourd'hui</div>
+            <div style="display:flex;gap:24px;">
+              <div>
+                <div style="font-size:32px;font-weight:700;color:var(--navy);letter-spacing:-0.03em;line-height:1;">47</div>
+                <div class="mono" style="font-size:9px;color:var(--muted);margin-top:2px;">triés</div>
+              </div>
+              <div>
+                <div style="font-size:32px;font-weight:700;color:var(--red);letter-spacing:-0.03em;line-height:1;">18</div>
+                <div class="mono" style="font-size:9px;color:var(--muted);margin-top:2px;">bloqués</div>
+              </div>
+              <div>
+                <div style="font-size:32px;font-weight:700;color:var(--green);letter-spacing:-0.03em;line-height:1;">23<span style="font-size:14px;font-weight:400;color:var(--muted);">m</span></div>
+                <div class="mono" style="font-size:9px;color:var(--muted);margin-top:2px;">gagnées</div>
+              </div>
+            </div>
+            <!-- Mini bar chart -->
+            <div style="display:flex;gap:2px;margin-top:16px;height:32px;align-items:flex-end;">
+              <div style="flex:1;background:var(--tag-blue-bg);height:40%;"></div>
+              <div style="flex:1;background:var(--tag-blue-bg);height:60%;"></div>
+              <div style="flex:1;background:var(--tag-blue-bg);height:35%;"></div>
+              <div style="flex:1;background:var(--tag-blue-bg);height:80%;"></div>
+              <div style="flex:1;background:var(--tag-blue-bg);height:55%;"></div>
+              <div style="flex:1;background:var(--tag-blue-bg);height:100%;border:1px solid var(--tag-blue);"></div>
+              <div style="flex:1;background:var(--surface);height:20%;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;">
+              <span class="mono" style="font-size:8px;color:var(--subtle);">lun</span>
+              <span class="mono" style="font-size:8px;color:var(--subtle);">mar</span>
+              <span class="mono" style="font-size:8px;color:var(--subtle);">mer</span>
+              <span class="mono" style="font-size:8px;color:var(--subtle);">jeu</span>
+              <span class="mono" style="font-size:8px;color:var(--subtle);">ven</span>
+              <span class="mono" style="font-size:8px;color:var(--navy);font-weight:500;">auj.</span>
+              <span class="mono" style="font-size:8px;color:var(--subtle);">—</span>
+            </div>
+          </div>
+
+          <!-- Right: à voir (priority emails) -->
+          <div style="background:white;border:1px solid var(--line);">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div style="width:3px;height:14px;background:var(--tag-blue);"></div>
+                <span style="font-size:13px;font-weight:600;color:var(--navy);">À voir</span>
+                <span class="mono" style="font-size:10px;color:var(--muted);">12</span>
+              </div>
+              <span class="mono" style="font-size:10px;color:var(--accent);">tout voir →</span>
+            </div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:10px;">
+              <div style="width:3px;height:24px;background:var(--tag-blue);flex-shrink:0;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:500;color:var(--ink);">Marc Dupont — Contrat Q2</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:1px;">Signature requise avant vendredi</div>
+              </div>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">14:32</span>
+            </div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:10px;">
+              <div style="width:3px;height:24px;background:var(--tag-blue);flex-shrink:0;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:500;color:var(--ink);">Sophie Martin — Webinar BPI</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:1px;">Inscription avant le 5 avril</div>
+              </div>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">11:20</span>
+            </div>
+            <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;">
+              <div style="width:3px;height:24px;background:var(--tag-blue);flex-shrink:0;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:500;color:var(--ink);">Jean Leclerc — Offre freelance</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:1px;">Développeur React disponible immédiatement</div>
+              </div>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">09:45</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom: recent filtered/blocked -->
+        <div style="background:white;border:1px solid var(--line);">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;font-weight:600;color:var(--navy);">Récemment filtrés</span>
+            <span class="mono" style="font-size:10px;color:var(--accent);">tout voir →</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;">
+            <!-- Left column: filtrés -->
+            <div style="border-right:1px solid var(--line);">
+              <div style="padding:10px 16px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:10px;opacity:0.6;">
+                <div style="width:3px;height:20px;background:var(--subtle);flex-shrink:0;"></div>
+                <div style="flex:1;"><div style="font-size:11px;color:var(--slate);">Sales Navigator — Solutions enterprise</div></div>
+                <span style="font-size:8px;padding:2px 6px;background:var(--tag-gray-bg);color:var(--tag-gray);font-weight:600;text-transform:uppercase;">Filtré</span>
+              </div>
+              <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;opacity:0.6;">
+                <div style="width:3px;height:20px;background:var(--subtle);flex-shrink:0;"></div>
+                <div style="flex:1;"><div style="font-size:11px;color:var(--slate);">HubSpot — Votre CRM gratuit</div></div>
+                <span style="font-size:8px;padding:2px 6px;background:var(--tag-gray-bg);color:var(--tag-gray);font-weight:600;text-transform:uppercase;">Filtré</span>
+              </div>
+            </div>
+            <!-- Right column: bloqués -->
+            <div>
+              <div style="padding:10px 16px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:10px;opacity:0.35;">
+                <div style="width:3px;height:20px;background:#d4a0a0;flex-shrink:0;"></div>
+                <div style="flex:1;"><div style="font-size:11px;color:var(--muted);text-decoration:line-through;">GrowthHack Pro — Pipeline B2B</div></div>
+                <span style="font-size:8px;padding:2px 6px;background:var(--tag-red-bg);color:var(--tag-red);font-weight:600;text-transform:uppercase;">Bloqué</span>
+              </div>
+              <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;opacity:0.35;">
+                <div style="width:3px;height:20px;background:#d4a0a0;flex-shrink:0;"></div>
+                <div style="flex:1;"><div style="font-size:11px;color:var(--muted);text-decoration:line-through;">Newsletter Growth Weekly</div></div>
+                <span style="font-size:8px;padding:2px 6px;background:var(--tag-red-bg);color:var(--tag-red);font-weight:600;text-transform:uppercase;">Bloqué</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="rationale">
+    <strong>Concept :</strong> Zones claires avec hiérarchie. En haut gauche : stats du jour + mini bar chart de la semaine. En haut droite : emails "À voir" (les prioritaires). En bas : filtrés/bloqués en 2 colonnes compactes. Le dirigeant voit d'abord ce qui nécessite son attention, puis le bruit filtré en secondaire.
+  </div>
+</div>
+
+</body>
+</html>
