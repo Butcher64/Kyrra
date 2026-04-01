@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { classificationLoop } from './classification'
 import { reconciliationLoop, watchRenewalLoop } from './reconciliation'
-import { onboardingScanLoop } from './onboarding'
+import { onboardingScanLoop, inboxScanLoop } from './onboarding'
 import { reclassificationLoop } from './reclassification'
 import { recapCronLoop } from './recap'
 import { monitoringLoop } from './monitoring'
@@ -45,13 +45,14 @@ async function main() {
   startHealthServer()
   markWorkerStarted()
 
-  // 7 resilient loops — crash in one does NOT kill others
+  // 8 resilient loops — crash in one does NOT kill others
   await Promise.all([
     resilientLoop('classification', () => classificationLoop(supabase)),
     resilientLoop('reclassification', () => reclassificationLoop(supabase)),
     resilientLoop('watchRenewal', () => watchRenewalLoop(supabase)),
     resilientLoop('reconciliation', () => reconciliationLoop(supabase)),
     resilientLoop('onboarding', () => onboardingScanLoop(supabase)),
+    resilientLoop('inboxScan', () => inboxScanLoop(supabase)),
     resilientLoop('recap', () => recapCronLoop(supabase)),
     resilientLoop('monitoring', () => monitoringLoop(supabase)),
   ])
