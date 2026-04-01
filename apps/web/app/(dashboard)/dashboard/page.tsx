@@ -1,6 +1,7 @@
 import { Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { getLabels } from '../actions/labels'
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -12,10 +13,19 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hours / 24)}j`
 }
 
-const classificationConfig = {
-  A_VOIR: { label: 'À voir', bar: 'bar-a-voir', badgeBg: 'bg-[#e8edf8]', badgeText: 'text-[#2d4a8a]', opacity: 'opacity-100', fontWeight: 'font-medium' },
-  FILTRE: { label: 'Filtré', bar: 'bar-filtre', badgeBg: 'bg-[#edeef2]', badgeText: 'text-[#5c6070]', opacity: 'opacity-55', fontWeight: 'font-normal' },
-  BLOQUE: { label: 'Bloqué', bar: 'bar-bloque', badgeBg: 'bg-[#f8e8e8]', badgeText: 'text-[#8a2d2d]', opacity: 'opacity-30', fontWeight: 'font-normal' },
+/**
+ * Derives badge styling from a hex color.
+ * Returns a light background and dark text version.
+ */
+function labelBadgeStyle(hexColor: string): { bg: string; text: string } {
+  // Parse hex to RGB
+  const r = parseInt(hexColor.slice(1, 3), 16)
+  const g = parseInt(hexColor.slice(3, 5), 16)
+  const b = parseInt(hexColor.slice(5, 7), 16)
+  return {
+    bg: `rgba(${r}, ${g}, ${b}, 0.12)`,
+    text: hexColor,
+  }
 }
 
 export default async function DashboardPage() {
@@ -26,9 +36,13 @@ export default async function DashboardPage() {
     return <div className="p-12 text-center text-[#8b90a0]">Session expirée. <a href="/login" className="text-[#3a5bc7] underline">Reconnexion</a></div>
   }
 
+  // Load user labels
+  const labelsResult = await getLabels()
+  const userLabels = labelsResult.data ?? []
+
   let filteredToday = 0
   let blockedToday = 0
-  let recentEmails: Array<{ gmail_message_id: string; classification_result: string; summary: string | null; confidence_score: number | null; created_at: string }> = []
+  let recentEmails: Array<{ gmail_message_id: string; classification_result: string; label_id: string | null; summary: string | null; confidence_score: number | null; created_at: string }> = []
   let weeklyByDay: number[] = [0, 0, 0, 0, 0, 0, 0]
   let weekBlocked = 0
 
@@ -46,7 +60,7 @@ export default async function DashboardPage() {
     const [countRes, blockedRes, recentRes, weekRes, weekBlockedRes] = await Promise.all([
       supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', `${today}T00:00:00Z`),
       supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('classification_result', 'BLOQUE').gte('created_at', `${today}T00:00:00Z`),
-      supabase.from('email_classifications').select('gmail_message_id, classification_result, summary, confidence_score, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+      supabase.from('email_classifications').select('gmail_message_id, classification_result, label_id, summary, confidence_score, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
       supabase.from('email_classifications').select('created_at').eq('user_id', user.id).gte('created_at', weekStart),
       supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('classification_result', 'BLOQUE').gte('created_at', weekStart),
     ])
@@ -60,7 +74,7 @@ export default async function DashboardPage() {
     if (weekRes.data) {
       for (const row of weekRes.data) {
         const dayOfWeek = (new Date(row.created_at).getDay() + 6) % 7 // Monday=0
-        weeklyByDay[dayOfWeek]++
+        if (weeklyByDay[dayOfWeek] !== undefined) weeklyByDay[dayOfWeek]++
       }
     }
   } catch (error) {
@@ -73,10 +87,45 @@ export default async function DashboardPage() {
   const now = new Date()
   const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' })
 
-  // Split emails by classification
-  const aVoirEmails = recentEmails.filter(e => e.classification_result === 'A_VOIR').slice(0, 3)
-  const filtreEmails = recentEmails.filter(e => e.classification_result === 'FILTRE').slice(0, 2)
-  const bloqueEmails = recentEmails.filter(e => e.classification_result === 'BLOQUE').slice(0, 2)
+  // Build label lookup for quick access
+  const labelById = new Map(userLabels.map(l => [l.id, l]))
+
+  // Helper: resolve label for an email (dynamic label_id or legacy classification_result fallback)
+  function resolveEmailLabel(email: typeof recentEmails[number]): { name: string; color: string; position: number } | null {
+    if (email.label_id && labelById.has(email.label_id)) {
+      const l = labelById.get(email.label_id)!
+      return { name: l.name, color: l.color, position: l.position }
+    }
+    // Legacy fallback: map classification_result to approximate label
+    const legacyMap: Record<string, { name: string; color: string; position: number }> = {
+      'A_VOIR': { name: 'À voir', color: '#2e7d32', position: 0 },
+      'FILTRE': { name: 'Filtré', color: '#5c6070', position: 50 },
+      'BLOQUE': { name: 'Bloqué', color: '#c23a3a', position: 100 },
+    }
+    return legacyMap[email.classification_result] ?? null
+  }
+
+  // Group emails by label, preserving order
+  const emailsByLabel = new Map<string, { label: { name: string; color: string; position: number }; emails: typeof recentEmails }>()
+  for (const email of recentEmails) {
+    const resolved = resolveEmailLabel(email)
+    if (!resolved) continue
+    const key = email.label_id ?? `legacy_${email.classification_result}`
+    if (!emailsByLabel.has(key)) {
+      emailsByLabel.set(key, { label: resolved, emails: [] })
+    }
+    emailsByLabel.get(key)!.emails.push(email)
+  }
+
+  // Sort groups by label position, take top labels
+  const sortedGroups = [...emailsByLabel.values()].sort((a, b) => a.label.position - b.label.position)
+
+  // The first group (lowest position = most important) goes in the featured card
+  const featuredGroup = sortedGroups[0] ?? null
+  const featuredEmails = featuredGroup?.emails.slice(0, 3) ?? []
+
+  // Remaining groups go in the bottom section
+  const otherGroups = sortedGroups.slice(1)
 
   // Weekly bar chart from real data
   const dayLabels = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim']
@@ -166,21 +215,21 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Right: A voir card */}
+        {/* Right: Featured label card */}
         <div className="bg-white border border-[#e4e6ed]">
-          {/* Header with blue bar */}
+          {/* Header with colored bar */}
           <div className="flex items-center gap-3 px-6 py-4 border-b border-[#e4e6ed]">
-            <div className="w-[3px] h-4 bg-[#3a5bc7]" />
-            <h2 className="text-[13px] font-semibold text-[#0c1a32]">&Agrave; voir</h2>
-            <span className="font-mono text-[10px] text-[#8b90a0]">{aVoirEmails.length}</span>
-            <Link href="/emails?filter=a_voir" className="font-mono text-[11px] text-[#3a5bc7] no-underline hover:underline ml-auto">
+            <div className="w-[3px] h-4" style={{ backgroundColor: featuredGroup?.label.color ?? '#3a5bc7' }} />
+            <h2 className="text-[13px] font-semibold text-[#0c1a32]">{featuredGroup?.label.name ?? '\u00c0 voir'}</h2>
+            <span className="font-mono text-[10px] text-[#8b90a0]">{featuredEmails.length}</span>
+            <Link href="/emails" className="font-mono text-[11px] text-[#3a5bc7] no-underline hover:underline ml-auto">
               tout voir &rarr;
             </Link>
           </div>
 
-          {aVoirEmails.length > 0 ? (
+          {featuredEmails.length > 0 ? (
             <div className="divide-y divide-[#e4e6ed]">
-              {aVoirEmails.map((email) => {
+              {featuredEmails.map((email) => {
                 const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
                 return (
                   <a
@@ -190,10 +239,10 @@ export default async function DashboardPage() {
                     rel="noopener noreferrer"
                     className="flex items-start gap-3 px-6 py-3.5 no-underline hover:bg-[#f5f6f9] transition-colors"
                   >
-                    <div className="w-[3px] self-stretch bg-[#3a5bc7] shrink-0 mt-0.5" />
+                    <div className="w-[3px] self-stretch shrink-0 mt-0.5" style={{ backgroundColor: featuredGroup?.label.color ?? '#3a5bc7' }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-medium text-[#0c1a32] truncate">
-                        {email.summary ?? 'Email &agrave; consulter'}
+                        {email.summary ?? 'Email \u00e0 consulter'}
                       </p>
                       <p className="font-mono text-[10px] text-[#c4c7d4] mt-0.5">
                         {timeAgo(email.created_at)}
@@ -206,13 +255,13 @@ export default async function DashboardPage() {
           ) : (
             <div className="py-12 text-center">
               <Mail size={22} strokeWidth={1} className="text-[#c4c7d4] mx-auto mb-2" />
-              <p className="text-[12px] text-[#8b90a0]">Aucun email &agrave; voir</p>
+              <p className="text-[12px] text-[#8b90a0]">Aucun email r&eacute;cent</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Bottom: Recently filtered — full width */}
+      {/* Bottom: Other labels — full width */}
       <div className="bg-white border border-[#e4e6ed]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#e4e6ed]">
           <h2 className="text-[13px] font-semibold text-[#0c1a32]">R&eacute;cemment filtr&eacute;s</h2>
@@ -221,75 +270,57 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {(filtreEmails.length > 0 || bloqueEmails.length > 0) ? (
-          <div className="grid grid-cols-2 divide-x divide-[#e4e6ed]">
-            {/* Left: Filtered */}
-            <div className="divide-y divide-[#e4e6ed]">
-              {filtreEmails.map((email) => {
-                const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
-                return (
-                  <a
-                    key={email.gmail_message_id}
-                    href={gmailLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 px-6 py-3.5 no-underline hover:bg-[#f5f6f9] transition-colors opacity-60"
-                  >
-                    <div className="w-[3px] self-stretch bg-[#c4c7d4] shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] text-[#0c1a32] truncate">
-                        {email.summary ?? 'Email filtr&eacute;'}
-                      </p>
-                      <p className="font-mono text-[10px] text-[#c4c7d4] mt-0.5">
-                        {timeAgo(email.created_at)}
-                      </p>
+        {otherGroups.length > 0 ? (
+          <div className={`grid divide-x divide-[#e4e6ed]`} style={{ gridTemplateColumns: `repeat(${Math.min(otherGroups.length, 3)}, 1fr)` }}>
+            {otherGroups.slice(0, 3).map((group) => {
+              const badge = labelBadgeStyle(group.label.color)
+              const shownEmails = group.emails.slice(0, 3)
+              // Lower position labels are more prominent
+              const opacity = group.label.position >= 5 ? 'opacity-40' : group.label.position >= 3 ? 'opacity-60' : ''
+              return (
+                <div key={group.label.name} className="divide-y divide-[#e4e6ed]">
+                  {/* Label header */}
+                  <div className="flex items-center gap-2 px-6 py-2.5 border-b border-[#e4e6ed]">
+                    <div className="w-[3px] h-3" style={{ backgroundColor: group.label.color }} />
+                    <span className="text-[11px] font-semibold text-[#0c1a32]">{group.label.name}</span>
+                    <span className="font-mono text-[9px] text-[#8b90a0]">{group.emails.length}</span>
+                  </div>
+                  {shownEmails.map((email) => {
+                    const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
+                    return (
+                      <a
+                        key={email.gmail_message_id}
+                        href={gmailLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex items-start gap-3 px-6 py-3.5 no-underline hover:bg-[#f5f6f9] transition-colors ${opacity}`}
+                      >
+                        <div className="w-[3px] self-stretch shrink-0 mt-0.5" style={{ backgroundColor: group.label.color }} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] text-[#0c1a32] truncate">
+                            {email.summary ?? 'Email'}
+                          </p>
+                          <p className="font-mono text-[10px] text-[#c4c7d4] mt-0.5">
+                            {timeAgo(email.created_at)}
+                          </p>
+                        </div>
+                        <span
+                          className="shrink-0 px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider"
+                          style={{ backgroundColor: badge.bg, color: badge.text }}
+                        >
+                          {group.label.name}
+                        </span>
+                      </a>
+                    )
+                  })}
+                  {shownEmails.length === 0 && (
+                    <div className={`py-8 text-center ${opacity}`}>
+                      <p className="text-[12px] text-[#8b90a0]">Aucun email</p>
                     </div>
-                    <span className="shrink-0 px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-[#edeef2] text-[#5c6070]">
-                      Filtr&eacute;
-                    </span>
-                  </a>
-                )
-              })}
-              {filtreEmails.length === 0 && (
-                <div className="py-8 text-center opacity-60">
-                  <p className="text-[12px] text-[#8b90a0]">Aucun email filtr&eacute;</p>
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* Right: Blocked */}
-            <div className="divide-y divide-[#e4e6ed]">
-              {bloqueEmails.map((email) => {
-                const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
-                return (
-                  <a
-                    key={email.gmail_message_id}
-                    href={gmailLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 px-6 py-3.5 no-underline hover:bg-[#f5f6f9] transition-colors opacity-35"
-                  >
-                    <div className="w-[3px] self-stretch bg-[#c23a3a] shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] text-[#0c1a32] truncate line-through">
-                        {email.summary ?? 'Email bloqu&eacute;'}
-                      </p>
-                      <p className="font-mono text-[10px] text-[#c4c7d4] mt-0.5">
-                        {timeAgo(email.created_at)}
-                      </p>
-                    </div>
-                    <span className="shrink-0 px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-[#f8e8e8] text-[#8a2d2d]">
-                      Bloqu&eacute;
-                    </span>
-                  </a>
-                )
-              })}
-              {bloqueEmails.length === 0 && (
-                <div className="py-8 text-center opacity-35">
-                  <p className="text-[12px] text-[#8b90a0]">Aucun email bloqu&eacute;</p>
-                </div>
-              )}
-            </div>
+              )
+            })}
           </div>
         ) : (
           <div className="py-16 text-center">
