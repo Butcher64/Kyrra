@@ -8,7 +8,7 @@ import { stripPIIFromSummary, sanitizeForLLM } from './lib/pii-stripper'
 import { getValidAccessToken, fetchEmailMetadata, fetchEmailBody, ensureDynamicLabels, applyDynamicLabel, GmailAuthError } from './lib/gmail'
 import { ClassificationLogger } from './lib/classification-logger'
 import { checkWhitelist } from './lib/whitelist-check'
-import { buildSystemPrompt } from './lib/prompt-builder'
+import { buildSystemPrompt, type UserProfile } from './lib/prompt-builder'
 import { resolveLabel, resolveLabelByName } from './lib/label-resolver'
 
 /**
@@ -182,7 +182,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
     // ── Step 6: Load user settings + credit check ──
     const { data: userSettings } = await supabase
       .from('user_settings')
-      .select('user_role, exposure_mode, role, daily_credit_limit')
+      .select('user_role, exposure_mode, role, daily_credit_limit, sector, company_description, prospection_utile, prospection_non_sollicitee, interests')
       .eq('user_id', job.user_id)
       .maybeSingle()
 
@@ -190,6 +190,16 @@ export async function classificationLoop(supabase: any): Promise<void> {
     const dailyCreditLimit: number = userSettings?.daily_credit_limit ?? 0
     const userRole: string = userSettings?.user_role ?? 'CEO'
     const exposureMode: string = userSettings?.exposure_mode ?? 'normal'
+
+    const userProfile: UserProfile = {
+      userRole,
+      exposureMode,
+      sector: userSettings?.sector || undefined,
+      companyDescription: userSettings?.company_description || undefined,
+      prospectionUtile: userSettings?.prospection_utile || undefined,
+      prospectionNonSollicitee: userSettings?.prospection_non_sollicitee || undefined,
+      interests: userSettings?.interests || undefined,
+    }
 
     if (accountRole !== 'admin') {
       if (dailyCreditLimit === 0) {
@@ -231,7 +241,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
     const fpResult = fingerprintEmail(emailHeaders)
 
     // Build dynamic prompt from user's labels
-    const dynamicPrompt = buildSystemPrompt(typedLabels, userRole, exposureMode)
+    const dynamicPrompt = buildSystemPrompt(typedLabels, userProfile)
 
     let finalResult: ClassificationResult
     let resolvedLabel: UserLabel
