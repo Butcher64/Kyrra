@@ -166,7 +166,7 @@ export default function OnboardingProgressPage() {
                 Vous recevrez un email quand c&apos;est pr&ecirc;t.
                 <br />
                 <a
-                  href="/dashboard"
+                  href="/configure-labels"
                   className="inline-block mt-2 text-white/50 underline underline-offset-4 hover:text-white/70 transition-colors"
                 >
                   Aller au tableau de bord &rarr;
@@ -207,10 +207,10 @@ export default function OnboardingProgressPage() {
             </p>
 
             <a
-              href="/dashboard"
+              href="/configure-labels"
               className="inline-flex items-center justify-center h-11 px-8 bg-white text-[#0c1a32] font-mono font-medium text-sm transition-opacity hover:opacity-90"
             >
-              Voir votre tableau de bord &rarr;
+              Configurer vos labels &rarr;
             </a>
           </div>
         )}
