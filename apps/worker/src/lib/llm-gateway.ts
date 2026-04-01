@@ -12,6 +12,7 @@ const LLM_TIMEOUT_MS = 14_000
 
 export interface LLMClassificationResult {
   result: ClassificationResult
+  labelName: string
   confidence: number
   summary: string
   _usage?: { inputTokens: number; outputTokens: number; costUsd: number; model: string; latencyMs: number }
@@ -63,30 +64,45 @@ async function recordMetrics(
 }
 
 /**
- * Classify an email via LLM (GPT-4o-mini primary)
- * Returns structured classification or null on failure (→ rules fallback)
+ * Build the legacy hardcoded system prompt for 3-label classification.
+ * Used when no systemPromptOverride is provided (backwards compat).
  */
-export async function classifyWithLLM(
-  email: EmailContent,
-  supabase: any,
-): Promise<LLMClassificationResult | null> {
-  // Check circuit breaker
-  if (await isCircuitOpen(supabase)) {
-    console.log('LLM circuit breaker open — routing to rules fallback')
-    return null
-  }
-
-  const systemPrompt = `You are Kyrra, an AI email classification system for B2B professionals.
+function buildLegacyPrompt(email: EmailContent): string {
+  return `You are Kyrra, an AI email classification system for B2B professionals.
 Classify the incoming email as one of: A_VOIR (worth reviewing), FILTRE (filtered noise), BLOQUE (blocked spam/prospecting).
 
 User context:
-- Role: ${email.userRole}
+- Role: ${email.userRole} (business decision-maker)
 - Exposure mode: ${email.exposureMode}
 
-Rules:
-- A_VOIR: Potentially relevant commercial email matching user's industry/needs
-- FILTRE: Generic commercial prospecting, not relevant to user's role
-- BLOQUE: Obvious mass prospecting, spam tools, irrelevant pitches
+CRITICAL RULES — classify in this order:
+
+1. TRANSACTIONAL/SERVICE emails are ALWAYS A_VOIR — NEVER classify as FILTRE or BLOQUE:
+   - Authentication: OTP codes, verification emails, password resets, 2FA
+   - Billing: invoices, payment confirmations, payment failures, subscription renewals
+   - Security alerts: login notifications, suspicious activity, account warnings
+   - Tool notifications: Slack, GitHub, Google Workspace, Notion, Figma, Linear, calendar invites
+   - Account management: welcome emails, plan changes, usage alerts, quota warnings
+   - Delivery/order: shipping confirmations, tracking, receipts
+
+2. A_VOIR — Emails the user should see:
+   - All transactional/service emails (rule 1 above)
+   - Potentially relevant business emails matching user's industry/role
+   - Emails from individuals (not mass-sent)
+   - Anything you're uncertain about — when in doubt, A_VOIR
+
+3. FILTRE — Noise the user probably doesn't need:
+   - Generic marketing newsletters the user didn't subscribe to
+   - Mass-sent commercial content not matching user's role
+   - Automated digest/recap emails from platforms
+   - Generic event invitations to unknown events
+
+4. BLOQUE — Obvious unwanted outreach:
+   - Cold prospecting/sales outreach from strangers
+   - Mass-sent pitches using prospecting tools
+   - Spam, phishing attempts, scam emails
+
+KEY PRINCIPLE: When in doubt between FILTRE and A_VOIR, choose A_VOIR. A false negative (missing a real email) is far worse than a false positive (showing noise).
 
 Respond with ONLY a JSON object:
 {
@@ -94,6 +110,28 @@ Respond with ONLY a JSON object:
   "confidence": 0.0 to 1.0,
   "summary": "One-line functional summary in the email's language (FR or EN). No PII."
 }`
+}
+
+/**
+ * Classify an email via LLM (GPT-4o-mini primary)
+ * Returns structured classification or null on failure (→ rules fallback)
+ *
+ * @param systemPromptOverride — Dynamic prompt built from user's custom labels.
+ *   When provided, replaces the legacy hardcoded prompt. Used by classification.ts
+ *   to pass dynamically-built prompts for custom label sets.
+ */
+export async function classifyWithLLM(
+  email: EmailContent,
+  supabase: any,
+  systemPromptOverride?: string,
+): Promise<LLMClassificationResult | null> {
+  // Check circuit breaker
+  if (await isCircuitOpen(supabase)) {
+    console.log('LLM circuit breaker open — routing to rules fallback')
+    return null
+  }
+
+  const systemPrompt = systemPromptOverride ?? buildLegacyPrompt(email)
 
   const userMessage = `From: ${email.from}
 Subject: ${email.subject}
@@ -143,12 +181,22 @@ ${email.tail}
 
     const parsed = JSON.parse(content)
 
-    // Validate structured output (FR9 — prompt injection resistance)
-    const validCategories = ['A_VOIR', 'FILTRE', 'BLOQUE']
-    if (!validCategories.includes(parsed.category)) {
-      console.error('LLM returned invalid category:', parsed.category)
+    // Handle both response formats:
+    // - Dynamic mode: { "label": "..." } (custom labels)
+    // - Legacy mode:  { "category": "..." } (A_VOIR / FILTRE / BLOQUE)
+    const labelName = parsed.label ?? parsed.category ?? ''
+    const legacyResult = parsed.category as ClassificationResult | undefined
+
+    if (!labelName && !legacyResult) {
+      console.error('LLM returned neither label nor category')
       return null // → rules fallback
     }
+
+    // Map to legacy result for backwards compat (FR9 — prompt injection resistance)
+    const validCategories = ['A_VOIR', 'FILTRE', 'BLOQUE']
+    const result: ClassificationResult = validCategories.includes(legacyResult ?? '')
+      ? legacyResult as ClassificationResult
+      : 'A_VOIR'
 
     if (typeof parsed.confidence !== 'number' || parsed.confidence < 0 || parsed.confidence > 1) {
       console.error('LLM returned invalid confidence:', parsed.confidence)
@@ -165,7 +213,8 @@ ${email.tail}
     await recordMetrics(supabase, costUsd, true)
 
     return {
-      result: parsed.category as ClassificationResult,
+      result,
+      labelName,
       confidence: parsed.confidence,
       summary: typeof parsed.summary === 'string' ? parsed.summary.slice(0, 200) : '',
       _usage: { inputTokens, outputTokens, costUsd, model: 'gpt-4o-mini', latencyMs: Date.now() - llmStartTime },

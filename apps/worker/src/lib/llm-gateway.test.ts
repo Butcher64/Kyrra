@@ -252,7 +252,73 @@ describe('classifyWithLLM — successful classification', () => {
       const result = await classifyWithLLM(makeEmail(), supabase)
       expect(result).not.toBeNull()
       expect(result!.result).toBe(category)
+      expect(result!.labelName).toBe(category)
     }
+  })
+
+  it('returns labelName from legacy category response', async () => {
+    const supabase = makeSupabaseMock(null)
+    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      makeOpenAIResponse({ category: 'FILTRE', confidence: 0.85, summary: 'Newsletter.' }),
+    )
+
+    const result = await classifyWithLLM(makeEmail(), supabase)
+    expect(result).not.toBeNull()
+    expect(result!.labelName).toBe('FILTRE')
+    expect(result!.result).toBe('FILTRE')
+  })
+
+  it('returns labelName from dynamic label response', async () => {
+    const supabase = makeSupabaseMock(null)
+    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      makeOpenAIResponse({ label: 'Prospection', confidence: 0.92, summary: 'Cold outreach.' }),
+    )
+
+    const result = await classifyWithLLM(makeEmail(), supabase)
+    expect(result).not.toBeNull()
+    expect(result!.labelName).toBe('Prospection')
+    // Non-legacy label defaults to A_VOIR for backwards compat
+    expect(result!.result).toBe('A_VOIR')
+  })
+
+  it('uses systemPromptOverride when provided', async () => {
+    const supabase = makeSupabaseMock(null)
+    const customPrompt = 'You are a custom classifier. Respond with JSON: { "label": "...", "confidence": 0.0-1.0, "summary": "..." }'
+    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      makeOpenAIResponse({ label: 'Important', confidence: 0.80, summary: 'Custom label.' }),
+    )
+
+    await classifyWithLLM(makeEmail(), supabase, customPrompt)
+
+    const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
+    expect(body.messages[0].content).toBe(customPrompt)
+  })
+
+  it('uses legacy prompt when no systemPromptOverride', async () => {
+    const supabase = makeSupabaseMock(null)
+    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      makeOpenAIResponse({ category: 'A_VOIR', confidence: 0.70, summary: 'Test.' }),
+    )
+
+    await classifyWithLLM(makeEmail({ userRole: 'CEO', exposureMode: 'normal' }), supabase)
+
+    const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
+    const systemPrompt: string = body.messages[0].content
+    // Legacy prompt should contain the hardcoded classification rules
+    expect(systemPrompt).toContain('A_VOIR')
+    expect(systemPrompt).toContain('FILTRE')
+    expect(systemPrompt).toContain('BLOQUE')
+    expect(systemPrompt).toContain('Role: CEO')
+  })
+
+  it('returns null when LLM returns neither label nor category', async () => {
+    const supabase = makeSupabaseMock(null)
+    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      makeOpenAIResponse({ confidence: 0.80, summary: 'No label.' }),
+    )
+
+    const result = await classifyWithLLM(makeEmail(), supabase)
+    expect(result).toBeNull()
   })
 })
 
@@ -321,14 +387,16 @@ describe('classifyWithLLM — error handling', () => {
     expect(result).toBeNull()
   })
 
-  it('returns null on invalid category (not A_VOIR/FILTRE/BLOQUE)', async () => {
+  it('defaults to A_VOIR when category is not a valid legacy category', async () => {
     const supabase = makeSupabaseMock(null)
     ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
       makeOpenAIResponse({ category: 'SPAM', confidence: 0.90, summary: 'Spam email.' }),
     )
 
     const result = await classifyWithLLM(makeEmail(), supabase)
-    expect(result).toBeNull()
+    expect(result).not.toBeNull()
+    expect(result!.result).toBe('A_VOIR')
+    expect(result!.labelName).toBe('SPAM')
   })
 
   it('returns null on invalid confidence (negative)', async () => {
@@ -398,10 +466,10 @@ describe('classifyWithLLM — error handling', () => {
     expect(metricsCalls).toHaveLength(0)
   })
 
-  it('does not record metrics when validation fails', async () => {
+  it('does not record metrics when confidence validation fails', async () => {
     const supabase = makeSupabaseMock(null)
     ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
-      makeOpenAIResponse({ category: 'INVALID', confidence: 0.90, summary: 'Test.' }),
+      makeOpenAIResponse({ category: 'FILTRE', confidence: -1, summary: 'Test.' }),
     )
 
     await classifyWithLLM(makeEmail(), supabase)
