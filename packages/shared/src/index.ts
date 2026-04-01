@@ -4,12 +4,16 @@
 export type { ActionResult, AppError } from './types/action-result'
 export type { ClassificationSignal } from './types/classification-signal'
 export type { UserIntegration, PublicIntegration } from './types/integration'
+export type { UserLabel } from './types/user-label'
+export { DEFAULT_LABELS, LEGACY_RESULT_TO_DEFAULT_LABEL } from './types/user-label'
 
 // Constants
 export {
   CLASSIFICATION_RESULTS,
   CLASSIFICATION_LABELS,
   SYSTEM_WHITELISTED_SENDERS,
+  SCAN_TIER,
+  getScanLimit,
 } from './constants/classification'
 export type { ClassificationResult } from './constants/classification'
 export { ERROR_CODES } from './constants/errors'
