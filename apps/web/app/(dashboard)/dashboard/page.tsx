@@ -42,9 +42,12 @@ export default async function DashboardPage() {
 
   let filteredToday = 0
   let blockedToday = 0
-  let recentEmails: Array<{ gmail_message_id: string; classification_result: string; label_id: string | null; summary: string | null; confidence_score: number | null; created_at: string }> = []
+  let recentEmails: Array<{ gmail_message_id: string; classification_result: string; label_id: string | null; summary: string | null; sender_display: string | null; subject_snippet: string | null; confidence_score: number | null; created_at: string }> = []
   let weeklyByDay: number[] = [0, 0, 0, 0, 0, 0, 0]
   let weekBlocked = 0
+
+  // B2.4 fix: count "blocked" by label position (>= 5 = Prospection/Spam), not classification_result
+  const blockedLabelIds = userLabels.filter(l => l.position >= 5).map(l => l.id)
 
   try {
     const now = new Date()
@@ -57,18 +60,29 @@ export default async function DashboardPage() {
     monday.setHours(0, 0, 0, 0)
     const weekStart = monday.toISOString()
 
+    // Build blocked queries using label_id instead of classification_result
+    const noBlockedFallback = Promise.resolve({ count: 0, data: null, error: null })
+
+    const blockedTodayQuery = blockedLabelIds.length > 0
+      ? supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).in('label_id', blockedLabelIds).gte('created_at', `${today}T00:00:00Z`)
+      : noBlockedFallback
+
+    const blockedWeekQuery = blockedLabelIds.length > 0
+      ? supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).in('label_id', blockedLabelIds).gte('created_at', weekStart)
+      : noBlockedFallback
+
     const [countRes, blockedRes, recentRes, weekRes, weekBlockedRes] = await Promise.all([
       supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', `${today}T00:00:00Z`),
-      supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('classification_result', 'BLOQUE').gte('created_at', `${today}T00:00:00Z`),
-      supabase.from('email_classifications').select('gmail_message_id, classification_result, label_id, summary, confidence_score, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+      blockedTodayQuery,
+      supabase.from('email_classifications').select('gmail_message_id, classification_result, label_id, summary, sender_display, subject_snippet, confidence_score, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
       supabase.from('email_classifications').select('created_at').eq('user_id', user.id).gte('created_at', weekStart),
-      supabase.from('email_classifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('classification_result', 'BLOQUE').gte('created_at', weekStart),
+      blockedWeekQuery,
     ])
 
     filteredToday = countRes.count ?? 0
-    blockedToday = blockedRes.count ?? 0
+    blockedToday = ('count' in blockedRes ? blockedRes.count : 0) ?? 0
     recentEmails = (recentRes.data ?? []) as typeof recentEmails
-    weekBlocked = weekBlockedRes.count ?? 0
+    weekBlocked = ('count' in weekBlockedRes ? weekBlockedRes.count : 0) ?? 0
 
     // Build weekly bar chart from real data
     if (weekRes.data) {
@@ -242,7 +256,10 @@ export default async function DashboardPage() {
                     <div className="w-[3px] self-stretch shrink-0 mt-0.5" style={{ backgroundColor: featuredGroup?.label.color ?? '#3a5bc7' }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-medium text-[#0c1a32] truncate">
-                        {email.summary ?? 'Email \u00e0 consulter'}
+                        {email.sender_display || email.summary || 'Email \u00e0 consulter'}
+                      </p>
+                      <p className="text-[11px] text-[#8b90a0] truncate">
+                        {email.subject_snippet || ''}
                       </p>
                       <p className="font-mono text-[10px] text-[#c4c7d4] mt-0.5">
                         {timeAgo(email.created_at)}
@@ -298,7 +315,10 @@ export default async function DashboardPage() {
                         <div className="w-[3px] self-stretch shrink-0 mt-0.5" style={{ backgroundColor: group.label.color }} />
                         <div className="flex-1 min-w-0">
                           <p className="text-[13px] text-[#0c1a32] truncate">
-                            {email.summary ?? 'Email'}
+                            {email.sender_display || email.summary || 'Email'}
+                          </p>
+                          <p className="text-[11px] text-[#8b90a0] truncate">
+                            {email.subject_snippet || ''}
                           </p>
                           <p className="font-mono text-[10px] text-[#c4c7d4] mt-0.5">
                             {timeAgo(email.created_at)}

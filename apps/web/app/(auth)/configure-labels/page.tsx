@@ -166,7 +166,7 @@ export default function ConfigureLabelsPage() {
     setSaving(true)
     setError(null)
 
-    const payload = labels.map((l, i) => ({
+    const payload = labels.map((l) => ({
       name: l.name,
       description: l.description,
       prompt: l.prompt,
@@ -174,12 +174,11 @@ export default function ConfigureLabelsPage() {
       gmail_label_id: l.gmail_label_id,
       gmail_label_name: l.gmail_label_name,
       is_default: l.is_default,
-      position: i,
     }))
 
     const result = await saveLabelsConfig(payload)
     if (result.success) {
-      router.push('/dashboard')
+      router.push('/scan-progress')
     } else {
       setError(result.error || 'Erreur lors de la sauvegarde')
       setSaving(false)

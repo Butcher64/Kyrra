@@ -22,7 +22,20 @@
 Ce projet utilise **BMAD v6.0.4** (installe dans `Kyrra/_bmad/`).
 Commandes heritees du parent `C:\Users\Thomas\Documents\CLAUDE\.claude\commands`.
 
-**Phase actuelle** : Implementation (Phase 4)
+### REGLE ABSOLUE : Toujours suivre BMAD en phase Implementation
+
+**Ne JAMAIS coder sans passer par les workflows BMAD.** Chaque session doit :
+1. Verifier l'etat du sprint en cours (`/bmad-bmm-sprint-status`)
+2. Planifier le sprint si necessaire (`/bmad-bmm-sprint-planning`)
+3. Traiter chaque feature/bug comme une story (`/bmad-bmm-dev-story`)
+4. Faire une code review apres chaque bloc significatif (`/bmad-bmm-code-review`)
+5. Mettre a jour les epics apres chaque story completee
+
+**Contexte** : Un drift majeur a eu lieu entre 2026-03-21 et 2026-04-01 — tout le travail
+(labels dynamiques, profiling, pipeline fixes, 14 commits) a ete fait hors BMAD.
+Les epics-beta.md sont desynchronises du code reel. A NE PLUS REPRODUIRE.
+
+### Phases completees (1-3)
 - [x] Product Brief (complete)
 - [x] PRD (complete — 86 FRs, version post-validation + edits)
 - [x] Validate PRD (complete — 5/5 Excellent, Pass, 2026-03-16)
@@ -30,6 +43,12 @@ Commandes heritees du parent `C:\Users\Thomas\Documents\CLAUDE\.claude\commands`
 - [x] Architecture (complete — 8 steps, 28 validations, 2026-03-17)
 - [x] Epics & Stories (complete — 8 epics, 44 stories, 84/86 FRs, 2026-03-19)
 - [x] Check Implementation Readiness (complete — READY, 0 critical, 0 major, 2 minor, 2026-03-20)
+
+### Phase 4 — Implementation (en cours)
+- [x] Beta Epics B0-B6 definis (2026-03-21)
+- [ ] **RECONCILIATION NECESSAIRE** : aligner epics-beta.md avec le code reel
+- [ ] Sprint planning pour les 7 bugs connus
+- [ ] Reprendre le cycle BMAD normal
 
 ---
 

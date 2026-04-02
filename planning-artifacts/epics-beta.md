@@ -2,7 +2,8 @@
 stepsCompleted: [design, validated]
 status: 'active'
 createdAt: '2026-03-21'
-context: 'Post-brainstorm — replaces original 44 stories marked done (scaffold only)'
+lastReconciled: '2026-04-01'
+context: 'Post-brainstorm — replaces original 44 stories marked done (scaffold only). Reconciled 2026-04-01: added B1.4-B1.9, B2.4-B2.6, B5.3 for work done outside BMAD + known bugs.'
 ---
 
 # Kyrra — Beta Sprint Epics & Stories
@@ -18,12 +19,14 @@ Un utilisateur peut se connecter de manière sécurisée et le code est producti
 **Blockers résolus:** Auth flow, token encryption, PKCE, CI fix
 
 ### Epic B1: Pipeline Production-Ready
-La classification fonctionne vraiment — whitelist consultée, profil utilisateur lu, idempotency correcte.
-**Blockers résolus:** Whitelist check, user settings dynamiques, sanitize LLM
+La classification fonctionne vraiment — whitelist, labels dynamiques, pré-filtrage, profil utilisateur, idempotency.
+**Blockers résolus:** Whitelist check, user settings dynamiques, sanitize LLM, labels dynamiques, pré-filtrage, parsing From, DKIM
+**Reste à faire:** saveLabelsConfig atomique, classification_result legacy
 
 ### Epic B2: Dashboard Fonctionnel
 L'utilisateur peut voir ses stats, configurer Kyrra, et naviguer dans l'app.
 **Blockers résolus:** Settings interactifs, navigation, empty states
+**Reste à faire:** Compteur bloqués, loading states, page scan temps réel
 
 ### Epic B3: Trust & Feedback Loop
 L'utilisateur peut corriger les erreurs et Kyrra apprend réellement.
@@ -36,6 +39,7 @@ Le Recap quotidien fonctionne end-to-end avec préférences.
 ### Epic B5: Tests & Observabilité
 Le code est testé, le CI fonctionne, les fondateurs sont alertés.
 **Blockers résolus:** Tests critiques, CI fix, monitoring alerts
+**Reste à faire:** Fix tests classification.ts (mocks obsolètes)
 
 ### Epic B6: RGPD & Beta Launch
 Conformité minimale + smoke test + lancement beta.
@@ -131,6 +135,94 @@ So that retries don't create duplicates and PII is protected.
 - **And** `sanitizeForLLM(content)` is called before passing to LLM gateway
 - **And** `increment_usage_counter()` is called for Free plan users before classification
 
+### Story B1.4: Labels dynamiques (système complet)
+
+> *Ajoutée lors de la réconciliation BMAD 2026-04-01. Travail réalisé hors BMAD le 2026-04-01 sur feat/dynamic-labels.*
+
+As a **user**,
+I want my emails classified with dynamic, customizable labels instead of 3 fixed categories,
+So that the classification matches my actual workflow.
+
+**Acceptance Criteria:**
+- **Given** the user has configured labels **When** an email is classified **Then** it receives one of the user's dynamic labels (not A_VOIR/FILTRE/BLOQUE)
+- **And** table `user_labels` stores id, user_id, name, description, prompt, color, gmail_label_id, is_default, position
+- **And** 7 default labels: Important, Transactionnel, Notifications, Newsletter, Prospection utile, Prospection, Spam
+- **And** `prompt-builder.ts` assembles system prompt dynamically from user labels + user profile
+- **And** `label-resolver.ts` maps fingerprint/prefilter results to the correct dynamic label
+- **And** Gmail labels are created/synced via `ensureDynamicLabels()` and applied via `applyDynamicLabel()`
+- **And** `email_classifications.label_id` FK references `user_labels`
+- **And** migration 023 creates `user_labels` table with RLS policies
+
+### Story B1.5: Pré-filtrage rapide (metadata-first pipeline)
+
+> *Ajoutée lors de la réconciliation BMAD 2026-04-01. Travail réalisé hors BMAD le 2026-04-01.*
+
+As a **system**,
+I want to classify ~80% of emails without fetching their body,
+So that API calls are minimized and classification is faster.
+
+**Acceptance Criteria:**
+- **Given** an email arrives **When** the pipeline processes it **Then** metadata is fetched first (headers only, no body)
+- **And** known domains (LinkedIn, SendGrid, etc.) are classified immediately via `prefilter.ts`
+- **And** noreply senders are classified without body fetch (60+ SaaS domains exempted)
+- **And** body is fetched lazily only when LLM classification is needed
+- **And** never-exchanged senders get a different treatment path
+
+### Story B1.6: Fix pipeline critiques (parsing, DKIM, whitelist)
+
+> *Ajoutée lors de la réconciliation BMAD 2026-04-01. Travail réalisé hors BMAD le 2026-04-01.*
+
+As a **user**,
+I want my known contacts to never be misclassified due to technical parsing bugs,
+So that I can trust Kyrra's classifications.
+
+**Acceptance Criteria:**
+- **Given** a sender like `"Name <email@domain.com>"` **When** parsed **Then** `extractEmailAddress()` strips angle brackets correctly
+- **And** DKIM allowlist includes 25+ legitimate providers (amazonses, sendgrid, google, etc.) to prevent false positives
+- **And** whitelist scan has no cap (was hardcoded to 100, now unlimited)
+- **And** transactional/auth emails always get classification_result `A_VOIR` (never FILTRE/BLOQUE)
+
+### Story B1.7: Profiling utilisateur dans l'onboarding
+
+> *Ajoutée lors de la réconciliation BMAD 2026-04-01. Travail réalisé hors BMAD le 2026-04-01 sur feat/dynamic-labels.*
+
+As a **user**,
+I want to configure my profile during onboarding (role, sector, interests),
+So that Kyrra's AI classification is tuned to my context.
+
+**Acceptance Criteria:**
+- **Given** the onboarding flow **When** user reaches `/configure-profile` **Then** they can set role, sector, company description, unwanted prospection types (chips), and interests
+- **And** profile data is stored in `user_settings` (sector, company_description, prospection_non_sollicitee, interests, profile_configured)
+- **And** migration 024 adds these columns with column-level GRANT
+- **And** profile data is injected into the LLM system prompt via `buildSystemPrompt()`
+- **And** onboarding flow: whitelist scan → profile → labels → inbox scan → dashboard
+
+### Story B1.8: Fix saveLabelsConfig atomique
+
+> *Bug connu identifié 2026-04-01.*
+
+As a **system**,
+I want label configuration saves to be atomic,
+So that a failed insert doesn't leave the user with zero labels.
+
+**Acceptance Criteria:**
+- **Given** the user saves their label configuration **When** the server action executes **Then** the delete + insert is wrapped in a Supabase RPC transaction
+- **And** if the insert fails, the delete is rolled back
+- **And** the user never ends up with 0 labels due to a partial failure
+
+### Story B1.9: Fix classification_result legacy
+
+> *Bug connu identifié 2026-04-01.*
+
+As a **system**,
+I want classification_result to be derived from the dynamic label position,
+So that dashboard counters and filters work correctly with the new label system.
+
+**Acceptance Criteria:**
+- **Given** an email is classified with a dynamic label **When** saved to `email_classifications` **Then** `classification_result` is derived from label position (e.g., position >= 5 → BLOQUE, position 3-4 → FILTRE, position 1-2 → A_VOIR)
+- **Or** `classification_result` is deprecated and all queries use `label_id` + `user_labels.position` directly
+- **And** existing dashboard queries are updated accordingly
+
 ---
 
 ## Epic B2: Dashboard Fonctionnel
@@ -171,6 +263,49 @@ So that users see accurate information.
 - **Given** the dashboard displays Trust score **When** calculated **Then** it uses `(1 - reclassification_rate_7d) * 100` (not hardcoded "94%")
 - **And** the Recap worker queries `user_integrations` + `user_settings` instead of non-existent `users` table
 - **And** exposure mode StatCard reads from `user_settings` (not hardcoded "Normal")
+
+### Story B2.4: Fix compteur "bloqués aujourd'hui" = 0
+
+> *Bug connu identifié 2026-04-01.*
+
+As a **user**,
+I want the dashboard to show accurate counts of blocked/filtered emails,
+So that I can see the value Kyrra provides.
+
+**Acceptance Criteria:**
+- **Given** the dashboard loads **When** it computes "bloqués aujourd'hui" **Then** it counts by `label_id` joined to `user_labels.position` (not by `classification_result = 'BLOQUE'`)
+- **And** "filtrés" count uses label position thresholds instead of legacy classification_result
+- **And** weekly chart data uses the same label-based counting
+- **And** time saved calculation uses real filtered count
+
+### Story B2.5: Loading states + feedback navigation
+
+> *Bug connu identifié 2026-04-01.*
+
+As a **user**,
+I want instant visual feedback when navigating the dashboard,
+So that the app feels responsive and professional.
+
+**Acceptance Criteria:**
+- **Given** a user clicks a navigation link **When** the page is loading **Then** a skeleton/loading state appears immediately (via `loading.tsx` in each route)
+- **And** navigation links show an active/loading state on click (opacity or highlight)
+- **And** no blank screen during page transitions
+- **And** no excessive animations — reactive, not flashy
+
+### Story B2.6: Page scan temps réel (onboarding)
+
+> *Bug connu identifié 2026-04-01. Feedback critique de Thomas.*
+
+As a **user**,
+I want to see my emails being classified one by one during the onboarding inbox scan,
+So that I understand what Kyrra is doing and feel confident in the results.
+
+**Acceptance Criteria:**
+- **Given** the inbox scan starts after label configuration **When** emails are being classified **Then** a dedicated page shows each email appearing with sender, subject, and assigned label (with color)
+- **And** a progress counter shows emails processed / total
+- **And** polling every 1-2s on recent classifications
+- **And** when scan is complete, redirect to dashboard which is already populated with data
+- **And** no generic spinner — real-time visibility is mandatory
 
 ---
 
@@ -253,6 +388,20 @@ So that I can react before users notice.
 - **And** alerts for: token revocations, reclassification rate >10%, reconciliation gap >10min, LLM errors >5%
 - **And** worker healthcheck endpoint `/health` for Railway
 
+### Story B5.3: Fix tests classification.ts (mocks obsolètes)
+
+> *Bug connu identifié 2026-04-01.*
+
+As a **developer**,
+I want the classification pipeline tests to pass with the new dynamic labels architecture,
+So that regressions are caught by CI.
+
+**Acceptance Criteria:**
+- **Given** the classification tests **When** executed **Then** all mocks reference the current imports (fetchEmailMetadata, fetchEmailBody, ensureDynamicLabels, applyDynamicLabel, etc.)
+- **And** tests cover the pre-filter → fingerprint → LLM → label resolution flow
+- **And** tests use UserLabel[] mock data instead of hardcoded A_VOIR/FILTRE/BLOQUE
+- **And** `pnpm test` passes in CI
+
 ---
 
 ## Epic B6: RGPD & Beta Launch
@@ -309,8 +458,10 @@ So that we know the product works end-to-end.
 
 | FR | Epic | Story |
 |----|------|-------|
-| FR7 | B1, B2 | B1.2, B2.1 |
+| FR7 | B1, B2 | B1.2, B1.4, B2.1 |
+| FR8 | B1 | B1.4 (dynamic labels) |
 | FR9 | B0 | B0.3 (sanitizeForLLM) |
+| FR10-12 | B1 | B1.4 (label config), B1.7 (user profile) |
 | FR20-21 | B0 | B0.4 |
 | FR27-28 | B1 | B1.1 |
 | FR29 | B2 | B2.1 (whitelist in settings) |

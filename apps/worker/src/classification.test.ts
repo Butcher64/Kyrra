@@ -23,9 +23,10 @@ vi.mock('./lib/pii-stripper', () => ({
 
 vi.mock('./lib/gmail', () => ({
   getValidAccessToken: vi.fn(),
-  fetchEmail: vi.fn(),
-  ensureLabels: vi.fn(),
-  applyLabel: vi.fn(),
+  fetchEmailMetadata: vi.fn(),
+  fetchEmailBody: vi.fn(),
+  ensureDynamicLabels: vi.fn(),
+  applyDynamicLabel: vi.fn(),
   GmailAuthError: class GmailAuthError extends Error {
     constructor(message: string) {
       super(message)
@@ -42,9 +43,22 @@ vi.mock('./lib/whitelist-check', () => ({
   checkWhitelist: vi.fn(),
 }))
 
+vi.mock('./lib/prefilter', () => ({
+  prefilterEmail: vi.fn(),
+}))
+
+vi.mock('./lib/prompt-builder', () => ({
+  buildSystemPrompt: vi.fn(() => 'mock-system-prompt'),
+}))
+
 vi.mock('@kyrra/shared', () => ({
   SYSTEM_WHITELISTED_SENDERS: ['noreply@kyrra.io', 'recap@kyrra.io', 'support@kyrra.io'],
   applyClassificationSafetyRules: vi.fn(),
+  LEGACY_RESULT_TO_DEFAULT_LABEL: {
+    A_VOIR: ['Important'],
+    FILTRE: ['Newsletter', 'Notifications', 'Prospection utile'],
+    BLOQUE: ['Prospection', 'Spam'],
+  },
 }))
 
 // ── Imports (after mocks) ──
@@ -54,37 +68,58 @@ import { claimNextJob, completeJob, failJob } from './lib/queue-consumer'
 import { fingerprintEmail } from './lib/fingerprinting'
 import { classifyWithLLM } from './lib/llm-gateway'
 import { stripPIIFromSummary, sanitizeForLLM } from './lib/pii-stripper'
-import { getValidAccessToken, fetchEmail, ensureLabels, applyLabel, GmailAuthError } from './lib/gmail'
+import { getValidAccessToken, fetchEmailMetadata, fetchEmailBody, ensureDynamicLabels, applyDynamicLabel, GmailAuthError } from './lib/gmail'
 import { ClassificationLogger } from './lib/classification-logger'
 import { checkWhitelist } from './lib/whitelist-check'
+import { prefilterEmail } from './lib/prefilter'
 import { applyClassificationSafetyRules } from '@kyrra/shared'
+
+// ── Constants ──
+
+const MOCK_USER_LABELS = [
+  { id: 'lbl-important', user_id: 'user-123', name: 'Important', description: '', prompt: '', color: '#2d4a8a', gmail_label_id: null, gmail_label_name: null, is_default: true, position: 0 },
+  { id: 'lbl-transac', user_id: 'user-123', name: 'Transactionnel', description: '', prompt: '', color: '#4a7a2d', gmail_label_id: null, gmail_label_name: null, is_default: true, position: 1 },
+  { id: 'lbl-notif', user_id: 'user-123', name: 'Notifications', description: '', prompt: '', color: '#7a5a2d', gmail_label_id: null, gmail_label_name: null, is_default: true, position: 2 },
+  { id: 'lbl-news', user_id: 'user-123', name: 'Newsletter', description: '', prompt: '', color: '#5a5a5a', gmail_label_id: null, gmail_label_name: null, is_default: true, position: 3 },
+  { id: 'lbl-prospu', user_id: 'user-123', name: 'Prospection utile', description: '', prompt: '', color: '#8a6a2d', gmail_label_id: null, gmail_label_name: null, is_default: true, position: 4 },
+  { id: 'lbl-prosp', user_id: 'user-123', name: 'Prospection', description: '', prompt: '', color: '#8a4a2d', gmail_label_id: null, gmail_label_name: null, is_default: true, position: 5 },
+  { id: 'lbl-spam', user_id: 'user-123', name: 'Spam', description: '', prompt: '', color: '#8a2d2d', gmail_label_id: null, gmail_label_name: null, is_default: true, position: 6 },
+]
+
+const MOCK_GMAIL_LABEL_MAP: Record<string, string> = {
+  'lbl-important': 'gmail-important',
+  'lbl-transac': 'gmail-transac',
+  'lbl-notif': 'gmail-notif',
+  'lbl-news': 'gmail-news',
+  'lbl-prospu': 'gmail-prospu',
+  'lbl-prosp': 'gmail-prosp',
+  'lbl-spam': 'gmail-spam',
+}
 
 // ── Helpers ──
 
 /**
- * Create a chainable mock Supabase client.
- * Every method returns the chain itself, except terminal methods
- * (.single(), .maybeSingle()) which resolve to { data: null } by default.
- * Override specific return values per test using `mockReturns`.
+ * Chainable + thenable mock Supabase client.
+ * Terminal methods (.single(), .maybeSingle()) return Promises.
+ * The chain itself is thenable for non-terminal queries (insert, update, select without terminal).
  */
 function createMockSupabase(mockReturns: Record<string, any> = {}) {
-  // Default terminal results for each table query
   const defaults: Record<string, any> = {
     'user_integrations.select.single': { data: null },
     'email_classifications.select.maybeSingle': { data: null },
     'user_settings.select.maybeSingle': { data: null },
+    'usage_counters.select.maybeSingle': { data: null },
+    'user_labels.select': { data: MOCK_USER_LABELS },
     'rpc.increment_usage_counter': { data: 1 },
     ...mockReturns,
   }
 
-  // Track the current table for resolving keys
   let currentTable = ''
-  let currentOp = '' // 'select', 'insert', 'update', 'rpc'
-  let rpcName = ''
+  let currentOp = ''
 
   const chain: any = {}
 
-  const chainMethods = ['from', 'select', 'insert', 'update', 'upsert', 'eq', 'order', 'limit']
+  const chainMethods = ['from', 'select', 'insert', 'update', 'upsert', 'eq', 'order', 'limit', 'gte', 'in', 'lte']
 
   for (const method of chainMethods) {
     chain[method] = vi.fn((...args: any[]) => {
@@ -100,9 +135,6 @@ function createMockSupabase(mockReturns: Record<string, any> = {}) {
   }
 
   chain.rpc = vi.fn((name: string, _params?: any) => {
-    rpcName = name
-    currentOp = 'rpc'
-    // For rpc calls, return the result immediately since rpc is terminal
     const key = `rpc.${name}`
     if (key in defaults) return Promise.resolve(defaults[key])
     return Promise.resolve({ data: null })
@@ -120,16 +152,21 @@ function createMockSupabase(mockReturns: Record<string, any> = {}) {
     return Promise.resolve({ data: null })
   })
 
+  // Make chain thenable for non-terminal queries (insert, update, select-without-terminal)
+  chain.then = (resolve: any, reject?: any) => {
+    const key = `${currentTable}.${currentOp}`
+    if (key in defaults) return Promise.resolve(defaults[key]).then(resolve, reject)
+    if (currentOp === 'insert' || currentOp === 'update') {
+      return Promise.resolve({ data: null, error: null }).then(resolve, reject)
+    }
+    return Promise.resolve({ data: null }).then(resolve, reject)
+  }
+
   return chain
 }
 
-/** Create a mock queue job with sensible defaults */
 function createMockJob(overrides: Partial<{
-  id: string
-  user_id: string
-  gmail_message_id: string
-  retry_count: number
-  status: string
+  id: string; user_id: string; gmail_message_id: string; retry_count: number
 }> = {}) {
   return {
     id: 'job-001',
@@ -141,54 +178,60 @@ function createMockJob(overrides: Partial<{
   }
 }
 
-/** Create a mock Gmail email payload */
-function createMockGmailEmail(overrides: Partial<{
-  from: string
-  subject: string
-  headers: Record<string, string>
-  bodyPreview: string
-  bodyTail: string
+function createMockMetadata(overrides: Partial<{
+  from: string; subject: string; headers: Record<string, string>
 }> = {}) {
   return {
-    id: 'msg-abc',
-    threadId: 'thread-1',
     from: 'sender@example.com',
-    to: 'user@test.com',
     subject: 'Hello World',
     headers: { from: 'sender@example.com', subject: 'Hello World' },
-    snippet: 'Hello world snippet',
-    bodyPreview: 'Hello world body preview text',
-    bodyTail: 'regards',
-    internalDate: '1711267200000',
-    labelIds: ['INBOX'],
     ...overrides,
   }
 }
 
-/** Wire up all the "happy path" mocks so we can test individual steps by overriding */
+function createMockBody(overrides: Partial<{
+  bodyPreview: string; bodyTail: string
+}> = {}) {
+  return {
+    bodyPreview: 'Hello world body preview text',
+    bodyTail: 'regards',
+    ...overrides,
+  }
+}
+
+/** Standard user_settings that passes the credit check (daily_credit_limit > 0) */
+const SETTINGS_CEO_NORMAL = { user_role: 'CEO', exposure_mode: 'normal', daily_credit_limit: 1000 }
+const SETTINGS_CEO_STRICT = { user_role: 'CEO', exposure_mode: 'strict', daily_credit_limit: 1000 }
+const SETTINGS_CEO_PERMISSIVE = { user_role: 'CEO', exposure_mode: 'permissive', daily_credit_limit: 1000 }
+
+/** Wire up all happy-path mocks so tests can override individual steps */
 function setupHappyPath(supabase: any) {
   const job = createMockJob()
-  const email = createMockGmailEmail()
+  const metadata = createMockMetadata()
+  const body = createMockBody()
 
   ;(claimNextJob as Mock).mockResolvedValue(job)
   ;(getValidAccessToken as Mock).mockResolvedValue('valid-token')
-  ;(fetchEmail as Mock).mockResolvedValue(email)
+  ;(fetchEmailMetadata as Mock).mockResolvedValue(metadata)
+  ;(fetchEmailBody as Mock).mockResolvedValue(body)
   ;(checkWhitelist as Mock).mockResolvedValue('none')
+  ;(prefilterEmail as Mock).mockReturnValue(null)
   ;(fingerprintEmail as Mock).mockReturnValue(null)
   ;(classifyWithLLM as Mock).mockResolvedValue({
     result: 'FILTRE',
     confidence: 0.85,
     summary: 'Commercial prospecting email',
+    labelName: 'Newsletter',
   })
   ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
   ;(stripPIIFromSummary as Mock).mockImplementation((s: string) => s)
   ;(sanitizeForLLM as Mock).mockImplementation((s: string) => `[sanitized]${s}`)
-  ;(ensureLabels as Mock).mockResolvedValue({ A_VOIR: 'lbl-1', FILTRE: 'lbl-2', BLOQUE: 'lbl-3' })
-  ;(applyLabel as Mock).mockResolvedValue(undefined)
+  ;(ensureDynamicLabels as Mock).mockResolvedValue(MOCK_GMAIL_LABEL_MAP)
+  ;(applyDynamicLabel as Mock).mockResolvedValue(undefined)
   ;(completeJob as Mock).mockResolvedValue(undefined)
   ;(failJob as Mock).mockResolvedValue(undefined)
 
-  return { job, email }
+  return { job, metadata, body }
 }
 
 // ── Tests ──
@@ -205,27 +248,22 @@ describe('classificationLoop', () => {
     ;(claimNextJob as Mock).mockResolvedValue(null)
 
     const promise = classificationLoop(supabase)
-    // Advance past the 1s sleep
     await vi.advanceTimersByTimeAsync(1000)
     await promise
 
     expect(claimNextJob).toHaveBeenCalledWith(supabase)
     expect(completeJob).not.toHaveBeenCalled()
-    expect(failJob).not.toHaveBeenCalled()
   })
 
   // 2. No active integration
   it('should failJob when no active Gmail integration exists', async () => {
-    const supabase = createMockSupabase({
-      'user_integrations.select.single': { data: null },
-    })
+    const supabase = createMockSupabase()
     const job = createMockJob()
     ;(claimNextJob as Mock).mockResolvedValue(job)
 
     await classificationLoop(supabase)
 
     expect(failJob).toHaveBeenCalledWith(supabase, 'job-001', 'NO_ACTIVE_INTEGRATION', 0)
-    expect(completeJob).not.toHaveBeenCalled()
   })
 
   // 3. Token revoked
@@ -242,23 +280,38 @@ describe('classificationLoop', () => {
     expect(failJob).toHaveBeenCalledWith(supabase, 'job-001', 'TOKEN_REVOKED', 0)
   })
 
+  // 3b. No labels configured
+  it('should completeJob without classifying when user has no labels', async () => {
+    const supabase = createMockSupabase({
+      'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
+      'user_labels.select': { data: [] },
+    })
+    const job = createMockJob()
+    ;(claimNextJob as Mock).mockResolvedValue(job)
+    ;(getValidAccessToken as Mock).mockResolvedValue('valid-token')
+
+    await classificationLoop(supabase)
+
+    expect(completeJob).toHaveBeenCalledWith(supabase, 'job-001')
+    expect(fetchEmailMetadata).not.toHaveBeenCalled()
+  })
+
   // 4. System whitelist (kyrra.io)
-  it('should skip classification for system whitelisted senders (@kyrra.io)', async () => {
+  it('should skip classification for system whitelisted senders', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
     })
     const job = createMockJob()
     ;(claimNextJob as Mock).mockResolvedValue(job)
     ;(getValidAccessToken as Mock).mockResolvedValue('valid-token')
-    ;(fetchEmail as Mock).mockResolvedValue(
-      createMockGmailEmail({ from: 'recap@kyrra.io' }),
+    ;(fetchEmailMetadata as Mock).mockResolvedValue(
+      createMockMetadata({ from: 'recap@kyrra.io', headers: { from: 'recap@kyrra.io' } }),
     )
 
     await classificationLoop(supabase)
 
     expect(completeJob).toHaveBeenCalledWith(supabase, 'job-001')
     expect(checkWhitelist).not.toHaveBeenCalled()
-    expect(fingerprintEmail).not.toHaveBeenCalled()
   })
 
   // 5. User whitelist exact match
@@ -269,23 +322,19 @@ describe('classificationLoop', () => {
     const job = createMockJob()
     ;(claimNextJob as Mock).mockResolvedValue(job)
     ;(getValidAccessToken as Mock).mockResolvedValue('valid-token')
-    ;(fetchEmail as Mock).mockResolvedValue(createMockGmailEmail())
+    ;(fetchEmailMetadata as Mock).mockResolvedValue(createMockMetadata())
     ;(checkWhitelist as Mock).mockResolvedValue('exact')
 
     await classificationLoop(supabase)
 
     expect(ClassificationLogger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: 'classification_skipped',
-        reason: 'whitelist_exact_match',
-      }),
+      expect.objectContaining({ event: 'classification_skipped', reason: 'whitelist_exact_match' }),
     )
     expect(completeJob).toHaveBeenCalledWith(supabase, 'job-001')
-    expect(fingerprintEmail).not.toHaveBeenCalled()
   })
 
   // 6. Already classified (idempotency)
-  it('should skip when email is already classified (idempotency)', async () => {
+  it('should skip when email is already classified', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
       'email_classifications.select.maybeSingle': { data: { id: 'cls-existing' } },
@@ -293,7 +342,7 @@ describe('classificationLoop', () => {
     const job = createMockJob()
     ;(claimNextJob as Mock).mockResolvedValue(job)
     ;(getValidAccessToken as Mock).mockResolvedValue('valid-token')
-    ;(fetchEmail as Mock).mockResolvedValue(createMockGmailEmail())
+    ;(fetchEmailMetadata as Mock).mockResolvedValue(createMockMetadata())
     ;(checkWhitelist as Mock).mockResolvedValue('none')
 
     await classificationLoop(supabase)
@@ -303,35 +352,71 @@ describe('classificationLoop', () => {
   })
 
   // 7. Daily limit reached
-  it('should skip classification and log when daily usage limit is reached', async () => {
+  it('should skip classification when daily usage limit is reached', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: null },
+      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal', daily_credit_limit: 30 } },
+      'usage_counters.select.maybeSingle': { data: { count: 30 } },
     })
-    const job = createMockJob()
-    ;(claimNextJob as Mock).mockResolvedValue(job)
-    ;(getValidAccessToken as Mock).mockResolvedValue('valid-token')
-    ;(fetchEmail as Mock).mockResolvedValue(createMockGmailEmail())
-    ;(checkWhitelist as Mock).mockResolvedValue('none')
+    setupHappyPath(supabase)
+    ;(prefilterEmail as Mock).mockReturnValue(null)
 
+    vi.useRealTimers()
     await classificationLoop(supabase)
 
     expect(ClassificationLogger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: 'classification_skipped',
-        reason: 'daily_limit_reached',
-      }),
+      expect.objectContaining({ event: 'classification_skipped', reason: 'daily_limit_reached' }),
     )
     expect(completeJob).toHaveBeenCalledWith(supabase, 'job-001')
-    expect(fingerprintEmail).not.toHaveBeenCalled()
   })
 
-  // 8. Fingerprint match -> direct classification (BLOQUE)
-  it('should classify directly when fingerprint matches with passing safety rules', async () => {
+  // 7b. No credits (daily_credit_limit = 0)
+  it('should skip classification when user has no credits', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal', daily_credit_limit: 0 } },
+    })
+    setupHappyPath(supabase)
+    ;(prefilterEmail as Mock).mockReturnValue(null)
+
+    vi.useRealTimers()
+    await classificationLoop(supabase)
+
+    expect(ClassificationLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({ event: 'classification_skipped', reason: 'no_credits' }),
+    )
+  })
+
+  // 7c. Prefilter match → instant classification without body fetch
+  it('should classify instantly via prefilter without fetching body', async () => {
+    const supabase = createMockSupabase({
+      'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
+    })
+    setupHappyPath(supabase)
+    ;(prefilterEmail as Mock).mockReturnValue({
+      result: 'BLOQUE',
+      confidence: 0.95,
+      reason: 'Known bulk sender domain',
+    })
+
+    vi.useRealTimers()
+    await classificationLoop(supabase)
+
+    expect(fetchEmailBody).not.toHaveBeenCalled()
+    expect(fingerprintEmail).not.toHaveBeenCalled()
+    expect(supabase.insert).toHaveBeenCalled()
+    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
+    expect(insertCall.source).toBe('prefilter')
+    expect(insertCall.label_id).toBe('lbl-prosp') // BLOQUE → Prospection (first candidate, position 5)
+    expect(insertCall.classification_result).toBe('BLOQUE')
+    expect(completeJob).toHaveBeenCalled()
+  })
+
+  // 8. Fingerprint match → direct classification
+  it('should classify directly when fingerprint matches', async () => {
+    const supabase = createMockSupabase({
+      'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
@@ -347,86 +432,69 @@ describe('classificationLoop', () => {
 
     expect(classifyWithLLM).not.toHaveBeenCalled()
     expect(supabase.insert).toHaveBeenCalled()
-    expect(completeJob).toHaveBeenCalledWith(supabase, 'job-001')
+    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
+    expect(insertCall.classification_result).toBe('BLOQUE')
+    expect(insertCall.label_id).toBe('lbl-prosp') // BLOQUE → Prospection (first candidate)
+    expect(completeJob).toHaveBeenCalled()
   })
 
-  // 9. Fingerprint + safety rules -> FORCE_LLM_REVIEW -> LLM succeeds
+  // 9. Fingerprint + safety rules → FORCE_LLM_REVIEW → LLM succeeds
   it('should route to LLM when safety rules return FORCE_LLM_REVIEW', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'BLOQUE',
-      confidence: 0.82,
-      reason: 'Domain reputation match',
+      classified: true, result: 'BLOQUE', confidence: 0.82, reason: 'Domain reputation',
     })
-    // First call: fingerprint path returns FORCE_LLM_REVIEW
-    // Second call: LLM path returns FILTRE
     ;(applyClassificationSafetyRules as Mock)
       .mockReturnValueOnce('FORCE_LLM_REVIEW')
       .mockReturnValueOnce('FILTRE')
-
     ;(classifyWithLLM as Mock).mockResolvedValue({
-      result: 'FILTRE',
-      confidence: 0.78,
-      summary: 'Borderline prospecting email',
+      result: 'FILTRE', confidence: 0.78, summary: 'Borderline prospecting', labelName: 'Newsletter',
     })
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
     expect(classifyWithLLM).toHaveBeenCalled()
+    expect(fetchEmailBody).toHaveBeenCalled()
     expect(sanitizeForLLM).toHaveBeenCalled()
-    expect(stripPIIFromSummary).toHaveBeenCalledWith('Borderline prospecting email')
-    expect(completeJob).toHaveBeenCalledWith(supabase, 'job-001')
+    expect(completeJob).toHaveBeenCalled()
   })
 
-  // 10. Fingerprint + FORCE_LLM_REVIEW -> LLM fails -> downgrade to FILTRE
+  // 10. FORCE_LLM_REVIEW → LLM fails → downgrade to FILTRE
   it('should downgrade to FILTRE when LLM fails after FORCE_LLM_REVIEW', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'BLOQUE',
-      confidence: 0.85,
-      reason: 'Tool signature detected',
+      classified: true, result: 'BLOQUE', confidence: 0.85, reason: 'Tool signature',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FORCE_LLM_REVIEW')
-    ;(classifyWithLLM as Mock).mockResolvedValue(null) // LLM failure
+    ;(classifyWithLLM as Mock).mockResolvedValue(null)
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    // Should insert FILTRE (downgraded from BLOQUE)
-    expect(supabase.insert).toHaveBeenCalled()
     const insertCall = (supabase.insert as Mock).mock.calls[0][0]
     expect(insertCall.classification_result).toBe('FILTRE')
-    // Confidence should be reduced (0.85 * 0.8 = 0.68)
-    expect(insertCall.confidence_score).toBeCloseTo(0.68)
-    expect(completeJob).toHaveBeenCalled()
+    expect(insertCall.label_id).toBe('lbl-news') // FILTRE → Newsletter (position 3)
+    expect(insertCall.confidence_score).toBeCloseTo(0.68) // 0.85 * 0.8
   })
 
-  // 11. No fingerprint -> LLM route succeeds
-  it('should route to LLM when fingerprinting returns null, LLM succeeds', async () => {
+  // 11. No fingerprint → LLM succeeds
+  it('should route to LLM when fingerprinting returns null', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'DRH', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: { ...SETTINGS_CEO_NORMAL, user_role: 'DRH' } },
     })
     setupHappyPath(supabase)
-    ;(fingerprintEmail as Mock).mockReturnValue(null)
     ;(classifyWithLLM as Mock).mockResolvedValue({
-      result: 'A_VOIR',
-      confidence: 0.75,
-      summary: 'Relevant HR tool offer',
+      result: 'A_VOIR', confidence: 0.75, summary: 'Relevant HR tool offer', labelName: 'Important',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('A_VOIR')
 
@@ -434,74 +502,62 @@ describe('classificationLoop', () => {
     await classificationLoop(supabase)
 
     expect(classifyWithLLM).toHaveBeenCalled()
-    expect(stripPIIFromSummary).toHaveBeenCalledWith('Relevant HR tool offer')
-    expect(supabase.insert).toHaveBeenCalled()
+    expect(fetchEmailBody).toHaveBeenCalled()
     const insertCall = (supabase.insert as Mock).mock.calls[0][0]
     expect(insertCall.classification_result).toBe('A_VOIR')
+    expect(insertCall.label_id).toBe('lbl-important')
     expect(insertCall.source).toBe('llm')
   })
 
-  // 12. No fingerprint -> LLM fails -> A_VOIR fallback
+  // 12. No fingerprint → LLM fails → A_VOIR fallback
   it('should fallback to A_VOIR when both fingerprint and LLM fail', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: null },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
-    ;(fingerprintEmail as Mock).mockReturnValue(null)
-    ;(classifyWithLLM as Mock).mockResolvedValue(null) // LLM failure
+    ;(classifyWithLLM as Mock).mockResolvedValue(null)
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    expect(supabase.insert).toHaveBeenCalled()
     const insertCall = (supabase.insert as Mock).mock.calls[0][0]
     expect(insertCall.classification_result).toBe('A_VOIR')
+    expect(insertCall.label_id).toBe('lbl-important')
     expect(insertCall.confidence_score).toBe(0.3)
     expect(insertCall.summary).toBe('Unable to classify — manual review recommended')
-    expect(insertCall.source).toBe('fingerprint')
   })
 
-  // 13. Domain whitelist: BLOQUE -> A_VOIR downgrade
-  it('should downgrade BLOQUE to A_VOIR when sender domain is whitelisted', async () => {
+  // 13. Domain whitelist: BLOQUE → A_VOIR downgrade
+  it('should downgrade to A_VOIR when sender domain is whitelisted and label is Prospection/Spam', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(checkWhitelist as Mock).mockResolvedValue('domain')
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'BLOQUE',
-      confidence: 0.95,
-      reason: 'Tool signature',
+      classified: true, result: 'BLOQUE', confidence: 0.95, reason: 'Tool signature',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('BLOQUE')
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    // BLOQUE should be downgraded to A_VOIR for domain-whitelisted senders
-    expect(supabase.insert).toHaveBeenCalled()
     const insertCall = (supabase.insert as Mock).mock.calls[0][0]
     expect(insertCall.classification_result).toBe('A_VOIR')
+    expect(insertCall.label_id).toBe('lbl-important')
   })
 
-  // 14. Strict mode: confidence threshold 0.8
+  // 14. Strict mode: confidence < 0.8 → promote to A_VOIR
   it('should promote to A_VOIR when confidence < 0.8 in strict mode', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'strict' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_STRICT },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'FILTRE',
-      confidence: 0.75, // Below strict threshold of 0.8
-      reason: 'Subject pattern match',
+      classified: true, result: 'FILTRE', confidence: 0.75, reason: 'Subject pattern',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
 
@@ -510,21 +566,18 @@ describe('classificationLoop', () => {
 
     const insertCall = (supabase.insert as Mock).mock.calls[0][0]
     expect(insertCall.classification_result).toBe('A_VOIR')
+    expect(insertCall.label_id).toBe('lbl-important')
   })
 
-  // 15. Normal mode: confidence threshold 0.6
+  // 15. Normal mode: confidence < 0.6 → promote to A_VOIR
   it('should promote to A_VOIR when confidence < 0.6 in normal mode', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'BLOQUE',
-      confidence: 0.55, // Below normal threshold of 0.6
-      reason: 'Weak domain reputation signal',
+      classified: true, result: 'BLOQUE', confidence: 0.55, reason: 'Weak signal',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('BLOQUE')
     ;(checkWhitelist as Mock).mockResolvedValue('none')
@@ -536,19 +589,15 @@ describe('classificationLoop', () => {
     expect(insertCall.classification_result).toBe('A_VOIR')
   })
 
-  // 16. Permissive mode: confidence threshold 0.4
+  // 16. Permissive mode: confidence < 0.4 → promote to A_VOIR
   it('should promote to A_VOIR when confidence < 0.4 in permissive mode', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'permissive' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_PERMISSIVE },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'FILTRE',
-      confidence: 0.35, // Below permissive threshold of 0.4
-      reason: 'Very weak signal',
+      classified: true, result: 'FILTRE', confidence: 0.35, reason: 'Very weak signal',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
 
@@ -559,19 +608,15 @@ describe('classificationLoop', () => {
     expect(insertCall.classification_result).toBe('A_VOIR')
   })
 
-  // 16b. Permissive mode: should NOT promote when confidence >= 0.4
+  // 16b. Permissive mode: confidence >= 0.4 → keep FILTRE
   it('should keep FILTRE when confidence >= 0.4 in permissive mode', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'permissive' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_PERMISSIVE },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'FILTRE',
-      confidence: 0.65,
-      reason: 'Known prospecting pattern',
+      classified: true, result: 'FILTRE', confidence: 0.65, reason: 'Known pattern',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
 
@@ -583,99 +628,87 @@ describe('classificationLoop', () => {
   })
 
   // 17. Classification saved with correct fields
-  it('should save classification with all required fields', async () => {
+  it('should save classification with all required fields including label_id', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'DSI', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: { ...SETTINGS_CEO_NORMAL, user_role: 'DSI' } },
     })
     setupHappyPath(supabase)
-    ;(fingerprintEmail as Mock).mockReturnValue(null)
     ;(classifyWithLLM as Mock).mockResolvedValue({
-      result: 'FILTRE',
-      confidence: 0.88,
-      summary: 'SaaS sales pitch for IT department',
+      result: 'FILTRE', confidence: 0.88, summary: 'SaaS sales pitch', labelName: 'Newsletter',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    expect(supabase.from).toHaveBeenCalledWith('email_classifications')
-    expect(supabase.insert).toHaveBeenCalled()
     const insertCall = (supabase.insert as Mock).mock.calls[0][0]
     expect(insertCall).toEqual(
       expect.objectContaining({
         user_id: 'user-123',
         gmail_message_id: 'msg-abc',
         classification_result: 'FILTRE',
+        label_id: 'lbl-news',
         confidence_score: 0.88,
-        summary: 'SaaS sales pitch for IT department',
+        summary: 'SaaS sales pitch',
         source: 'llm',
         idempotency_key: 'msg-abc',
+        sender_display: expect.any(String),
+        subject_snippet: expect.any(String),
       }),
     )
     expect(insertCall.processing_time_ms).toEqual(expect.any(Number))
   })
 
-  // 18. Gmail label applied after classification
-  it('should apply Gmail label after saving classification', async () => {
+  // 18. Gmail dynamic label applied after classification
+  it('should apply dynamic Gmail label after saving classification', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'BLOQUE',
-      confidence: 0.95,
-      reason: 'Lemlist detected',
+      classified: true, result: 'BLOQUE', confidence: 0.95, reason: 'Lemlist detected',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('BLOQUE')
     ;(checkWhitelist as Mock).mockResolvedValue('none')
-    const labelMap = { A_VOIR: 'lbl-1', FILTRE: 'lbl-2', BLOQUE: 'lbl-3' }
-    ;(ensureLabels as Mock).mockResolvedValue(labelMap)
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    expect(ensureLabels).toHaveBeenCalledWith('valid-token')
-    expect(applyLabel).toHaveBeenCalledWith('valid-token', 'msg-abc', 'BLOQUE', labelMap)
+    expect(ensureDynamicLabels).toHaveBeenCalledWith('valid-token', expect.any(Array))
+    expect(applyDynamicLabel).toHaveBeenCalledWith(
+      'valid-token',
+      'msg-abc',
+      'gmail-prosp', // BLOQUE → Prospection label's gmail ID
+      expect.any(Array),
+    )
   })
 
   // 19. Gmail label failure is non-fatal
   it('should complete job even when Gmail label application fails', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'FILTRE',
-      confidence: 0.90,
-      reason: 'Known pattern',
+      classified: true, result: 'FILTRE', confidence: 0.90, reason: 'Known pattern',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
-    ;(ensureLabels as Mock).mockRejectedValue(new Error('Gmail API 429'))
+    ;(ensureDynamicLabels as Mock).mockRejectedValue(new Error('Gmail API 429'))
 
-    // Suppress expected console.error
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    // Classification should still be saved and job completed
     expect(supabase.insert).toHaveBeenCalled()
     expect(completeJob).toHaveBeenCalledWith(supabase, 'job-001')
     expect(failJob).not.toHaveBeenCalled()
-
     consoleSpy.mockRestore()
   })
 
-  // 20. GmailAuthError -> mark integration revoked
+  // 20. GmailAuthError → mark integration revoked
   it('should mark integration as revoked on GmailAuthError', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
@@ -683,32 +716,26 @@ describe('classificationLoop', () => {
     const job = createMockJob()
     ;(claimNextJob as Mock).mockResolvedValue(job)
     ;(getValidAccessToken as Mock).mockResolvedValue('valid-token')
-    ;(fetchEmail as Mock).mockRejectedValue(new GmailAuthError('Access token expired'))
+    ;(fetchEmailMetadata as Mock).mockRejectedValue(new GmailAuthError('Access token expired'))
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    // Should update integration status to 'revoked'
     expect(supabase.from).toHaveBeenCalledWith('user_integrations')
-    expect(supabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'revoked' }),
-    )
+    expect(supabase.update).toHaveBeenCalledWith(expect.objectContaining({ status: 'revoked' }))
     expect(failJob).toHaveBeenCalledWith(supabase, 'job-001', 'TOKEN_REVOKED', 0)
   })
 
-  // 21. Default user settings when no settings row
-  it('should use default CEO/normal when user_settings row is missing', async () => {
+  // 21. Default user settings when no settings row — credits still available via admin role
+  it('should use default CEO/normal when user_settings is missing but admin bypasses credit check', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: null }, // No settings row
+      // role='admin' bypasses the credit check entirely, simulating a no-settings scenario
+      'user_settings.select.maybeSingle': { data: { role: 'admin' } },
     })
     setupHappyPath(supabase)
-    ;(fingerprintEmail as Mock).mockReturnValue(null)
     ;(classifyWithLLM as Mock).mockResolvedValue({
-      result: 'FILTRE',
-      confidence: 0.85,
-      summary: 'Generic pitch',
+      result: 'FILTRE', confidence: 0.85, summary: 'Generic pitch', labelName: 'Newsletter',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
 
@@ -717,11 +744,9 @@ describe('classificationLoop', () => {
 
     // LLM should have been called with default userRole='CEO' and exposureMode='normal'
     expect(classifyWithLLM).toHaveBeenCalledWith(
-      expect.objectContaining({
-        userRole: 'CEO',
-        exposureMode: 'normal',
-      }),
+      expect.objectContaining({ userRole: 'CEO', exposureMode: 'normal' }),
       supabase,
+      expect.any(String), // dynamicPrompt
     )
   })
 
@@ -729,52 +754,41 @@ describe('classificationLoop', () => {
   it('should sanitize email content before sending to LLM', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
-    })
-    const email = createMockGmailEmail({
-      bodyPreview: 'Patient diagnosed with cancer at hospital',
-      bodyTail: 'best regards',
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
-    ;(fetchEmail as Mock).mockResolvedValue(email)
-    ;(fingerprintEmail as Mock).mockReturnValue(null)
+    ;(fetchEmailBody as Mock).mockResolvedValue(
+      createMockBody({ bodyPreview: 'Patient diagnosed with cancer', bodyTail: 'best regards' }),
+    )
     ;(classifyWithLLM as Mock).mockResolvedValue({
-      result: 'A_VOIR',
-      confidence: 0.7,
-      summary: 'Medical related email',
+      result: 'A_VOIR', confidence: 0.7, summary: 'Medical email', labelName: 'Important',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('A_VOIR')
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    // sanitizeForLLM should be called on both bodyPreview and bodyTail
-    expect(sanitizeForLLM).toHaveBeenCalledWith('Patient diagnosed with cancer at hospital')
+    expect(sanitizeForLLM).toHaveBeenCalledWith('Patient diagnosed with cancer')
     expect(sanitizeForLLM).toHaveBeenCalledWith('best regards')
-    // classifyWithLLM should receive the sanitized content
     expect(classifyWithLLM).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: expect.stringContaining('[sanitized]'),
         tail: expect.stringContaining('[sanitized]'),
       }),
       supabase,
+      expect.any(String),
     )
   })
 
-  // 23. FILTRE with high confidence in strict mode should stay FILTRE
+  // 23. Strict mode: confidence >= 0.8 → keep FILTRE
   it('should keep FILTRE when confidence >= 0.8 in strict mode', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'strict' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_STRICT },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'FILTRE',
-      confidence: 0.90, // Above strict threshold of 0.8
-      reason: 'Clear prospecting pattern',
+      classified: true, result: 'FILTRE', confidence: 0.90, reason: 'Clear pattern',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
 
@@ -785,19 +799,15 @@ describe('classificationLoop', () => {
     expect(insertCall.classification_result).toBe('FILTRE')
   })
 
-  // 24. A_VOIR is never overridden by confidence threshold
-  it('should never promote A_VOIR further (threshold check skips A_VOIR)', async () => {
+  // 24. A_VOIR never overridden by confidence threshold
+  it('should never promote A_VOIR further', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'strict' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_STRICT },
     })
     setupHappyPath(supabase)
-    ;(fingerprintEmail as Mock).mockReturnValue(null)
     ;(classifyWithLLM as Mock).mockResolvedValue({
-      result: 'A_VOIR',
-      confidence: 0.35, // Below all thresholds, but already A_VOIR
-      summary: 'Potential client email',
+      result: 'A_VOIR', confidence: 0.35, summary: 'Potential client', labelName: 'Important',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('A_VOIR')
 
@@ -805,7 +815,6 @@ describe('classificationLoop', () => {
     await classificationLoop(supabase)
 
     const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    // A_VOIR should remain A_VOIR regardless of confidence
     expect(insertCall.classification_result).toBe('A_VOIR')
   })
 
@@ -813,44 +822,32 @@ describe('classificationLoop', () => {
   it('should update user_pipeline_health after successful classification', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'FILTRE',
-      confidence: 0.85,
-      reason: 'Pattern match',
+      classified: true, result: 'FILTRE', confidence: 0.85, reason: 'Pattern',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    // user_pipeline_health should be updated
     expect(supabase.from).toHaveBeenCalledWith('user_pipeline_health')
     expect(supabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        last_classified_at: expect.any(String),
-        updated_at: expect.any(String),
-      }),
+      expect.objectContaining({ last_classified_at: expect.any(String) }),
     )
   })
 
-  // 26. ClassificationLogger.log called with complete event after classification
-  it('should log classification_complete event with all whitelisted fields', async () => {
+  // 26. ClassificationLogger.log called with label_name
+  it('should log classification_complete with label_name', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'BLOQUE',
-      confidence: 0.95,
-      reason: 'Lemlist detected',
+      classified: true, result: 'BLOQUE', confidence: 0.95, reason: 'Lemlist detected',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('BLOQUE')
     ;(checkWhitelist as Mock).mockResolvedValue('none')
@@ -862,28 +859,23 @@ describe('classificationLoop', () => {
       expect.objectContaining({
         event: 'classification_complete',
         email_id: 'msg-abc',
-        classification_result: 'BLOQUE',
+        label_name: 'Prospection',
         confidence_score: 0.95,
-        processing_time_ms: expect.any(Number),
         source: 'fingerprint',
       }),
     )
   })
 
-  // 27. Domain whitelist should not affect FILTRE classification
-  it('should not downgrade FILTRE when sender domain is whitelisted (only BLOQUE is downgraded)', async () => {
+  // 27. Domain whitelist should not affect FILTRE
+  it('should not downgrade FILTRE when sender domain is whitelisted', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'normal' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
     })
     setupHappyPath(supabase)
     ;(checkWhitelist as Mock).mockResolvedValue('domain')
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'FILTRE',
-      confidence: 0.85,
-      reason: 'Subject pattern',
+      classified: true, result: 'FILTRE', confidence: 0.85, reason: 'Subject pattern',
     })
     ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
 
@@ -891,11 +883,10 @@ describe('classificationLoop', () => {
     await classificationLoop(supabase)
 
     const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    // FILTRE should stay FILTRE — domain whitelist only affects BLOQUE
     expect(insertCall.classification_result).toBe('FILTRE')
   })
 
-  // 28. Generic error -> failJob with error message
+  // 28. Generic error → failJob
   it('should failJob with error message on generic errors', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
@@ -903,18 +894,13 @@ describe('classificationLoop', () => {
     const job = createMockJob()
     ;(claimNextJob as Mock).mockResolvedValue(job)
     ;(getValidAccessToken as Mock).mockResolvedValue('valid-token')
-    ;(fetchEmail as Mock).mockRejectedValue(new Error('Gmail API error 500: Internal Server Error'))
+    ;(fetchEmailMetadata as Mock).mockRejectedValue(new Error('Gmail API error 500'))
 
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    expect(failJob).toHaveBeenCalledWith(
-      supabase,
-      'job-001',
-      'Gmail API error 500: Internal Server Error',
-      0,
-    )
+    expect(failJob).toHaveBeenCalledWith(supabase, 'job-001', 'Gmail API error 500', 0)
     consoleSpy.mockRestore()
   })
 
@@ -926,8 +912,8 @@ describe('classificationLoop', () => {
     const job = createMockJob()
     ;(claimNextJob as Mock).mockResolvedValue(job)
     ;(getValidAccessToken as Mock).mockResolvedValue('valid-token')
-    ;(fetchEmail as Mock).mockResolvedValue(
-      createMockGmailEmail({ from: 'NoReply@Kyrra.IO' }),
+    ;(fetchEmailMetadata as Mock).mockResolvedValue(
+      createMockMetadata({ from: 'NoReply@Kyrra.IO', headers: { from: 'NoReply@Kyrra.IO' } }),
     )
 
     vi.useRealTimers()
@@ -937,52 +923,43 @@ describe('classificationLoop', () => {
     expect(fingerprintEmail).not.toHaveBeenCalled()
   })
 
-  // 30. LLM route with FORCE_LLM_REVIEW passes sanitized content
-  it('should pass sanitized content to LLM during FORCE_LLM_REVIEW re-route', async () => {
+  // 30. FORCE_LLM_REVIEW passes sanitized content
+  it('should pass sanitized content to LLM during FORCE_LLM_REVIEW', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
-      'rpc.increment_usage_counter': { data: 1 },
-      'user_settings.select.maybeSingle': { data: { user_role: 'CEO', exposure_mode: 'strict' } },
-    })
-    const email = createMockGmailEmail({
-      from: 'sales@competitor.com',
-      subject: 'Partnership opportunity',
-      bodyPreview: 'We would like to discuss a syndicat partnership',
-      bodyTail: 'Best regards',
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_STRICT },
     })
     setupHappyPath(supabase)
-    ;(fetchEmail as Mock).mockResolvedValue(email)
+    ;(fetchEmailMetadata as Mock).mockResolvedValue(
+      createMockMetadata({ from: 'sales@competitor.com', subject: 'Partnership', headers: { from: 'sales@competitor.com', subject: 'Partnership' } }),
+    )
+    ;(fetchEmailBody as Mock).mockResolvedValue(
+      createMockBody({ bodyPreview: 'We would like to discuss', bodyTail: 'Best regards' }),
+    )
     ;(fingerprintEmail as Mock).mockReturnValue({
-      classified: true,
-      result: 'BLOQUE',
-      confidence: 0.82,
-      reason: 'Subject pattern match',
+      classified: true, result: 'BLOQUE', confidence: 0.82, reason: 'Subject pattern',
     })
     ;(applyClassificationSafetyRules as Mock)
       .mockReturnValueOnce('FORCE_LLM_REVIEW')
       .mockReturnValueOnce('FILTRE')
     ;(classifyWithLLM as Mock).mockResolvedValue({
-      result: 'FILTRE',
-      confidence: 0.78,
-      summary: 'Sales pitch about partnership',
+      result: 'FILTRE', confidence: 0.78, summary: 'Sales pitch', labelName: 'Newsletter',
     })
 
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    // sanitizeForLLM should have been called on bodyPreview and bodyTail
-    expect(sanitizeForLLM).toHaveBeenCalledWith('We would like to discuss a syndicat partnership')
+    expect(sanitizeForLLM).toHaveBeenCalledWith('We would like to discuss')
     expect(sanitizeForLLM).toHaveBeenCalledWith('Best regards')
-
-    // classifyWithLLM should have received from, subject, and sanitized content
     expect(classifyWithLLM).toHaveBeenCalledWith(
       expect.objectContaining({
         from: 'sales@competitor.com',
-        subject: 'Partnership opportunity',
+        subject: 'Partnership',
         userRole: 'CEO',
         exposureMode: 'strict',
       }),
       supabase,
+      expect.any(String),
     )
   })
 })

@@ -3,6 +3,19 @@ import { LEGACY_RESULT_TO_DEFAULT_LABEL } from '@kyrra/shared'
 import type { ClassificationResult } from '@kyrra/shared'
 
 /**
+ * Derive the legacy classification_result from a label's position.
+ * Ensures the DB enum value is always consistent with the dynamic label.
+ *   position 0-2 → A_VOIR (visible to user)
+ *   position 3-4 → FILTRE (filtered but accessible)
+ *   position 5+  → BLOQUE (blocked)
+ */
+export function deriveLegacyResult(position: number): ClassificationResult {
+  if (position <= 2) return 'A_VOIR'
+  if (position <= 4) return 'FILTRE'
+  return 'BLOQUE'
+}
+
+/**
  * Resolve a legacy ClassificationResult (from fingerprint/prefilter) to a user label.
  * Strategy: find the user's default label that matches the legacy result.
  * If user deleted the default, fall back by position (first = safest).

@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
     publicRoutes.some((route) => pathname.startsWith(route))
 
   // Routes that don't require Gmail integration (but do require auth)
-  const noIntegrationRoutes = ['/connect-gmail', '/onboarding-progress', '/configure-profile', '/configure-labels']
+  const noIntegrationRoutes = ['/connect-gmail', '/onboarding-progress', '/configure-profile', '/configure-labels', '/scan-progress']
   const isNoIntegrationRoute = noIntegrationRoutes.some((route) =>
     pathname.startsWith(route),
   )

@@ -1,19 +1,40 @@
-# generated: 2026-03-21
+# generated: 2026-04-01
 # project: Kyrra
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: ./implementation-artifacts
 #
-# STATUS UPDATE 2026-03-21:
-# Post-brainstorm reality check — original 44 stories were scaffold, not production-ready.
-# New Beta epics (B0-B6) track the work needed for a real MVP-0 Beta.
-# Original epics kept as "scaffold-done" for reference.
+# RECONCILIATION 2026-04-01:
+# Stories B1.4-B1.9, B2.4-B2.6, B5.3 added to cover work done outside BMAD
+# and known bugs. Epics B1, B2, B5 reopened to in-progress.
 #
-# BETA SPRINT STATUS (NEW — active work):
-# Epic Status: backlog → in-progress → done
-# Story Status: backlog → ready-for-dev → in-progress → review → done
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+#   - done-unreviewed: Completed outside BMAD, not code-reviewed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Mark epic as 'in-progress' when starting work on its first story
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
-generated: 2026-03-21
+generated: 2026-04-01
 project: Kyrra
 project_key: NOKEY
 tracking_system: file-system
@@ -21,7 +42,7 @@ story_location: ./implementation-artifacts
 
 development_status:
   # ══════════════════════════════════════════
-  # BETA SPRINTS (ACTIVE — real work to do)
+  # BETA SPRINTS (ACTIVE)
   # ══════════════════════════════════════════
 
   # ── Epic B0: Auth & Security Fixes ──
@@ -37,6 +58,12 @@ development_status:
   b1-1-whitelist-check-in-classification: done
   b1-2-dynamic-user-settings-in-classification: done
   b1-3-fix-idempotency-sanitize-llm-usage-counter: done
+  b1-4-dynamic-labels-system: done-unreviewed        # feat/dynamic-labels, 2026-04-01
+  b1-5-prefilter-metadata-first-pipeline: done-unreviewed  # 2026-04-01
+  b1-6-fix-pipeline-parsing-dkim-whitelist: done-unreviewed # 2026-04-01
+  b1-7-user-profiling-onboarding: done-unreviewed     # feat/dynamic-labels, 2026-04-01
+  b1-8-fix-save-labels-config-atomic: done
+  b1-9-fix-classification-result-legacy: done
   epic-b1-retrospective: optional
 
   # ── Epic B2: Dashboard Fonctionnel ──
@@ -44,6 +71,9 @@ development_status:
   b2-1-settings-page-interactive: done
   b2-2-navigation-gear-icon-empty-states: done
   b2-3-trust-score-real-recap-table-fix: done
+  b2-4-fix-dashboard-blocked-counter: done
+  b2-5-loading-states-navigation-feedback: done
+  b2-6-realtime-scan-page-onboarding: done
   epic-b2-retrospective: optional
 
   # ── Epic B3: Trust & Feedback Loop ──
@@ -62,6 +92,7 @@ development_status:
   epic-b5: done
   b5-1-critical-unit-tests: done
   b5-2-monitoring-alerts-founders: done
+  b5-3-fix-classification-tests-mocks: done
   epic-b5-retrospective: optional
 
   # ── Epic B6: RGPD & Beta Launch ──
@@ -73,11 +104,15 @@ development_status:
   epic-b6-retrospective: optional
 
   # ══════════════════════════════════════════
-  # ORIGINAL SCAFFOLD EPICS (reference only)
-  # Status: scaffold-done (code exists but incomplete)
+  # MERGE GATE
   # ══════════════════════════════════════════
+  # feat/dynamic-labels → master
+  # Requires: B1.8, B1.9, B2.4, B2.5, B2.6, B5.3 = done
+  # Then: merge + deploy
 
-  # ── Epic 0-7: Original scaffold (all scaffold-done) ──
+  # ══════════════════════════════════════════
+  # ORIGINAL SCAFFOLD EPICS (reference only)
+  # ══════════════════════════════════════════
   epic-0: scaffold-done
   epic-1: scaffold-done
   epic-2: scaffold-done

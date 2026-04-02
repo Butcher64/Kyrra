@@ -96,6 +96,15 @@ async function generateAndSendRecap(
   today: string,
   dateFormatted: string,
 ): Promise<void> {
+  // Fetch user's labels to identify "À voir" bucket (position 0-2)
+  const { data: userLabels } = await supabase
+    .from('user_labels')
+    .select('id, position')
+    .eq('user_id', user.id)
+    .lte('position', 2)
+
+  const aVoirLabelIds = (userLabels ?? []).map((l: { id: string }) => l.id)
+
   // Fetch today's filtered count
   const { count: filteredCount } = await supabase
     .from('email_classifications')
@@ -105,15 +114,19 @@ async function generateAndSendRecap(
 
   const filtered = filteredCount ?? 0
 
-  // Fetch "À voir" emails with summaries
-  const { data: aVoirEmails } = await supabase
-    .from('email_classifications')
-    .select('gmail_message_id, summary, confidence_score')
-    .eq('user_id', user.id)
-    .eq('classification_result', 'A_VOIR')
-    .gte('created_at', `${today}T00:00:00Z`)
-    .order('created_at', { ascending: false })
-    .limit(5)
+  // Fetch "À voir" emails with summaries (labels with position 0-2)
+  const aVoirQuery = aVoirLabelIds.length > 0
+    ? supabase
+        .from('email_classifications')
+        .select('gmail_message_id, summary, confidence_score')
+        .eq('user_id', user.id)
+        .in('label_id', aVoirLabelIds)
+        .gte('created_at', `${today}T00:00:00Z`)
+        .order('created_at', { ascending: false })
+        .limit(5)
+    : Promise.resolve({ data: [] })
+
+  const { data: aVoirEmails } = await aVoirQuery
 
   // Generate recap tokens for each "À voir" email (FR85)
   const aVoirList = aVoirEmails ?? []
@@ -161,13 +174,17 @@ async function generateAndSendRecap(
       .gte('created_at', lastMonthStart.toISOString())
       .lt('created_at', lastMonthEnd.toISOString())
 
-    const { count: monthAVoir } = await supabase
-      .from('email_classifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('classification_result', 'A_VOIR')
-      .gte('created_at', lastMonthStart.toISOString())
-      .lt('created_at', lastMonthEnd.toISOString())
+    const monthAVoirQuery = aVoirLabelIds.length > 0
+      ? supabase
+          .from('email_classifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .in('label_id', aVoirLabelIds)
+          .gte('created_at', lastMonthStart.toISOString())
+          .lt('created_at', lastMonthEnd.toISOString())
+      : Promise.resolve({ count: 0 })
+
+    const { count: monthAVoir } = await monthAVoirQuery
 
     const mFiltered = monthFiltered ?? 0
     monthlyStats = {

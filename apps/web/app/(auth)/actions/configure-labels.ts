@@ -10,7 +10,6 @@ interface LabelConfig {
   gmail_label_id: string | null
   gmail_label_name: string | null
   is_default: boolean
-  position: number
 }
 
 export async function saveLabelsConfig(
@@ -23,34 +22,33 @@ export async function saveLabelsConfig(
   if (labels.length < 2) return { success: false, error: 'Minimum 2 labels required' }
   if (labels.length > 15) return { success: false, error: 'Maximum 15 labels' }
 
-  // Delete existing labels (fresh start)
-  await supabase.from('user_labels').delete().eq('user_id', user.id)
+  // Atomic delete + insert via RPC (single transaction — no partial failure)
+  const { error: rpcError } = await supabase.rpc('save_user_labels', {
+    p_labels: labels.map((label) => ({
+      name: label.name,
+      description: label.description,
+      prompt: label.prompt,
+      color: label.color,
+      gmail_label_id: label.gmail_label_id,
+      gmail_label_name: label.gmail_label_name,
+      is_default: label.is_default,
+    })),
+  })
 
-  // Insert new labels
-  const rows = labels.map((label, index) => ({
-    user_id: user.id,
-    name: label.name,
-    description: label.description,
-    prompt: label.prompt,
-    color: label.color,
-    gmail_label_id: label.gmail_label_id,
-    gmail_label_name: label.gmail_label_name,
-    is_default: label.is_default,
-    position: index,
-  }))
-
-  const { error: insertError } = await supabase.from('user_labels').insert(rows)
-
-  if (insertError) {
-    console.error('Failed to save labels:', insertError)
+  if (rpcError) {
+    console.error('Failed to save labels:', rpcError)
     return { success: false, error: 'Failed to save label configuration' }
   }
 
-  // Mark onboarding as labels_configured
-  await supabase
+  // Mark onboarding as labels_configured (non-blocking — labels are already saved)
+  const { error: onboardingError } = await supabase
     .from('onboarding_scans')
     .update({ labels_configured: true, updated_at: new Date().toISOString() })
     .eq('user_id', user.id)
+
+  if (onboardingError) {
+    console.error('Failed to mark labels configured:', onboardingError)
+  }
 
   return { success: true }
 }

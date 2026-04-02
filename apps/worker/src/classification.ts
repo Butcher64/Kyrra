@@ -9,7 +9,7 @@ import { getValidAccessToken, fetchEmailMetadata, fetchEmailBody, ensureDynamicL
 import { ClassificationLogger } from './lib/classification-logger'
 import { checkWhitelist } from './lib/whitelist-check'
 import { buildSystemPrompt, type UserProfile } from './lib/prompt-builder'
-import { resolveLabel, resolveLabelByName } from './lib/label-resolver'
+import { resolveLabel, resolveLabelByName, deriveLegacyResult } from './lib/label-resolver'
 
 /**
  * Classification loop — processes emails from the queue
@@ -85,6 +85,13 @@ export async function classificationLoop(supabase: any): Promise<void> {
       headers: metadata.headers,
     }
 
+    // Extract display-friendly sender name and subject for scan page (B2.6)
+    const rawFrom = metadata.headers['from'] ?? metadata.from
+    const senderDisplay = rawFrom.includes('<')
+      ? rawFrom.split('<')[0]!.trim().replace(/^["']|["']$/g, '')
+      : rawFrom
+    const subjectSnippet = (metadata.subject || '(sans objet)').slice(0, 120)
+
     // ── Step 2: System whitelist (PM6 — skip @kyrra.io emails) ──
     const senderEmail = emailHeaders.from.toLowerCase()
     if (SYSTEM_WHITELISTED_SENDERS.some((addr: string) => senderEmail === addr)) {
@@ -141,13 +148,15 @@ export async function classificationLoop(supabase: any): Promise<void> {
       await supabase.from('email_classifications').insert({
         user_id: job.user_id,
         gmail_message_id: job.gmail_message_id,
-        classification_result: pfResult,
+        classification_result: deriveLegacyResult(resolvedLabel.position),
         label_id: resolvedLabel.id,
         confidence_score: pfConfidence,
         summary: prefilterResult.reason,
         source: 'prefilter',
         processing_time_ms: processingTimeMs,
         idempotency_key: job.gmail_message_id,
+        sender_display: senderDisplay,
+        subject_snippet: subjectSnippet,
       })
 
       try {
@@ -321,7 +330,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
     if (whitelistMatch === 'domain' && (resolvedLabel.name === 'Prospection' || resolvedLabel.name === 'Spam')) {
       const sortedByPosition = [...typedLabels].sort((a, b) => a.position - b.position)
       resolvedLabel = sortedByPosition[0]!
-      finalResult = 'A_VOIR'
+      finalResult = deriveLegacyResult(resolvedLabel.position)
     }
 
     // Mode-specific confidence thresholds (B1.2)
@@ -331,7 +340,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
       : 0.6
     if (resolvedLabel.id !== firstLabel.id && confidence < aVoirThreshold) {
       resolvedLabel = firstLabel
-      finalResult = 'A_VOIR'
+      finalResult = deriveLegacyResult(resolvedLabel.position)
     }
 
     const processingTimeMs = Date.now() - startTime
@@ -340,13 +349,15 @@ export async function classificationLoop(supabase: any): Promise<void> {
     await supabase.from('email_classifications').insert({
       user_id: job.user_id,
       gmail_message_id: job.gmail_message_id,
-      classification_result: finalResult,
+      classification_result: deriveLegacyResult(resolvedLabel.position),
       label_id: resolvedLabel.id,
       confidence_score: confidence,
       summary,
       source,
       processing_time_ms: processingTimeMs,
       idempotency_key: job.gmail_message_id,
+      sender_display: senderDisplay,
+      subject_snippet: subjectSnippet,
     })
 
     // Log LLM usage for cost tracking
