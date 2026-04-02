@@ -1,8 +1,8 @@
 # CLAUDE.md - Kyrra Project Memory
 
 > **Auto-update** : Mettre a jour ce fichier apres chaque decision majeure.
-> **Derniere MAJ** : 2026-04-01
-> **Phase actuelle** : Beta Prep — Dynamic Labels implementes, tests + polish en cours
+> **Derniere MAJ** : 2026-04-02
+> **Phase actuelle** : Beta Ready — 33/33 stories done, MVP-0 100%, merge + deploy pending
 
 ---
 
@@ -19,16 +19,16 @@
 
 ## BMAD Framework
 
-Ce projet utilise **BMAD v6.0.4** (installe dans `Kyrra/_bmad/`).
-Commandes heritees du parent `C:\Users\Thomas\Documents\CLAUDE\.claude\commands`.
+Ce projet utilise **BMAD v6.2.2** (officiel bmad-code-org, installe dans `Kyrra/_bmad/`).
+Skills chargees automatiquement depuis `.claude/skills/` (heritees du parent).
 
 ### REGLE ABSOLUE : Toujours suivre BMAD en phase Implementation
 
 **Ne JAMAIS coder sans passer par les workflows BMAD.** Chaque session doit :
-1. Verifier l'etat du sprint en cours (`/bmad-bmm-sprint-status`)
-2. Planifier le sprint si necessaire (`/bmad-bmm-sprint-planning`)
-3. Traiter chaque feature/bug comme une story (`/bmad-bmm-dev-story`)
-4. Faire une code review apres chaque bloc significatif (`/bmad-bmm-code-review`)
+1. Verifier l'etat du sprint en cours (`/bmad-sprint-status`)
+2. Planifier le sprint si necessaire (`/bmad-sprint-planning`)
+3. Traiter chaque feature/bug comme une story (`/bmad-dev-story`)
+4. Faire une code review apres chaque bloc significatif (`/bmad-code-review`)
 5. Mettre a jour les epics apres chaque story completee
 
 **Contexte** : Un drift majeur a eu lieu entre 2026-03-21 et 2026-04-01 — tout le travail

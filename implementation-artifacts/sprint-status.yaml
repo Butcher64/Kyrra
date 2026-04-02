@@ -103,12 +103,19 @@ development_status:
   b6-4-smoke-test-e2e: done
   epic-b6-retrospective: optional
 
+  # ── Epic B7: Beta 100% MVP-0 Polish ──
+  epic-b7: done
+  b7-1-resume-interrupted-onboarding: done
+  b7-2-auto-whitelist-reclassification: done
+  b7-3-degraded-mode-notification: done
+  epic-b7-retrospective: optional
+
   # ══════════════════════════════════════════
-  # MERGE GATE
+  # MERGE GATE — CLEARED
   # ══════════════════════════════════════════
   # feat/dynamic-labels → master
-  # Requires: B1.8, B1.9, B2.4, B2.5, B2.6, B5.3 = done
-  # Then: merge + deploy
+  # All dependencies done. Ready for merge + deploy.
+  # Epics B0-B7: 33/33 stories done.
 
   # ══════════════════════════════════════════
   # ORIGINAL SCAFFOLD EPICS (reference only)
