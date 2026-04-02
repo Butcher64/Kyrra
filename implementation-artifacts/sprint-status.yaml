@@ -96,11 +96,11 @@ development_status:
   epic-b5-retrospective: optional
 
   # ── Epic B6: RGPD & Beta Launch ──
-  epic-b6: in-progress
-  b6-1-rgpd-consent-minimal: backlog
+  epic-b6: done
+  b6-1-rgpd-consent-minimal: done
   b6-2-clean-uninstall-flow: done
   b6-3-cgu-privacy-policy-pages: done
-  b6-4-smoke-test-e2e: backlog
+  b6-4-smoke-test-e2e: done
   epic-b6-retrospective: optional
 
   # ══════════════════════════════════════════

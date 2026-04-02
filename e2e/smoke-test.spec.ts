@@ -119,29 +119,58 @@ test.describe('Smoke Test — Error Pages', () => {
  *
  * Prerequisites:
  * - Test Gmail account (kyrra.test@gmail.com or similar)
- * - Dev server running on localhost:3000
- * - Supabase + worker running
+ * - Dev server running: pnpm dev (localhost:3000)
+ * - Supabase running (local or cloud)
+ * - Worker running: cd apps/worker && pnpm dev
+ * - Migrations 001-026 applied
  *
- * Steps:
+ * ── ONBOARDING FLOW ──
+ *
  * 1. Navigate to /login
  * 2. Click "Se connecter avec Google"
  * 3. Authenticate with test Gmail account
- * 4. Verify redirect to /connect-gmail (pre-OAuth consent)
- * 5. Accept consent, authorize Gmail permissions
- * 6. Verify redirect to /onboarding-progress
- * 7. Wait for scan completion (progress bar reaches 100%)
- * 8. Verify redirect to /dashboard
- * 9. Check dashboard shows stats (trust score, filtered count)
- * 10. Navigate to /settings
- * 11. Change exposure mode (Strict → Normal)
- * 12. Verify toast confirmation
- * 13. Send a test prospection email to test Gmail
- * 14. Wait 2 minutes for classification
- * 15. Verify email has Kyrra label in Gmail
- * 16. Check dashboard shows new alert
- * 17. Navigate to /settings → "Supprimer mon compte"
- * 18. Type "SUPPRIMER" and confirm
- * 19. Verify redirect to /login?uninstalled=true
- * 20. Verify success banner displayed
- * 21. Verify Gmail labels removed
+ * 4. Verify redirect to /connect-gmail (RGPD consent)
+ * 5. Check "J'autorise Kyrra à classifier mes emails" checkbox
+ * 6. Click "Connecter Gmail →"
+ * 7. Authorize Gmail permissions in Google OAuth popup
+ * 8. Verify redirect to /onboarding-progress (whitelist scan)
+ * 9. Wait for whitelist scan completion
+ * 10. Verify redirect to /configure-profile
+ * 11. Fill profile: role, sector, company description
+ * 12. Add prospection types to avoid (chips)
+ * 13. Click "Continuer"
+ * 14. Verify redirect to /configure-labels
+ * 15. Check 7 default labels are displayed as cards
+ * 16. Optionally add/remove a custom label
+ * 17. Click "Valider mes labels"
+ * 18. Verify redirect to /scan-progress
+ * 19. Watch emails appear one by one (sender, subject, label with color)
+ * 20. Wait for scan completion (counter reaches total)
+ * 21. Verify redirect to /dashboard
+ *
+ * ── DASHBOARD FLOW ──
+ *
+ * 22. Check dashboard shows stats: trust score, filtered count, blocked count
+ * 23. Verify loading skeleton appears when navigating between pages
+ * 24. Navigate to /emails — verify dynamic label tabs and badge colors
+ * 25. Navigate to /labels — verify label cards with descriptions
+ * 26. Navigate to /settings
+ * 27. Change exposure mode (Strict → Normal)
+ * 28. Verify toast confirmation
+ *
+ * ── CLASSIFICATION FLOW ──
+ *
+ * 29. Send a test prospection email to test Gmail (from a non-whitelisted sender)
+ * 30. Wait 2 minutes for classification
+ * 31. Verify email has Kyrra label in Gmail (Prospection or Spam)
+ * 32. Check /dashboard shows new blocked count
+ * 33. Check /emails shows the email with correct label badge
+ *
+ * ── UNINSTALL FLOW ──
+ *
+ * 34. Navigate to /settings → "Supprimer mon compte"
+ * 35. Type "SUPPRIMER" and confirm
+ * 36. Verify redirect to /login?uninstalled=true
+ * 37. Verify success banner displayed
+ * 38. Verify Gmail Kyrra labels removed
  */
