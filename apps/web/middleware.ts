@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    // If user is authenticated but not on a no-integration route, check Gmail integration
+    // If user is authenticated but not on a no-integration route, check Gmail integration + onboarding
     if (!isNoIntegrationRoute) {
       const { data: integration } = await supabase
         .from('user_integrations')
@@ -89,6 +89,40 @@ export async function middleware(request: NextRequest) {
         console.log('[AUTH MW] No Gmail integration — redirect to /connect-gmail')
         const url = request.nextUrl.clone()
         url.pathname = '/connect-gmail'
+        return NextResponse.redirect(url)
+      }
+
+      // Check onboarding completion — redirect to correct step if incomplete
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('profile_configured')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (!settings?.profile_configured) {
+        console.log('[AUTH MW] Profile not configured — redirect to /configure-profile')
+        const url = request.nextUrl.clone()
+        url.pathname = '/configure-profile'
+        return NextResponse.redirect(url)
+      }
+
+      const { data: scan } = await supabase
+        .from('onboarding_scans')
+        .select('labels_configured, status')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (!scan?.labels_configured) {
+        console.log('[AUTH MW] Labels not configured — redirect to /configure-labels')
+        const url = request.nextUrl.clone()
+        url.pathname = '/configure-labels'
+        return NextResponse.redirect(url)
+      }
+
+      if (scan.status !== 'completed') {
+        console.log('[AUTH MW] Inbox scan not complete — redirect to /scan-progress')
+        const url = request.nextUrl.clone()
+        url.pathname = '/scan-progress'
         return NextResponse.redirect(url)
       }
     }
