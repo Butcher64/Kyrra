@@ -1,70 +1,61 @@
 import { Mail, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 
-type ClassificationResult = 'A_VOIR' | 'FILTRE' | 'BLOQUE'
-
-const classificationConfig: Record<ClassificationResult, {
-  label: string
-  bar: string
-  badgeBg: string
-  badgeText: string
-  opacity: string
-  fontWeight: string
-  lineThrough: boolean
-}> = {
-  A_VOIR: {
-    label: 'À voir',
-    bar: 'bar-a-voir',
-    badgeBg: 'bg-[#e8edf8]',
-    badgeText: 'text-[#2d4a8a]',
-    opacity: 'opacity-100',
-    fontWeight: 'font-semibold',
-    lineThrough: false,
-  },
-  FILTRE: {
-    label: 'Filtré',
-    bar: 'bar-filtre',
-    badgeBg: 'bg-[#edeef2]',
-    badgeText: 'text-[#5c6070]',
-    opacity: 'opacity-55',
-    fontWeight: 'font-normal',
-    lineThrough: false,
-  },
-  BLOQUE: {
-    label: 'Bloqué',
-    bar: 'bar-bloque',
-    badgeBg: 'bg-[#f8e8e8]',
-    badgeText: 'text-[#8a2d2d]',
-    opacity: 'opacity-30',
-    fontWeight: 'font-normal',
-    lineThrough: true,
-  },
-}
-
 export default async function EmailsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Fetch user's dynamic labels
+  const { data: userLabels } = await supabase
+    .from('user_labels')
+    .select('id, name, color, position')
+    .eq('user_id', user!.id)
+    .order('position', { ascending: true })
+
+  const labels = userLabels ?? []
+
+  // Fetch classifications (join labels in memory — avoids PostgREST FK/RLS issues)
   const { data: classifications } = await supabase
     .from('email_classifications')
-    .select('gmail_message_id, classification_result, summary, confidence_score, created_at')
+    .select('gmail_message_id, label_id, summary, confidence_score, created_at, sender_display, subject_snippet')
     .eq('user_id', user!.id)
     .order('created_at', { ascending: false })
     .limit(50)
 
-  const emails = classifications ?? []
+  const labelMap = new Map(labels.map((l) => [l.id, l]))
 
-  const countAVoir = emails.filter((e) => e.classification_result === 'A_VOIR').length
-  const countFiltre = emails.filter((e) => e.classification_result === 'FILTRE').length
-  const countBloque = emails.filter((e) => e.classification_result === 'BLOQUE').length
-  const totalPages = Math.max(1, Math.ceil(emails.length / 50))
+  const emails = (classifications ?? []).map((c: any) => {
+    const label = c.label_id ? labelMap.get(c.label_id) : null
+    return {
+      gmail_message_id: c.gmail_message_id,
+      label_id: c.label_id,
+      label_name: label?.name ?? 'Inconnu',
+      label_color: label?.color ?? '#8b90a0',
+      label_position: label?.position ?? 99,
+      summary: c.summary,
+      confidence_score: c.confidence_score,
+      created_at: c.created_at,
+      sender_display: c.sender_display,
+      subject_snippet: c.subject_snippet,
+    }
+  })
+
+  // Build tabs from user's labels
+  const labelCounts = new Map<string, number>()
+  for (const email of emails) {
+    labelCounts.set(email.label_name, (labelCounts.get(email.label_name) ?? 0) + 1)
+  }
 
   const tabs = [
     { label: 'Tous', count: emails.length, active: true },
-    { label: 'À voir', count: countAVoir, active: false },
-    { label: 'Filtrés', count: countFiltre, active: false },
-    { label: 'Bloqués', count: countBloque, active: false },
+    ...labels.map((l) => ({
+      label: l.name,
+      count: labelCounts.get(l.name) ?? 0,
+      active: false,
+    })),
   ]
+
+  const totalPages = Math.max(1, Math.ceil(emails.length / 50))
 
   return (
     <>
@@ -127,8 +118,10 @@ export default async function EmailsPage() {
           <div className="bg-white border-x border-b border-[#e4e6ed]">
             <div className="divide-y divide-[#e4e6ed]">
               {emails.map((email) => {
-                const result = email.classification_result as ClassificationResult
-                const config = classificationConfig[result] ?? classificationConfig.FILTRE
+                const isBlocked = email.label_position >= 5
+                const isFiltered = email.label_position >= 3 && email.label_position < 5
+                const opacity = isBlocked ? 'opacity-30' : isFiltered ? 'opacity-55' : 'opacity-100'
+                const fontWeight = email.label_position <= 2 ? 'font-semibold' : 'font-normal'
                 const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`
                 const time = new Intl.DateTimeFormat('fr-FR', {
                   day: 'numeric',
@@ -137,50 +130,45 @@ export default async function EmailsPage() {
                   minute: '2-digit',
                 }).format(new Date(email.created_at))
 
-                // Extract a pseudo sender from gmail_message_id (first 8 chars)
-                const messageIdShort = email.gmail_message_id
-                  ? email.gmail_message_id.slice(0, 12)
-                  : '—'
-
                 return (
                   <a
                     key={email.gmail_message_id}
                     href={gmailLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex items-stretch no-underline transition-colors hover:bg-[#f5f6f9] ${config.opacity}`}
+                    className={`flex items-stretch no-underline transition-colors hover:bg-[#f5f6f9] ${opacity}`}
                   >
-                    {/* Classification bar */}
-                    <span className={`shrink-0 ${config.bar}`} />
+                    {/* Classification color bar */}
+                    <span
+                      className="shrink-0 w-[3px]"
+                      style={{ backgroundColor: email.label_color }}
+                    />
 
                     {/* Main content */}
                     <div className="flex-1 min-w-0 flex items-center justify-between gap-4 px-5 py-3.5">
-                      {/* Left: sender + subject + excerpt */}
+                      {/* Left: sender + subject + summary */}
                       <div className="min-w-0 flex-1">
-                        {/* Sender line */}
                         <div className="flex items-baseline gap-2">
-                          <span
-                            className={`text-[13px] ${config.fontWeight} text-[#0c1a32] truncate ${
-                              config.lineThrough ? 'line-through' : ''
-                            }`}
-                          >
-                            {email.summary ?? 'Email trié'}
+                          <span className={`text-[13px] ${fontWeight} text-[#0c1a32] truncate`}>
+                            {email.sender_display || email.summary || 'Email trié'}
                           </span>
                         </div>
-
-                        {/* Message ID as subtitle */}
-                        <p className="font-mono text-[9px] text-[#c4c7d4] mt-0.5 truncate">
-                          id: {messageIdShort}
+                        <p className="text-[11px] text-[#8b90a0] mt-0.5 truncate">
+                          {email.subject_snippet || email.summary || ''}
                         </p>
                       </div>
 
-                      {/* Right: badge + confidence + time */}
+                      {/* Right: label badge + confidence + time */}
                       <div className="flex items-center gap-3 shrink-0">
-                        {/* Classification badge */}
+                        {/* Dynamic label badge */}
                         <span
-                          className={`px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider ${config.badgeBg} ${config.badgeText}`}
+                          className="px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider"
+                          style={{
+                            backgroundColor: `${email.label_color}20`,
+                            color: email.label_color,
+                          }}
                         >
-                          {config.label}
+                          {email.label_name}
                         </span>
 
                         {/* Confidence + time */}

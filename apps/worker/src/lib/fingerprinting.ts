@@ -79,6 +79,36 @@ const KNOWN_PROSPECTING_DOMAINS = new Set([
   // This list will grow as fingerprints are collected
 ])
 
+// Legitimate email sending infrastructure — NOT a signal of mismatch
+// Many SaaS/enterprises send via these providers (Slack via amazonses, Stripe via sendgrid, etc.)
+const LEGITIMATE_SENDING_PROVIDERS = new Set([
+  'amazonses.com',
+  'sendgrid.net',
+  'mailgun.org',
+  'mandrillapp.com',
+  'postmarkapp.com',
+  'sparkpostmail.com',
+  'sailthru.com',
+  'mcsv.net',          // Mailchimp
+  'rsgsv.net',         // Mailchimp
+  'google.com',
+  'googlemail.com',
+  'gappssmtp.com',     // Google Apps SMTP relay
+  'outlook.com',
+  'protection.outlook.com',
+  'pphosted.com',      // Proofpoint
+  'mimecast.com',
+  'salesforce.com',
+  'exacttarget.com',   // Salesforce Marketing Cloud
+  'ccsend.com',        // Constant Contact
+  'createsend.com',    // Campaign Monitor
+  'hubspot.com',
+  'brevo.com',
+  'sendinblue.com',
+  'mailjet.com',
+  'intercom.io',
+])
+
 function checkDomainReputation(senderDomain: string, headers: Record<string, string>): FingerprintResult | null {
   // Check against known prospecting sending domains
   if (KNOWN_PROSPECTING_DOMAINS.has(senderDomain)) {
@@ -91,12 +121,17 @@ function checkDomainReputation(senderDomain: string, headers: Record<string, str
   }
 
   // Check for DKIM domain mismatch (sender domain != DKIM signing domain)
+  // Exclude legitimate sending providers — most SaaS use third-party email infrastructure
   const dkimSignature = headers['dkim-signature'] || ''
   if (dkimSignature) {
     const dkimDomainMatch = dkimSignature.match(/d=([^;]+)/)
     if (dkimDomainMatch) {
       const dkimDomain = dkimDomainMatch[1]!.trim()
-      if (dkimDomain !== senderDomain && !senderDomain.endsWith(`.${dkimDomain}`)) {
+      if (
+        dkimDomain !== senderDomain &&
+        !senderDomain.endsWith(`.${dkimDomain}`) &&
+        !isLegitimateProvider(dkimDomain)
+      ) {
         return {
           classified: true,
           result: 'FILTRE',
@@ -119,6 +154,19 @@ function checkDomainReputation(senderDomain: string, headers: Record<string, str
   }
 
   return null
+}
+
+/**
+ * Check if a DKIM signing domain is a known legitimate email infrastructure provider
+ * Matches exact domain or subdomains (e.g., s51.y.mc.salesforce.com → salesforce.com)
+ */
+function isLegitimateProvider(dkimDomain: string): boolean {
+  if (LEGITIMATE_SENDING_PROVIDERS.has(dkimDomain)) return true
+  // Check if dkimDomain is a subdomain of a known provider
+  for (const provider of LEGITIMATE_SENDING_PROVIDERS) {
+    if (dkimDomain.endsWith(`.${provider}`)) return true
+  }
+  return false
 }
 
 // ── Layer 3: Subject pattern matching ──

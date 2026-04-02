@@ -1,0 +1,93 @@
+<h2>Les labels Gmail existants du client — qu'en faire ?</h2>
+<p class="subtitle">Le client a déjà des labels dans Gmail (Clients, Projets, Admin...). Comment Kyrra les intègre ?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Ignorer les labels Gmail</h3>
+      <p>Kyrra crée ses propres labels indépendamment. Les labels Gmail du client restent intacts mais Kyrra ne les utilise pas. Séparation claire.</p>
+      <div class="pros-cons" style="margin-top:10px;font-size:12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Simple à implémenter</li><li>Pas de risque de casser l'organisation existante</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Le client se retrouve avec 2 systèmes de labels</li><li>Kyrra ne bénéficie pas de l'effort d'organisation déjà fait</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Scanner + proposer un mapping</h3>
+      <p>Kyrra lit les labels Gmail existants et PROPOSE de les intégrer dans sa taxonomie. Ex: "Vous avez un label 'Clients' — voulez-vous que les emails de ce label soient toujours dans 'Important' ?" Le client valide chaque mapping.</p>
+      <div class="mockup" style="margin-top:10px;">
+        <div class="mockup-header">Aperçu — Mapping labels</div>
+        <div class="mockup-body" style="padding:14px;font-family:system-ui;font-size:12px;">
+          <div style="margin-bottom:12px;font-size:13px;font-weight:600;">Vos labels Gmail détectés</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8f8f8;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:10px;height:10px;background:#4285f4;border-radius:2px;display:inline-block;"></span>
+                <span style="font-weight:500;">Clients</span>
+                <span style="color:#aaa;font-size:11px;">(34 emails)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="color:#888;">→</span>
+                <span style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;font-size:11px;font-weight:600;">🟢 Important</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8f8f8;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:10px;height:10px;background:#fbbc04;border-radius:2px;display:inline-block;"></span>
+                <span style="font-weight:500;">Admin / Compta</span>
+                <span style="color:#aaa;font-size:11px;">(18 emails)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="color:#888;">→</span>
+                <span style="background:#e3f2fd;color:#1565c0;padding:2px 8px;font-size:11px;font-weight:600;">🔵 Transactionnel</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8f8f8;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:10px;height:10px;background:#34a853;border-radius:2px;display:inline-block;"></span>
+                <span style="font-weight:500;">Veille</span>
+                <span style="color:#aaa;font-size:11px;">(52 emails)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="color:#888;">→</span>
+                <span style="background:#fff3e0;color:#e65100;padding:2px 8px;font-size:11px;font-weight:600;">🟠 Newsletter</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8f8f8;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:10px;height:10px;background:#ea4335;border-radius:2px;display:inline-block;"></span>
+                <span style="font-weight:500;">Spam commercial</span>
+                <span style="color:#aaa;font-size:11px;">(127 emails)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="color:#888;">→</span>
+                <span style="background:#fce4ec;color:#c62828;padding:2px 8px;font-size:11px;font-weight:600;">🔴 Prospection</span>
+              </div>
+            </div>
+          </div>
+          <div style="color:#888;font-size:11px;margin-top:8px;text-align:center;">Cliquez sur un mapping pour le modifier</div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:10px;font-size:12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Effet "wow" — Kyrra comprend votre organisation</li><li>Le client part de ses habitudes, pas de zéro</li><li>L'IA apprend de l'organisation existante</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Plus complexe à implémenter (scan labels + IA pour mapping)</li><li>Besoin d'un scope Gmail API supplémentaire (labels.list)</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Utiliser les labels Gmail COMME labels Kyrra</h3>
+      <p>Au lieu de créer de nouveaux labels Kyrra, on utilise directement les labels Gmail existants du client + on en crée si besoin. Les classifications Kyrra appliquent les labels que le client connaît déjà.</p>
+      <div class="pros-cons" style="margin-top:10px;font-size:12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Zéro friction — pas de double système</li><li>Le client garde ses repères</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Risque de conflits si le client modifie ses labels</li><li>On perd le "branding" Kyrra dans Gmail</li><li>Complexe à synchroniser</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

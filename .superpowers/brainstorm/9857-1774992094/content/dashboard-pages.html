@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kyrra — Dashboard Pages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0c1a32;
+    --ink: #1a1f36;
+    --slate: #4a5068;
+    --muted: #8b90a0;
+    --subtle: #c4c7d4;
+    --line: #e4e6ed;
+    --surface: #f5f6f9;
+    --white: #ffffff;
+    --tag-blue-bg: #e8edf8;
+    --tag-blue: #2d4a8a;
+    --tag-gray-bg: #edeef2;
+    --tag-gray: #5c6070;
+    --tag-red-bg: #f8e8e8;
+    --tag-red: #8a2d2d;
+    --green: #1a7a4a;
+    --green-dot: #2dd881;
+    --red: #c23a3a;
+    --accent: #3a5bc7;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:#08080b; color:#e8e8ec; padding:32px 40px; }
+  .mono { font-family:'IBM Plex Mono',monospace; }
+  .serif { font-family:'Instrument Serif',serif; }
+
+  .page-section { margin-bottom:64px; }
+  .section-label {
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--muted); margin-bottom:14px; padding-bottom:8px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .frame { border:1px solid rgba(255,255,255,0.08); overflow:hidden; }
+  .frame-header {
+    background:rgba(255,255,255,0.03); padding:6px 12px;
+    font-family:'IBM Plex Mono',monospace; font-size:9px;
+    text-transform:uppercase; letter-spacing:0.1em; color:var(--muted);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    display:flex; justify-content:space-between;
+  }
+  .note {
+    margin-top:10px; padding:10px 14px;
+    background:rgba(58,91,199,0.06); border-left:2px solid var(--accent);
+    font-size:12px; color:var(--muted); line-height:1.7;
+  }
+
+  /* Sidebar shared */
+  .sidebar {
+    width:220px; background:var(--navy); padding:20px 14px;
+    display:flex; flex-direction:column; position:relative; overflow:hidden; flex-shrink:0;
+  }
+  .sidebar-noise {
+    position:absolute; inset:0; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+  .sidebar-content { position:relative; z-index:1; display:flex; flex-direction:column; flex:1; }
+  .nav-item { padding:8px 10px; font-size:13px; }
+  .nav-active { background:rgba(255,255,255,0.06); color:white; }
+  .nav-inactive { color:rgba(255,255,255,0.25); }
+</style>
+</head>
+<body>
+
+<h1 class="serif" style="font-size:36px;color:white;margin-bottom:6px;">Dashboard — Toutes les pages</h1>
+<p style="font-size:14px;color:var(--muted);margin-bottom:48px;max-width:600px;">
+  4 pages du dashboard : Tableau de bord, Mes emails, Libellés, Paramètres. Chaque page est un mockup complet.
+</p>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE 1: TABLEAU DE BORD -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page-section">
+  <div class="section-label">Page 1 — Tableau de bord</div>
+  <div class="frame">
+    <div class="frame-header"><span>/dashboard</span><span>vue d'ensemble quotidienne</span></div>
+    <div style="display:flex;background:var(--surface);min-height:520px;">
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-noise"></div>
+        <div class="sidebar-content">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:28px;">
+            <div style="width:22px;height:22px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.6);"></div></div>
+            <span style="font-size:15px;font-weight:700;color:white;letter-spacing:-0.04em;">Kyrra</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:4px;"><div style="width:5px;height:5px;background:var(--green-dot);border-radius:50%;box-shadow:0 0 6px var(--green-dot);"></div><span class="mono" style="font-size:8px;color:rgba(255,255,255,0.3);">actif</span></div>
+          </div>
+          <div class="mono" style="font-size:8px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.12);margin-bottom:6px;padding:0 10px;">Menu</div>
+          <div class="nav-item nav-active">📊 Tableau de bord</div>
+          <div class="nav-item nav-inactive">✉️ Mes emails</div>
+          <div class="nav-item nav-inactive">🏷️ Libellés</div>
+          <div class="nav-item nav-inactive">⚙️ Paramètres</div>
+          <div style="flex:1;"></div>
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;background:rgba(255,255,255,0.06);font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-weight:600;">T</div>
+            <div><div style="font-size:12px;color:rgba(255,255,255,0.6);">Thomas</div><div class="mono" style="font-size:9px;color:rgba(255,255,255,0.2);">thomas@kyrra.ai</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main -->
+      <div style="flex:1;padding:28px 32px;overflow:hidden;">
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+          <div>
+            <h1 style="font-size:22px;font-weight:700;color:var(--navy);letter-spacing:-0.02em;">Bonjour, Thomas</h1>
+            <div class="mono" style="font-size:11px;color:var(--muted);margin-top:3px;">lun. 31 mars · 47 emails triés aujourd'hui</div>
+          </div>
+          <div style="display:flex;gap:20px;align-items:baseline;">
+            <div style="text-align:right;"><div style="font-size:20px;font-weight:700;color:var(--navy);">18</div><div class="mono" style="font-size:8px;color:var(--muted);text-transform:uppercase;">bloqués</div></div>
+            <div style="width:1px;height:28px;background:var(--line);"></div>
+            <div style="text-align:right;"><div style="font-size:20px;font-weight:700;color:var(--green);">23<span style="font-size:11px;font-weight:400;color:var(--muted);">min</span></div><div class="mono" style="font-size:8px;color:var(--muted);text-transform:uppercase;">gagnées</div></div>
+            <div style="width:1px;height:28px;background:var(--line);"></div>
+            <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--line);"><div style="width:5px;height:5px;background:var(--green-dot);border-radius:50%;box-shadow:0 0 4px var(--green-dot);"></div><span class="mono" style="font-size:9px;color:var(--green);">protégé</span></div>
+          </div>
+        </div>
+
+        <!-- 2 columns -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+          <!-- Overview card -->
+          <div style="background:white;border:1px solid var(--line);padding:20px;">
+            <div class="mono" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;">Cette semaine</div>
+            <div style="display:flex;gap:24px;">
+              <div><div style="font-size:32px;font-weight:700;color:var(--navy);line-height:1;">312</div><div class="mono" style="font-size:9px;color:var(--muted);margin-top:2px;">triés</div></div>
+              <div><div style="font-size:32px;font-weight:700;color:var(--red);line-height:1;">89</div><div class="mono" style="font-size:9px;color:var(--muted);margin-top:2px;">bloqués</div></div>
+              <div><div style="font-size:32px;font-weight:700;color:var(--green);line-height:1;">1.9<span style="font-size:14px;font-weight:400;color:var(--muted);">h</span></div><div class="mono" style="font-size:9px;color:var(--muted);margin-top:2px;">gagnées</div></div>
+            </div>
+            <div style="display:flex;gap:2px;margin-top:16px;height:32px;align-items:flex-end;">
+              <div style="flex:1;background:var(--tag-blue-bg);height:40%;"></div>
+              <div style="flex:1;background:var(--tag-blue-bg);height:60%;"></div>
+              <div style="flex:1;background:var(--tag-blue-bg);height:35%;"></div>
+              <div style="flex:1;background:var(--tag-blue-bg);height:80%;"></div>
+              <div style="flex:1;background:var(--tag-blue-bg);height:55%;"></div>
+              <div style="flex:1;background:var(--tag-blue);height:100%;"></div>
+              <div style="flex:1;background:var(--surface);height:20%;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;">
+              <span class="mono" style="font-size:8px;color:var(--subtle);">lun</span><span class="mono" style="font-size:8px;color:var(--subtle);">mar</span><span class="mono" style="font-size:8px;color:var(--subtle);">mer</span><span class="mono" style="font-size:8px;color:var(--subtle);">jeu</span><span class="mono" style="font-size:8px;color:var(--subtle);">ven</span><span class="mono" style="font-size:8px;color:var(--navy);font-weight:500;">auj.</span><span class="mono" style="font-size:8px;color:var(--subtle);">—</span>
+            </div>
+          </div>
+
+          <!-- À voir -->
+          <div style="background:white;border:1px solid var(--line);">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:6px;"><div style="width:3px;height:14px;background:var(--tag-blue);"></div><span style="font-size:13px;font-weight:600;color:var(--navy);">À voir</span><span class="mono" style="font-size:10px;color:var(--muted);">12</span></div>
+              <span class="mono" style="font-size:10px;color:var(--accent);">tout voir →</span>
+            </div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:10px;">
+              <div style="width:3px;height:24px;background:var(--tag-blue);flex-shrink:0;"></div>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--ink);">Marc Dupont — Contrat Q2</div><div style="font-size:10px;color:var(--muted);margin-top:1px;">Signature requise avant vendredi</div></div>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">14:32</span>
+            </div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:10px;">
+              <div style="width:3px;height:24px;background:var(--tag-blue);flex-shrink:0;"></div>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--ink);">Sophie Martin — Webinar BPI</div><div style="font-size:10px;color:var(--muted);margin-top:1px;">Inscription avant le 5 avril</div></div>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">11:20</span>
+            </div>
+            <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;">
+              <div style="width:3px;height:24px;background:var(--tag-blue);flex-shrink:0;"></div>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--ink);">Jean Leclerc — Offre freelance</div><div style="font-size:10px;color:var(--muted);margin-top:1px;">Dev React disponible immédiatement</div></div>
+              <span class="mono" style="font-size:9px;color:var(--subtle);">09:45</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recently filtered -->
+        <div style="background:white;border:1px solid var(--line);">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;"><span style="font-size:13px;font-weight:600;color:var(--navy);">Récemment filtrés</span><span class="mono" style="font-size:10px;color:var(--accent);">tout voir →</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;">
+            <div style="border-right:1px solid var(--line);">
+              <div style="padding:10px 16px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:10px;opacity:0.6;"><div style="width:3px;height:20px;background:var(--subtle);flex-shrink:0;"></div><div style="flex:1;font-size:11px;color:var(--slate);">Sales Navigator — Solutions enterprise</div><span style="font-size:8px;padding:2px 6px;background:var(--tag-gray-bg);color:var(--tag-gray);font-weight:600;text-transform:uppercase;">Filtré</span></div>
+              <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;opacity:0.6;"><div style="width:3px;height:20px;background:var(--subtle);flex-shrink:0;"></div><div style="flex:1;font-size:11px;color:var(--slate);">HubSpot — Votre CRM gratuit</div><span style="font-size:8px;padding:2px 6px;background:var(--tag-gray-bg);color:var(--tag-gray);font-weight:600;text-transform:uppercase;">Filtré</span></div>
+            </div>
+            <div>
+              <div style="padding:10px 16px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:10px;opacity:0.35;"><div style="width:3px;height:20px;background:#d4a0a0;flex-shrink:0;"></div><div style="flex:1;font-size:11px;color:var(--muted);text-decoration:line-through;">GrowthHack Pro — Pipeline B2B</div><span style="font-size:8px;padding:2px 6px;background:var(--tag-red-bg);color:var(--tag-red);font-weight:600;text-transform:uppercase;">Bloqué</span></div>
+              <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;opacity:0.35;"><div style="width:3px;height:20px;background:#d4a0a0;flex-shrink:0;"></div><div style="flex:1;font-size:11px;color:var(--muted);text-decoration:line-through;">Newsletter Growth Weekly</div><span style="font-size:8px;padding:2px 6px;background:var(--tag-red-bg);color:var(--tag-red);font-weight:600;text-transform:uppercase;">Bloqué</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Tableau de bord :</strong> Vue d'ensemble. Stats compactes dans le header. 2 zones : overview semaine + bar chart à gauche, emails "À voir" prioritaires à droite. En bas : filtrés/bloqués récents en 2 colonnes.</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE 2: MES EMAILS -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page-section">
+  <div class="section-label">Page 2 — Mes emails</div>
+  <div class="frame">
+    <div class="frame-header"><span>/emails</span><span>boîte mail triée par kyrra</span></div>
+    <div style="display:flex;background:var(--surface);min-height:520px;">
+      <div class="sidebar">
+        <div class="sidebar-noise"></div>
+        <div class="sidebar-content">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:28px;"><div style="width:22px;height:22px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.6);"></div></div><span style="font-size:15px;font-weight:700;color:white;letter-spacing:-0.04em;">Kyrra</span></div>
+          <div class="mono" style="font-size:8px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.12);margin-bottom:6px;padding:0 10px;">Menu</div>
+          <div class="nav-item nav-inactive">📊 Tableau de bord</div>
+          <div class="nav-item nav-active">✉️ Mes emails</div>
+          <div class="nav-item nav-inactive">🏷️ Libellés</div>
+          <div class="nav-item nav-inactive">⚙️ Paramètres</div>
+          <div style="flex:1;"></div>
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;background:rgba(255,255,255,0.06);font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;">T</div><div><div style="font-size:12px;color:rgba(255,255,255,0.6);">Thomas</div></div></div>
+        </div>
+      </div>
+      <div style="flex:1;padding:28px 32px;overflow:hidden;">
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <div>
+            <h1 style="font-size:22px;font-weight:700;color:var(--navy);">Mes emails</h1>
+            <div class="mono" style="font-size:11px;color:var(--muted);margin-top:3px;">312 emails triés cette semaine</div>
+          </div>
+          <!-- Search -->
+          <div style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);padding:7px 14px;background:white;width:280px;">
+            <span style="font-size:14px;color:var(--subtle);">🔍</span>
+            <span style="font-size:12px;color:var(--subtle);">Rechercher un email...</span>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--line);">
+          <div style="padding:8px 16px;font-size:12px;font-weight:500;color:var(--navy);border-bottom:2px solid var(--navy);">Tous <span class="mono" style="font-size:10px;color:var(--muted);margin-left:4px;">312</span></div>
+          <div style="padding:8px 16px;font-size:12px;color:var(--muted);">À voir <span class="mono" style="font-size:10px;margin-left:4px;">48</span></div>
+          <div style="padding:8px 16px;font-size:12px;color:var(--muted);">Filtrés <span class="mono" style="font-size:10px;margin-left:4px;">175</span></div>
+          <div style="padding:8px 16px;font-size:12px;color:var(--muted);">Bloqués <span class="mono" style="font-size:10px;margin-left:4px;">89</span></div>
+        </div>
+
+        <!-- Email list -->
+        <div style="background:white;border:1px solid var(--line);">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;">
+            <div style="width:3px;height:32px;background:var(--tag-blue);flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-size:13px;font-weight:600;color:var(--ink);">Marc Dupont</span><span class="mono" style="font-size:9px;color:var(--subtle);">marc@acme-corp.com</span></div>
+              <div style="font-size:13px;color:var(--ink);">Re: Contrat Q2 — signature requise avant vendredi</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">CEO souhaite finaliser le partenariat technique...</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;"><span style="font-size:8px;font-weight:600;text-transform:uppercase;padding:2px 7px;background:var(--tag-blue-bg);color:var(--tag-blue);">À voir</span><span class="mono" style="font-size:9px;color:var(--subtle);">94% · 14:32</span></div>
+          </div>
+          <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;">
+            <div style="width:3px;height:32px;background:var(--tag-blue);flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-size:13px;font-weight:600;color:var(--ink);">Sophie Martin</span><span class="mono" style="font-size:9px;color:var(--subtle);">s.martin@bpi.fr</span></div>
+              <div style="font-size:13px;color:var(--ink);">Invitation webinar — Transformation digitale PME</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;"><span style="font-size:8px;font-weight:600;text-transform:uppercase;padding:2px 7px;background:var(--tag-blue-bg);color:var(--tag-blue);">À voir</span><span class="mono" style="font-size:9px;color:var(--subtle);">91% · 11:20</span></div>
+          </div>
+          <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;opacity:0.55;">
+            <div style="width:3px;height:32px;background:var(--subtle);flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-size:13px;color:var(--slate);">Sales Navigator</span><span class="mono" style="font-size:9px;color:var(--subtle);">noreply@linkedin.com</span></div>
+              <div style="font-size:13px;color:var(--slate);">Découvrez nos solutions enterprise pour votre équipe</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;"><span style="font-size:8px;font-weight:600;text-transform:uppercase;padding:2px 7px;background:var(--tag-gray-bg);color:var(--tag-gray);">Filtré</span><span class="mono" style="font-size:9px;color:var(--subtle);">87% · 10:45</span></div>
+          </div>
+          <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;opacity:0.3;">
+            <div style="width:3px;height:32px;background:#d4a0a0;flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-size:13px;color:var(--muted);text-decoration:line-through;">GrowthHack Pro</span><span class="mono" style="font-size:9px;color:var(--subtle);">team@growthhack.io</span></div>
+              <div style="font-size:13px;color:var(--muted);text-decoration:line-through;">Boostez votre pipeline B2B en 48h</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;"><span style="font-size:8px;font-weight:600;text-transform:uppercase;padding:2px 7px;background:var(--tag-red-bg);color:var(--tag-red);">Bloqué</span><span class="mono" style="font-size:9px;color:var(--subtle);">99% · 09:12</span></div>
+          </div>
+          <div style="padding:14px 18px;display:flex;align-items:center;gap:14px;opacity:0.3;">
+            <div style="width:3px;height:32px;background:#d4a0a0;flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-size:13px;color:var(--muted);text-decoration:line-through;">Newsletter Weekly</span><span class="mono" style="font-size:9px;color:var(--subtle);">news@startupweekly.co</span></div>
+              <div style="font-size:13px;color:var(--muted);text-decoration:line-through;">Votre dose hebdo d'actualités startup</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;"><span style="font-size:8px;font-weight:600;text-transform:uppercase;padding:2px 7px;background:var(--tag-red-bg);color:var(--tag-red);">Bloqué</span><span class="mono" style="font-size:9px;color:var(--subtle);">98% · 08:30</span></div>
+          </div>
+        </div>
+        <!-- Pagination -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
+          <span class="mono" style="font-size:10px;color:var(--muted);">page 1 / 16</span>
+          <div style="display:flex;gap:4px;">
+            <div style="padding:5px 10px;border:1px solid var(--line);font-size:11px;color:var(--subtle);">←</div>
+            <div style="padding:5px 10px;border:1px solid var(--line);font-size:11px;color:var(--navy);">→</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Mes emails :</strong> Vue liste complète type Gmail. Tabs de filtrage (Tous/À voir/Filtrés/Bloqués). Barre de recherche. Expéditeur + email + objet + extrait. Pagination. C'est la page où le dirigeant passe le plus de temps.</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE 3: LIBELLÉS -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page-section">
+  <div class="section-label">Page 3 — Libellés</div>
+  <div class="frame">
+    <div class="frame-header"><span>/labels</span><span>centre de contrôle des règles</span></div>
+    <div style="display:flex;background:var(--surface);min-height:520px;">
+      <div class="sidebar">
+        <div class="sidebar-noise"></div>
+        <div class="sidebar-content">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:28px;"><div style="width:22px;height:22px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.6);"></div></div><span style="font-size:15px;font-weight:700;color:white;letter-spacing:-0.04em;">Kyrra</span></div>
+          <div class="mono" style="font-size:8px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.12);margin-bottom:6px;padding:0 10px;">Menu</div>
+          <div class="nav-item nav-inactive">📊 Tableau de bord</div>
+          <div class="nav-item nav-inactive">✉️ Mes emails</div>
+          <div class="nav-item nav-active">🏷️ Libellés</div>
+          <div class="nav-item nav-inactive">⚙️ Paramètres</div>
+          <div style="flex:1;"></div>
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;background:rgba(255,255,255,0.06);font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;">T</div><div><div style="font-size:12px;color:rgba(255,255,255,0.6);">Thomas</div></div></div>
+        </div>
+      </div>
+      <div style="flex:1;padding:28px 32px;overflow:hidden;">
+        <h1 style="font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px;">Libellés</h1>
+        <div class="mono" style="font-size:11px;color:var(--muted);margin-bottom:24px;">Gérez vos labels automatiques et personnalisés</div>
+
+        <!-- Kyrra labels -->
+        <div style="margin-bottom:24px;">
+          <div class="mono" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Labels Kyrra (automatiques)</div>
+          <div style="background:white;border:1px solid var(--line);">
+            <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;">
+              <div style="width:3px;height:28px;background:var(--subtle);flex-shrink:0;"></div>
+              <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Filtré</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">Prospection générique — pas urgente</div></div>
+              <div style="text-align:right;"><div style="font-size:16px;font-weight:700;color:var(--navy);">175</div><div class="mono" style="font-size:8px;color:var(--muted);">cette semaine</div></div>
+            </div>
+            <div style="padding:14px 18px;display:flex;align-items:center;gap:14px;">
+              <div style="width:3px;height:28px;background:#d4a0a0;flex-shrink:0;"></div>
+              <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Bloqué</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">Spam et prospection indésirable</div></div>
+              <div style="text-align:right;"><div style="font-size:16px;font-weight:700;color:var(--red);">89</div><div class="mono" style="font-size:8px;color:var(--muted);">cette semaine</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gmail labels synced -->
+        <div style="margin-bottom:24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div class="mono" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Labels Gmail (synchronisés)</div>
+            <div class="mono" style="font-size:9px;color:var(--accent);cursor:pointer;">synchroniser ↻</div>
+          </div>
+          <div style="background:white;border:1px solid var(--line);">
+            <div style="padding:12px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;justify-content:between;">
+              <div style="display:flex;align-items:center;gap:10px;flex:1;"><div style="width:8px;height:8px;background:#4285f4;flex-shrink:0;"></div><span style="font-size:13px;color:var(--ink);">Clients</span></div>
+              <span class="mono" style="font-size:10px;color:var(--muted);">234 emails</span>
+            </div>
+            <div style="padding:12px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;">
+              <div style="display:flex;align-items:center;gap:10px;flex:1;"><div style="width:8px;height:8px;background:#0f9d58;flex-shrink:0;"></div><span style="font-size:13px;color:var(--ink);">Fournisseurs</span></div>
+              <span class="mono" style="font-size:10px;color:var(--muted);">89 emails</span>
+            </div>
+            <div style="padding:12px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;">
+              <div style="display:flex;align-items:center;gap:10px;flex:1;"><div style="width:8px;height:8px;background:#f4b400;flex-shrink:0;"></div><span style="font-size:13px;color:var(--ink);">Projets en cours</span></div>
+              <span class="mono" style="font-size:10px;color:var(--muted);">156 emails</span>
+            </div>
+            <div style="padding:12px 18px;display:flex;align-items:center;">
+              <div style="display:flex;align-items:center;gap:10px;flex:1;"><div style="width:8px;height:8px;background:#db4437;flex-shrink:0;"></div><span style="font-size:13px;color:var(--ink);">Comptabilité</span></div>
+              <span class="mono" style="font-size:10px;color:var(--muted);">67 emails</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom rules -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div class="mono" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Règles personnalisées</div>
+            <div style="padding:5px 14px;background:var(--navy);color:white;font-size:11px;font-weight:500;cursor:pointer;">+ Nouvelle règle</div>
+          </div>
+          <div style="background:white;border:1px solid var(--line);">
+            <div style="padding:14px 18px;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:14px;">
+              <div style="width:8px;height:8px;background:#4285f4;flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:500;color:var(--ink);">Emails de @acme-corp.com → Clients</div>
+                <div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px;">domaine · créé il y a 3 jours · 12 emails matchés</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <span class="mono" style="font-size:9px;color:var(--accent);cursor:pointer;">modifier</span>
+                <span class="mono" style="font-size:9px;color:var(--red);cursor:pointer;">supprimer</span>
+              </div>
+            </div>
+            <div style="padding:14px 18px;display:flex;align-items:center;gap:14px;">
+              <div style="width:8px;height:8px;background:#f4b400;flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:500;color:var(--ink);">Contient "facture" → Comptabilité</div>
+                <div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px;">mot-clé · créé il y a 1 semaine · 8 emails matchés</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <span class="mono" style="font-size:9px;color:var(--accent);cursor:pointer;">modifier</span>
+                <span class="mono" style="font-size:9px;color:var(--red);cursor:pointer;">supprimer</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Libellés :</strong> 3 sections. Labels Kyrra auto (Filtré/Bloqué) avec stats. Labels Gmail synchronisés (lecture avec couleurs Gmail). Règles personnalisées avec bouton "+ Nouvelle règle". Chaque règle montre : condition → label, type, date, nb emails matchés.</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE 4: PARAMÈTRES -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page-section">
+  <div class="section-label">Page 4 — Paramètres</div>
+  <div class="frame">
+    <div class="frame-header"><span>/settings</span><span>configuration du compte</span></div>
+    <div style="display:flex;background:var(--surface);min-height:520px;">
+      <div class="sidebar">
+        <div class="sidebar-noise"></div>
+        <div class="sidebar-content">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:28px;"><div style="width:22px;height:22px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.6);"></div></div><span style="font-size:15px;font-weight:700;color:white;letter-spacing:-0.04em;">Kyrra</span></div>
+          <div class="mono" style="font-size:8px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.12);margin-bottom:6px;padding:0 10px;">Menu</div>
+          <div class="nav-item nav-inactive">📊 Tableau de bord</div>
+          <div class="nav-item nav-inactive">✉️ Mes emails</div>
+          <div class="nav-item nav-inactive">🏷️ Libellés</div>
+          <div class="nav-item nav-active">⚙️ Paramètres</div>
+          <div style="flex:1;"></div>
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;background:rgba(255,255,255,0.06);font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;">T</div><div><div style="font-size:12px;color:rgba(255,255,255,0.6);">Thomas</div></div></div>
+        </div>
+      </div>
+      <div style="flex:1;padding:28px 32px;overflow:hidden;">
+        <h1 style="font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px;">Paramètres</h1>
+        <div class="mono" style="font-size:11px;color:var(--muted);margin-bottom:28px;">Configuration de votre compte Kyrra</div>
+
+        <div style="max-width:560px;">
+          <!-- Mode d'exposition -->
+          <div style="background:white;border:1px solid var(--line);padding:20px;margin-bottom:16px;">
+            <div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px;">Mode d'exposition</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Ajustez la sensibilité du filtre</div>
+            <div style="display:flex;gap:0;">
+              <div style="flex:1;padding:10px;border:1px solid var(--line);text-align:center;font-size:12px;color:var(--muted);cursor:pointer;">Strict</div>
+              <div style="flex:1;padding:10px;border:1px solid var(--navy);background:var(--navy);text-align:center;font-size:12px;color:white;font-weight:500;">Normal</div>
+              <div style="flex:1;padding:10px;border:1px solid var(--line);text-align:center;font-size:12px;color:var(--muted);cursor:pointer;">Permissif</div>
+            </div>
+            <div class="mono" style="font-size:9px;color:var(--muted);margin-top:8px;">Normal : équilibre entre filtrage et tolérance. Recommandé pour la plupart des dirigeants.</div>
+          </div>
+
+          <!-- Recap -->
+          <div style="background:white;border:1px solid var(--line);padding:20px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--navy);">Kyrra Recap</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px;">Recevez un résumé quotidien de vos emails triés</div>
+              </div>
+              <!-- Toggle -->
+              <div style="width:40px;height:22px;background:var(--navy);padding:2px;cursor:pointer;display:flex;justify-content:flex-end;">
+                <div style="width:18px;height:18px;background:white;"></div>
+              </div>
+            </div>
+            <div class="mono" style="font-size:9px;color:var(--muted);margin-top:8px;">Envoyé chaque matin à 8h dans votre boîte mail</div>
+          </div>
+
+          <!-- Compte -->
+          <div style="background:white;border:1px solid var(--line);padding:20px;margin-bottom:16px;">
+            <div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:12px;">Compte</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--surface);">
+              <div><div style="font-size:12px;color:var(--slate);">Email</div></div>
+              <div class="mono" style="font-size:12px;color:var(--ink);">thomas@kyrra.ai</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--surface);">
+              <div><div style="font-size:12px;color:var(--slate);">Plan</div></div>
+              <div style="display:flex;align-items:center;gap:8px;"><span class="mono" style="font-size:12px;color:var(--ink);">Pro</span><span class="mono" style="font-size:9px;color:var(--accent);cursor:pointer;">gérer →</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
+              <div><div style="font-size:12px;color:var(--slate);">Gmail connecté</div></div>
+              <div style="display:flex;align-items:center;gap:6px;"><div style="width:4px;height:4px;background:var(--green-dot);border-radius:50%;"></div><span class="mono" style="font-size:12px;color:var(--green);">connecté</span></div>
+            </div>
+          </div>
+
+          <!-- Danger zone -->
+          <div style="border:1px solid var(--line);padding:20px;">
+            <div class="mono" style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">Zone dangereuse</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><div style="font-size:13px;color:var(--ink);">Supprimer mon compte</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">Désinstalle Kyrra et supprime toutes vos données</div></div>
+              <div style="padding:7px 14px;border:1px solid var(--red);color:var(--red);font-size:11px;font-weight:500;cursor:pointer;">Supprimer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Paramètres :</strong> 4 blocs empilés sur une colonne étroite (560px). Mode d'exposition (3 pills carrés). Kyrra Recap (toggle). Infos compte (email, plan, Gmail status). Zone dangereuse (suppression). Tout est fonctionnel et carré.</div>
+</div>
+
+</body>
+</html>

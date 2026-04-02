@@ -1,0 +1,165 @@
+<h2>Design final — Onboarding Labels Dynamiques</h2>
+<p class="subtitle">Résumé de toutes les décisions prises pendant le brainstorm</p>
+
+<div class="section">
+  <h3>Parcours onboarding (6 étapes)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Flow complet</div>
+    <div class="mockup-body" style="padding:20px;font-family:system-ui;font-size:13px;">
+      <div style="display:flex;flex-direction:column;gap:2px;">
+
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f0f7f0;">
+          <div style="min-width:24px;height:24px;background:#2e7d32;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">1</div>
+          <div>
+            <div style="font-weight:600;">Connexion Gmail + Consentement</div>
+            <div style="color:#888;font-size:11px;">Existe déjà — OAuth + écran de consentement</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;color:#2e7d32;">✓ existant</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f0f7f0;">
+          <div style="min-width:24px;height:24px;background:#2e7d32;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">2</div>
+          <div>
+            <div style="font-weight:600;">Scan whitelist (contacts connus)</div>
+            <div style="color:#888;font-size:11px;">Existe déjà — scan sent items 6 mois, progress bar</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;color:#2e7d32;">✓ existant</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#e3f2fd;">
+          <div style="min-width:24px;height:24px;background:#1565c0;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">3</div>
+          <div>
+            <div style="font-weight:600;">🆕 Scan labels Gmail existants</div>
+            <div style="color:#888;font-size:11px;">API Gmail labels.list → récupère les labels du client, compte les emails par label</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;color:#1565c0;font-weight:600;">NOUVEAU</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#e3f2fd;">
+          <div style="min-width:24px;height:24px;background:#1565c0;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">4</div>
+          <div>
+            <div style="font-weight:600;">🆕 Proposition labels — Cards avec exemples</div>
+            <div style="color:#888;font-size:11px;">Fusion intelligente : labels Gmail existants + labels Kyrra manquants. Chaque card montre 2-3 exemples réels tirés de la boîte du client.</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;color:#1565c0;font-weight:600;">NOUVEAU</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#e3f2fd;">
+          <div style="min-width:24px;height:24px;background:#1565c0;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">5</div>
+          <div>
+            <div style="font-weight:600;">🆕 Personnalisation</div>
+            <div style="color:#888;font-size:11px;">Le client peut : supprimer un label (✕), ajouter un label custom (texte libre pour la description), modifier la description d'un label existant. Pas de drag & drop pour la V1.</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;color:#1565c0;font-weight:600;">NOUVEAU</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f0f7f0;">
+          <div style="min-width:24px;height:24px;background:#2e7d32;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">6</div>
+          <div>
+            <div style="font-weight:600;">Validation + Scan inbox</div>
+            <div style="color:#888;font-size:11px;">Existe déjà — classification des emails inbox avec le nouveau système de labels</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;color:#2e7d32;">✓ existant (adapté)</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Taxonomie par défaut — 7 labels</h3>
+  <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:6px;font-size:12px;">
+    <div style="background:#e8f5e9;padding:8px;text-align:center;">
+      <div style="font-weight:700;color:#2e7d32;">🟢 Important</div>
+      <div style="color:#666;font-size:10px;margin-top:2px;">Contacts connus, emails directs</div>
+    </div>
+    <div style="background:#e3f2fd;padding:8px;text-align:center;">
+      <div style="font-weight:700;color:#1565c0;">🔵 Transactionnel</div>
+      <div style="color:#666;font-size:10px;margin-top:2px;">Factures, auth, OTP, alertes</div>
+    </div>
+    <div style="background:#e0f7fa;padding:8px;text-align:center;">
+      <div style="font-weight:700;color:#00838f;">🩵 Notifications</div>
+      <div style="color:#666;font-size:10px;margin-top:2px;">Slack, GitHub, calendrier</div>
+    </div>
+    <div style="background:#fff3e0;padding:8px;text-align:center;">
+      <div style="font-weight:700;color:#e65100;">🟠 Newsletter</div>
+      <div style="color:#666;font-size:10px;margin-top:2px;">Abonnements, veille, marketing</div>
+    </div>
+    <div style="background:#fff8e1;padding:8px;text-align:center;">
+      <div style="font-weight:700;color:#f57f17;">🟡 Prospection utile</div>
+      <div style="color:#666;font-size:10px;margin-top:2px;">Pertinent au métier/secteur</div>
+    </div>
+    <div style="background:#fce4ec;padding:8px;text-align:center;">
+      <div style="font-weight:700;color:#c62828;">🔴 Prospection</div>
+      <div style="color:#666;font-size:10px;margin-top:2px;">Cold outreach, pitches</div>
+    </div>
+    <div style="background:#f3e5f5;padding:8px;text-align:center;">
+      <div style="font-weight:700;color:#6a1b9a;">🟣 Spam</div>
+      <div style="color:#666;font-size:10px;margin-top:2px;">Mass mailing, phishing</div>
+    </div>
+    <div style="background:#fafafa;padding:8px;text-align:center;border:1px dashed #ccc;">
+      <div style="font-weight:700;color:#888;">+ Custom</div>
+      <div style="color:#888;font-size:10px;margin-top:2px;">Ajouté par le client</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Décisions clés</h3>
+  <div style="font-size:13px;line-height:1.6;">
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:4px 16px;">
+      <div style="font-weight:600;color:#555;">Approche onboarding</div>
+      <div>Wizard guidé — Kyrra scanne et propose, le client valide</div>
+
+      <div style="font-weight:600;color:#555;">Présentation labels</div>
+      <div>Cards avec exemples réels tirés de la boîte du client</div>
+
+      <div style="font-weight:600;color:#555;">Labels Gmail existants</div>
+      <div>Fusion intelligente — réutiliser les labels du client, demander des descriptions, proposer d'en ajouter</div>
+
+      <div style="font-weight:600;color:#555;">Labels custom</div>
+      <div>Texte libre pour la description (pas de reformulation IA)</div>
+
+      <div style="font-weight:600;color:#555;">Prompt IA</div>
+      <div>Un prompt par label, assemblé dynamiquement au moment de classifier</div>
+
+      <div style="font-weight:600;color:#555;">Drag & drop exemples</div>
+      <div>V2 dans les settings — pas dans l'onboarding V1</div>
+
+      <div style="font-weight:600;color:#555;">Migration beta</div>
+      <div>Fresh start — les users existants repassent le nouvel onboarding</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Architecture technique</h3>
+  <div style="font-size:12px;line-height:1.7;font-family:monospace;background:#1a1a2e;color:#e0e0e0;padding:16px;border-radius:0;">
+    <div style="color:#7ec8e3;">── Tables Supabase ──</div>
+    <div style="margin-top:4px;">
+      <span style="color:#f7a7c0;">user_labels</span> : id, user_id, name, description, prompt, color, position, gmail_label_id, is_default, created_at<br>
+      <span style="color:#888;">→ Chaque label du user avec son prompt IA et le lien vers le label Gmail</span>
+    </div>
+    <div style="margin-top:8px;">
+      <span style="color:#f7a7c0;">email_classifications.label_id</span> : FK → user_labels.id<br>
+      <span style="color:#888;">→ Remplace l'enum classification_result (A_VOIR/FILTRE/BLOQUE)</span>
+    </div>
+
+    <div style="margin-top:12px;color:#7ec8e3;">── Classification pipeline ──</div>
+    <div style="margin-top:4px;">
+      1. Charger les labels du user : <span style="color:#b9e4d0;">SELECT * FROM user_labels WHERE user_id = ?</span><br>
+      2. Assembler le system prompt dynamiquement depuis les labels<br>
+      3. LLM reçoit la liste des labels + descriptions → choisit le meilleur<br>
+      4. Résultat = label_id (pas un enum fixe)
+    </div>
+
+    <div style="margin-top:12px;color:#7ec8e3;">── Onboarding scan ──</div>
+    <div style="margin-top:4px;">
+      1. Gmail API <span style="color:#b9e4d0;">labels.list</span> → labels existants + couleurs<br>
+      2. Gmail API <span style="color:#b9e4d0;">messages.list</span> par label → compter les emails<br>
+      3. Échantillonner 2-3 emails par label pour les exemples (metadata only)<br>
+      4. Fusionner avec les 7 defaults Kyrra → proposer au client
+    </div>
+  </div>
+</div>

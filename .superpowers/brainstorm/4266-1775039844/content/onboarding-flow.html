@@ -1,0 +1,148 @@
+<h2>Parcours onboarding — Comment présenter les labels ?</h2>
+<p class="subtitle">Après le scan whitelist, Kyrra montre les labels proposés. Comment le client les voit-il ?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Liste simple avec toggle</h3>
+      <p>Les 7 labels en liste verticale avec un switch ON/OFF pour chacun. Clic sur un label pour voir sa description et des exemples. Bouton "Ajouter un label" en bas.</p>
+      <div class="mockup" style="margin-top:12px;">
+        <div class="mockup-header">Aperçu — Liste toggle</div>
+        <div class="mockup-body" style="padding:16px;font-family:system-ui;font-size:13px;">
+          <div style="text-align:center;margin-bottom:16px;">
+            <div style="font-size:18px;font-weight:600;">Kyrra a analysé votre boîte</div>
+            <div style="color:#888;font-size:12px;">Voici les catégories que nous vous proposons</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid #e0e0e0;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:16px;">🟢</span>
+                <div>
+                  <div style="font-weight:600;font-size:13px;">Important</div>
+                  <div style="color:#888;font-size:11px;">Contacts connus, emails directs</div>
+                </div>
+              </div>
+              <div style="width:36px;height:20px;background:#2e7d32;border-radius:10px;position:relative;">
+                <div style="width:16px;height:16px;background:white;border-radius:50%;position:absolute;right:2px;top:2px;"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid #e0e0e0;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:16px;">🔵</span>
+                <div>
+                  <div style="font-weight:600;font-size:13px;">Transactionnel</div>
+                  <div style="color:#888;font-size:11px;">Factures, auth, alertes sécurité</div>
+                </div>
+              </div>
+              <div style="width:36px;height:20px;background:#2e7d32;border-radius:10px;position:relative;">
+                <div style="width:16px;height:16px;background:white;border-radius:50%;position:absolute;right:2px;top:2px;"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid #e0e0e0;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:16px;">🩵</span>
+                <div>
+                  <div style="font-weight:600;font-size:13px;">Notifications</div>
+                  <div style="color:#888;font-size:11px;">Slack, GitHub, Google, calendrier</div>
+                </div>
+              </div>
+              <div style="width:36px;height:20px;background:#2e7d32;border-radius:10px;position:relative;">
+                <div style="width:16px;height:16px;background:white;border-radius:50%;position:absolute;right:2px;top:2px;"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid #e0e0e0;opacity:0.5;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:16px;">🟠</span>
+                <div>
+                  <div style="font-weight:600;font-size:13px;">Newsletter</div>
+                  <div style="color:#888;font-size:11px;">Abonnements, veille, marketing</div>
+                </div>
+              </div>
+              <div style="width:36px;height:20px;background:#ccc;border-radius:10px;position:relative;">
+                <div style="width:16px;height:16px;background:white;border-radius:50%;position:absolute;left:2px;top:2px;"></div>
+              </div>
+            </div>
+            <div style="text-align:center;color:#888;font-size:11px;padding:4px;">· · ·  3 autres labels  · · ·</div>
+          </div>
+          <div style="text-align:center;margin-top:12px;">
+            <span style="color:#3a5bc7;font-size:12px;cursor:pointer;">+ Ajouter un label personnalisé</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Cards avec exemples réels</h3>
+      <p>Chaque label est une card avec 2-3 exemples réels tirés de la boîte du client. Le client voit concrètement ce que chaque label va contenir. Bouton ✕ pour supprimer, + pour ajouter.</p>
+      <div class="mockup" style="margin-top:12px;">
+        <div class="mockup-header">Aperçu — Cards avec exemples</div>
+        <div class="mockup-body" style="padding:16px;font-family:system-ui;font-size:13px;">
+          <div style="text-align:center;margin-bottom:16px;">
+            <div style="font-size:18px;font-weight:600;">Voici comment Kyrra va trier vos emails</div>
+            <div style="color:#888;font-size:12px;">Basé sur l'analyse de votre boîte · Personnalisez si besoin</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="border:1px solid #e0e0e0;padding:12px;position:relative;">
+              <div style="position:absolute;top:8px;right:8px;color:#ccc;font-size:11px;cursor:pointer;">✕</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <span style="width:8px;height:8px;background:#2e7d32;border-radius:50%;display:inline-block;"></span>
+                <span style="font-weight:600;font-size:13px;">Important</span>
+              </div>
+              <div style="font-size:11px;color:#888;margin-bottom:8px;">Emails de vos contacts connus</div>
+              <div style="background:#f8f8f8;padding:6px 8px;margin-bottom:4px;font-size:11px;">
+                <span style="color:#888;">De:</span> matthieu@planete-sfactory.com
+              </div>
+              <div style="background:#f8f8f8;padding:6px 8px;margin-bottom:4px;font-size:11px;">
+                <span style="color:#888;">De:</span> hadrien@hacksprint.fr
+              </div>
+              <div style="background:#f8f8f8;padding:6px 8px;font-size:11px;">
+                <span style="color:#888;">De:</span> felix@hacksprint.fr
+              </div>
+            </div>
+            <div style="border:1px solid #e0e0e0;padding:12px;position:relative;">
+              <div style="position:absolute;top:8px;right:8px;color:#ccc;font-size:11px;cursor:pointer;">✕</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <span style="width:8px;height:8px;background:#1565c0;border-radius:50%;display:inline-block;"></span>
+                <span style="font-weight:600;font-size:13px;">Transactionnel</span>
+              </div>
+              <div style="font-size:11px;color:#888;margin-bottom:8px;">Factures, paiements, sécurité</div>
+              <div style="background:#f8f8f8;padding:6px 8px;margin-bottom:4px;font-size:11px;">
+                <span style="color:#888;">De:</span> noreply@google.com
+              </div>
+              <div style="background:#f8f8f8;padding:6px 8px;margin-bottom:4px;font-size:11px;">
+                <span style="color:#888;">De:</span> receipts@stripe.com
+              </div>
+              <div style="background:#f8f8f8;padding:6px 8px;font-size:11px;">
+                <span style="color:#888;">De:</span> no-reply@ovh.com
+              </div>
+            </div>
+            <div style="border:1px solid #e0e0e0;padding:12px;position:relative;">
+              <div style="position:absolute;top:8px;right:8px;color:#ccc;font-size:11px;cursor:pointer;">✕</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <span style="width:8px;height:8px;background:#c62828;border-radius:50%;display:inline-block;"></span>
+                <span style="font-weight:600;font-size:13px;">Prospection</span>
+              </div>
+              <div style="font-size:11px;color:#888;margin-bottom:8px;">Cold outreach, pitches non sollicités</div>
+              <div style="background:#f8f8f8;padding:6px 8px;margin-bottom:4px;font-size:11px;">
+                <span style="color:#888;">Obj:</span> "Suite à notre échange..."
+              </div>
+              <div style="background:#f8f8f8;padding:6px 8px;margin-bottom:4px;font-size:11px;">
+                <span style="color:#888;">Via:</span> Lemlist, Apollo.io
+              </div>
+              <div style="background:#f8f8f8;padding:6px 8px;font-size:11px;">
+                <span style="color:#888;">Obj:</span> "Quick question about..."
+              </div>
+            </div>
+            <div style="border:1px dashed #ccc;padding:12px;display:flex;align-items:center;justify-content:center;color:#888;font-size:13px;cursor:pointer;">
+              + Ajouter un label
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

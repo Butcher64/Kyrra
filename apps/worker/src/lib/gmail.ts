@@ -221,7 +221,89 @@ export class GmailAuthError extends Error {
   }
 }
 
+// ── Helpers ──
+
+/**
+ * Extract bare email address from a From/To header value
+ * Handles: "Name" <email@domain.com>, Name <email@domain.com>, email@domain.com
+ */
+function extractEmailAddress(headerValue: string): string {
+  const match = headerValue.match(/<([^>]+)>/)
+  if (match) return match[1]!
+  return headerValue.trim()
+}
+
 // ── Email fetching (in-memory only) ──
+
+export interface GmailEmailMetadata {
+  id: string
+  threadId: string
+  from: string
+  to: string
+  subject: string
+  headers: Record<string, string>
+  snippet: string
+  internalDate: string
+  labelIds: string[]
+}
+
+/**
+ * Fetch email metadata only (headers, no body) — cheap API call
+ * Used for pre-filtering, whitelist checks, and fingerprinting
+ * Body is fetched lazily via fetchEmailBody() only when LLM is needed
+ */
+export async function fetchEmailMetadata(
+  accessToken: string,
+  messageId: string,
+): Promise<GmailEmailMetadata> {
+  const response = await gmailFetch(
+    accessToken,
+    `/messages/${messageId}?format=metadata`,
+  )
+
+  const data = await response.json()
+
+  const headers: Record<string, string> = {}
+  const headersList: Array<{ name: string; value: string }> = data.payload?.headers ?? []
+  for (const h of headersList) {
+    headers[h.name.toLowerCase()] = h.value
+  }
+
+  return {
+    id: data.id,
+    threadId: data.threadId,
+    from: extractEmailAddress(headers['from'] ?? ''),
+    to: extractEmailAddress(headers['to'] ?? ''),
+    subject: headers['subject'] ?? '',
+    headers,
+    snippet: data.snippet ?? '',
+    internalDate: data.internalDate ?? '',
+    labelIds: data.labelIds ?? [],
+  }
+}
+
+/**
+ * Fetch full email body — lazy load, only when LLM classification is needed
+ * Returns truncated body for LLM context (first 500 + last 50 chars)
+ * Content is in-memory only, never persisted (RGPD)
+ */
+export async function fetchEmailBody(
+  accessToken: string,
+  messageId: string,
+): Promise<{ bodyPreview: string; bodyTail: string }> {
+  const response = await gmailFetch(
+    accessToken,
+    `/messages/${messageId}?format=full&fields=payload`,
+  )
+
+  const data = await response.json()
+  const bodyText = extractBodyText(data.payload)
+
+  return {
+    bodyPreview: bodyText.slice(0, 500),
+    bodyTail: bodyText.slice(-50),
+  }
+}
 
 /**
  * Fetch a single email by message ID — in-memory only, never persisted
@@ -254,8 +336,8 @@ export async function fetchEmail(
   return {
     id: data.id,
     threadId: data.threadId,
-    from: headers['from'] ?? '',
-    to: headers['to'] ?? '',
+    from: extractEmailAddress(headers['from'] ?? ''),
+    to: extractEmailAddress(headers['to'] ?? ''),
     subject: headers['subject'] ?? '',
     headers,
     snippet: data.snippet ?? '',
@@ -528,7 +610,7 @@ export async function listInboxMessageIds(
   do {
     const params = new URLSearchParams({
       q: 'in:inbox',
-      maxResults: String(Math.min(maxResults - messageIds.length, 100)),
+      maxResults: String(Math.min(maxResults - messageIds.length, 500)),
       fields: 'messages(id),nextPageToken',
     })
     if (pageToken) params.set('pageToken', pageToken)
@@ -604,13 +686,169 @@ export async function listSentMessages(
     await onBatch(batch)
     totalProcessed += batch.length
 
-    // Beta limit: stop after 100 emails to avoid excessive API usage
-    if (totalProcessed >= 100) break
-
     pageToken = listData.nextPageToken
   } while (pageToken)
 
   return totalProcessed
+}
+
+// ── Dynamic label support (user-defined labels) ──
+
+export interface GmailLabelInfo {
+  id: string
+  name: string
+  type: 'user' | 'system'
+  color?: { textColor: string; backgroundColor: string }
+  messagesTotal: number
+}
+
+/**
+ * List all user-created Gmail labels (excluding system labels and Kyrra/* labels)
+ * Fetches detail for each to get messagesTotal. Sorted by messagesTotal descending.
+ */
+export async function listUserGmailLabels(
+  accessToken: string,
+): Promise<GmailLabelInfo[]> {
+  const response = await gmailFetch(accessToken, '/labels')
+  const data = await response.json()
+  const labels: Array<{ id: string; name: string; type: string }> = data.labels ?? []
+
+  // Filter: keep only user-created labels, skip system labels and Kyrra/* labels
+  const userLabels = labels.filter(
+    (l) => l.type === 'user' && !l.name.startsWith('Kyrra/'),
+  )
+
+  // Fetch detail for each label to get messagesTotal and color
+  const detailed: GmailLabelInfo[] = []
+  for (const label of userLabels) {
+    const detailResponse = await gmailFetch(accessToken, `/labels/${label.id}`)
+    const detail = await detailResponse.json()
+
+    detailed.push({
+      id: detail.id,
+      name: detail.name,
+      type: 'user',
+      color: detail.color ?? undefined,
+      messagesTotal: detail.messagesTotal ?? 0,
+    })
+  }
+
+  // Sort by messagesTotal descending
+  detailed.sort((a, b) => b.messagesTotal - a.messagesTotal)
+
+  return detailed
+}
+
+/**
+ * Sample recent emails from a specific Gmail label
+ * Returns from/subject for each sampled email
+ */
+export async function sampleEmailsFromLabel(
+  accessToken: string,
+  labelId: string,
+  count: number = 3,
+): Promise<Array<{ from: string; subject: string }>> {
+  const params = new URLSearchParams({
+    labelIds: labelId,
+    maxResults: String(count),
+    fields: 'messages(id)',
+  })
+
+  const response = await gmailFetch(accessToken, `/messages?${params}`)
+  const data = await response.json()
+  const messageIds: string[] = (data.messages ?? []).map((m: { id: string }) => m.id)
+
+  const samples: Array<{ from: string; subject: string }> = []
+  for (const msgId of messageIds) {
+    const metadata = await fetchEmailMetadata(accessToken, msgId)
+    samples.push({ from: metadata.from, subject: metadata.subject })
+  }
+
+  return samples
+}
+
+/**
+ * Ensure dynamic user labels exist as Kyrra/<name> labels in Gmail
+ * Returns a map of user_label.id → Gmail label ID
+ * Idempotent: checks existing labels once upfront before creating
+ */
+export async function ensureDynamicLabels(
+  accessToken: string,
+  userLabels: Array<{ id: string; name: string; color: string; gmail_label_id: string | null }>,
+): Promise<Record<string, string>> {
+  const colorMap: Record<string, { textColor: string; backgroundColor: string }> = {
+    '#2e7d32': { textColor: '#0b4f30', backgroundColor: '#b9e4d0' },
+    '#1565c0': { textColor: '#04502e', backgroundColor: '#a0dab3' },
+    '#00838f': { textColor: '#094228', backgroundColor: '#b3efd3' },
+    '#e65100': { textColor: '#662e37', backgroundColor: '#fbc8d9' },
+    '#f57f17': { textColor: '#684e07', backgroundColor: '#fdedc1' },
+    '#c62828': { textColor: '#711a36', backgroundColor: '#f7a7c0' },
+    '#6a1b9a': { textColor: '#41236d', backgroundColor: '#d3bfdb' },
+  }
+
+  const result: Record<string, string> = {}
+
+  // Fetch existing Gmail labels once upfront (avoid N calls)
+  const listResponse = await gmailFetch(accessToken, '/labels')
+  const listData = await listResponse.json()
+  const existingLabels: Array<{ id: string; name: string }> = listData.labels ?? []
+
+  for (const ul of userLabels) {
+    // If already linked to a Gmail label, use it directly
+    if (ul.gmail_label_id) {
+      result[ul.id] = ul.gmail_label_id
+      continue
+    }
+
+    // Check if Kyrra/<name> already exists in Gmail
+    const gmailName = `Kyrra/${ul.name}`
+    const existing = existingLabels.find((l) => l.name === gmailName)
+    if (existing) {
+      result[ul.id] = existing.id
+      continue
+    }
+
+    // Create the label in Gmail
+    const gmailColor = colorMap[ul.color] ?? { textColor: '#0b4f30', backgroundColor: '#b9e4d0' }
+    const createResponse = await gmailFetch(accessToken, '/labels', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: gmailName,
+        labelListVisibility: 'labelShow',
+        messageListVisibility: 'show',
+        color: gmailColor,
+      }),
+    })
+
+    const created = await createResponse.json()
+    result[ul.id] = created.id
+
+    // Add to cache so subsequent iterations find it
+    existingLabels.push({ id: created.id, name: gmailName })
+  }
+
+  return result
+}
+
+/**
+ * Apply a dynamic label to a message, removing all other Kyrra labels
+ * Same pattern as applyLabel() but for user-defined dynamic labels
+ */
+export async function applyDynamicLabel(
+  accessToken: string,
+  messageId: string,
+  targetGmailLabelId: string,
+  allGmailLabelIds: string[],
+): Promise<void> {
+  const labelsToRemove = allGmailLabelIds.filter((id) => id !== targetGmailLabelId)
+
+  await gmailFetch(accessToken, `/messages/${messageId}/modify`, {
+    method: 'POST',
+    body: JSON.stringify({
+      addLabelIds: [targetGmailLabelId],
+      removeLabelIds: labelsToRemove,
+    }),
+  })
 }
 
 // ── Label deletion (clean uninstall — FR84) ──

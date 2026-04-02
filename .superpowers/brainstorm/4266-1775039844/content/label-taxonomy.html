@@ -1,0 +1,74 @@
+<h2>Quelle taxonomie de labels par défaut ?</h2>
+<p class="subtitle">Kyrra proposera ces labels au client après analyse de sa boîte. Il pourra les modifier/supprimer/ajouter.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>5 labels — Essentiel</h3>
+      <p>Simple, pas intimidant, couvre 95% des cas</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">
+        <span style="background:#e8f5e9;color:#2e7d32;padding:3px 10px;font-size:12px;font-weight:600;">🟢 Important</span>
+        <span style="background:#e3f2fd;color:#1565c0;padding:3px 10px;font-size:12px;font-weight:600;">🔵 Transactionnel</span>
+        <span style="background:#fff3e0;color:#e65100;padding:3px 10px;font-size:12px;font-weight:600;">🟠 Newsletter</span>
+        <span style="background:#fce4ec;color:#c62828;padding:3px 10px;font-size:12px;font-weight:600;">🔴 Prospection</span>
+        <span style="background:#f3e5f5;color:#6a1b9a;padding:3px 10px;font-size:12px;font-weight:600;">🟣 Spam</span>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:#888;">
+        <strong>Important</strong> = contacts connus, emails perso, réponses directes<br>
+        <strong>Transactionnel</strong> = factures, auth, alertes sécurité, OTP<br>
+        <strong>Newsletter</strong> = abonnements, veille, marketing souscrit<br>
+        <strong>Prospection</strong> = cold outreach, pitches commerciaux<br>
+        <strong>Spam</strong> = mass mailing, outils prospection, phishing
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>7 labels — Complet</h3>
+      <p>Plus granulaire, distingue les notifications et la prospection pertinente</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">
+        <span style="background:#e8f5e9;color:#2e7d32;padding:3px 10px;font-size:12px;font-weight:600;">🟢 Important</span>
+        <span style="background:#e3f2fd;color:#1565c0;padding:3px 10px;font-size:12px;font-weight:600;">🔵 Transactionnel</span>
+        <span style="background:#e0f7fa;color:#00838f;padding:3px 10px;font-size:12px;font-weight:600;">🩵 Notifications</span>
+        <span style="background:#fff3e0;color:#e65100;padding:3px 10px;font-size:12px;font-weight:600;">🟠 Newsletter</span>
+        <span style="background:#fff8e1;color:#f57f17;padding:3px 10px;font-size:12px;font-weight:600;">🟡 Prospection utile</span>
+        <span style="background:#fce4ec;color:#c62828;padding:3px 10px;font-size:12px;font-weight:600;">🔴 Prospection</span>
+        <span style="background:#f3e5f5;color:#6a1b9a;padding:3px 10px;font-size:12px;font-weight:600;">🟣 Spam</span>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:#888;">
+        <strong>Notifications</strong> = Slack, GitHub, Google, calendrier, outils SaaS<br>
+        <strong>Prospection utile</strong> = offre pertinente pour ton métier/secteur<br>
+        <em>Le reste identique à l'option A</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>3 catégories + sous-labels</h3>
+      <p>Hiérarchie : 3 zones (Garder / Filtrer / Bloquer) avec des sous-labels dedans</p>
+      <div style="margin-top:10px;font-size:12px;color:#888;">
+        <div style="margin-bottom:8px;">
+          <strong style="color:#2e7d32;">📥 GARDER</strong>
+          <div style="padding-left:16px;">→ Important · Transactionnel · Notifications</div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <strong style="color:#e65100;">📦 FILTRER</strong>
+          <div style="padding-left:16px;">→ Newsletter · Prospection utile · Marketing</div>
+        </div>
+        <div>
+          <strong style="color:#c62828;">🚫 BLOQUER</strong>
+          <div style="padding-left:16px;">→ Prospection spam · Phishing · Mass mailing</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:#666;">
+        Avantage : le client comprend d'abord les 3 zones (simple), puis affine avec les sous-labels (avancé).
+        Les labels Gmail créés seraient <code>Kyrra/Garder/Transactionnel</code>, etc.
+      </div>
+    </div>
+  </div>
+</div>
