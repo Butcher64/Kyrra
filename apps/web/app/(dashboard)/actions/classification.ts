@@ -9,7 +9,10 @@ import type { ActionResult } from '@kyrra/shared'
  * Reclassify an email — user says "this is not prospecting"
  * 1. Insert new classification (append-only — ADR-003)
  * 2. Queue reclassification_request for worker (Gmail label update <10s)
- * 3. Auto-whitelist handled separately by caller (addToWhitelist)
+ * 3. Auto-whitelist (FR28): handled client-side by ReclassifyButton calling addToWhitelist()
+ *    in parallel. Server-side would require Gmail API call to extract sender email
+ *    (email_classifications only stores sender_display name, not email address).
+ *    Current pattern works for beta — revisit for server-side atomicity in V2.
  */
 export async function reclassifyEmail(params: unknown): Promise<ActionResult> {
   const parsed = reclassifyParamsSchema.safeParse(params)
