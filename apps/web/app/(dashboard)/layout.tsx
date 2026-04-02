@@ -27,7 +27,7 @@ export default async function DashboardLayout({
     <DashboardErrorBoundary>
       <DashboardShell
         user={{ email: user.email!, name: user.user_metadata?.full_name }}
-        pipelineStatus={(health?.mode as 'active' | 'paused') ?? 'active'}
+        pipelineStatus={(health?.mode as 'active' | 'paused' | 'degraded') ?? 'active'}
       >
         {children}
       </DashboardShell>

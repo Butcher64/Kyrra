@@ -31,10 +31,12 @@ export function TopBar({ onMenuClick, pipelineStatus }: TopBarProps) {
       <div className="flex items-center gap-1.5">
         <span className={cn(
           'w-[5px] h-[5px] rounded-full',
-          pipelineStatus === 'active' ? 'bg-[#2dd881] shadow-[0_0_6px_#2dd881]' : 'bg-[#d97706]',
+          pipelineStatus === 'active' && 'bg-[#2dd881] shadow-[0_0_6px_#2dd881]',
+          pipelineStatus === 'paused' && 'bg-[#d97706]',
+          pipelineStatus === 'degraded' && 'bg-[#d97706] animate-pulse',
         )} />
         <span className="font-mono text-[9px] text-[#8b90a0]">
-          {pipelineStatus === 'active' ? 'actif' : 'pausé'}
+          {pipelineStatus === 'active' ? 'actif' : pipelineStatus === 'degraded' ? 'mode simplifié' : 'pausé'}
         </span>
       </div>
     </header>
