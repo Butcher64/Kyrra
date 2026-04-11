@@ -3,13 +3,23 @@
  * Uses a Postgres function for atomic SELECT FOR UPDATE SKIP LOCKED
  */
 
+import { withTimeout } from './timeout'
+
+const RPC_TIMEOUT_MS = 10_000 // B9.1: 10s timeout on RPC calls
+
 /**
  * Atomically claim the next pending job from the queue
  * Uses Postgres function with FOR UPDATE SKIP LOCKED for true atomicity
  * Returns null if no pending jobs
  */
 export async function claimNextJob(supabase: any) {
-  const { data, error } = await supabase.rpc('claim_next_queue_item')
+  // Force the Supabase builder to resolve as a real Promise (not just thenable)
+  // so withTimeout can actually race against it
+  const { data, error } = await withTimeout<{ data: any; error: any }>(
+    Promise.resolve(supabase.rpc('claim_next_queue_item')),
+    RPC_TIMEOUT_MS,
+    'claimNextJob',
+  )
 
   if (error) {
     console.error('[queue] claimNextJob RPC error:', error.message)

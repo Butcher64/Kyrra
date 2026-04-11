@@ -3,13 +3,55 @@ import type { ClassificationResult, UserLabel } from '@kyrra/shared'
 import { claimNextJob, completeJob, failJob } from './lib/queue-consumer'
 import { fingerprintEmail, type EmailHeaders } from './lib/fingerprinting'
 import { prefilterEmail } from './lib/prefilter'
-import { classifyWithLLM } from './lib/llm-gateway'
+import { classifyWithLLM, recordMetrics } from './lib/llm-gateway'
 import { stripPIIFromSummary, sanitizeForLLM } from './lib/pii-stripper'
 import { getValidAccessToken, fetchEmailMetadata, fetchEmailBody, ensureDynamicLabels, applyDynamicLabel, GmailAuthError } from './lib/gmail'
 import { ClassificationLogger } from './lib/classification-logger'
 import { checkWhitelist } from './lib/whitelist-check'
 import { buildSystemPrompt, type UserProfile } from './lib/prompt-builder'
 import { resolveLabel, resolveLabelByName, deriveLegacyResult } from './lib/label-resolver'
+import { withRetry } from './lib/retry'
+
+/**
+ * Save classification result atomically via RPC (B8.1)
+ * Wraps email_classifications INSERT + user_pipeline_health UPDATE in one transaction.
+ * Gmail label application stays outside (external API).
+ * LLM usage logging stays outside (best-effort, table may not exist).
+ */
+export async function saveClassificationResult(
+  supabase: any,
+  params: {
+    userId: string
+    gmailMessageId: string
+    classificationResult: ClassificationResult
+    labelId: string
+    confidenceScore: number
+    summary: string
+    source: 'fingerprint' | 'llm' | 'prefilter'
+    processingTimeMs: number
+    idempotencyKey: string
+    senderDisplay: string
+    subjectSnippet: string
+  },
+): Promise<void> {
+  const { error } = await supabase.rpc('save_classification_result', {
+    p_user_id: params.userId,
+    p_gmail_message_id: params.gmailMessageId,
+    p_classification_result: params.classificationResult,
+    p_label_id: params.labelId,
+    p_confidence_score: params.confidenceScore,
+    p_summary: params.summary,
+    p_source: params.source,
+    p_processing_time_ms: params.processingTimeMs,
+    p_idempotency_key: params.idempotencyKey,
+    p_sender_display: params.senderDisplay,
+    p_subject_snippet: params.subjectSnippet,
+  })
+
+  if (error) {
+    throw new Error(`save_classification_result RPC failed: ${error.message}`)
+  }
+}
 
 /**
  * Classification loop — processes emails from the queue
@@ -145,34 +187,41 @@ export async function classificationLoop(supabase: any): Promise<void> {
 
       const processingTimeMs = Date.now() - startTime
 
-      await supabase.from('email_classifications').insert({
-        user_id: job.user_id,
-        gmail_message_id: job.gmail_message_id,
-        classification_result: deriveLegacyResult(resolvedLabel.position),
-        label_id: resolvedLabel.id,
-        confidence_score: pfConfidence,
+      // Atomic save: classification + pipeline health in one transaction (B8.1)
+      await saveClassificationResult(supabase, {
+        userId: job.user_id,
+        gmailMessageId: job.gmail_message_id,
+        classificationResult: deriveLegacyResult(resolvedLabel.position),
+        labelId: resolvedLabel.id,
+        confidenceScore: pfConfidence,
         summary: prefilterResult.reason,
         source: 'prefilter',
-        processing_time_ms: processingTimeMs,
-        idempotency_key: job.gmail_message_id,
-        sender_display: senderDisplay,
-        subject_snippet: subjectSnippet,
+        processingTimeMs,
+        idempotencyKey: job.gmail_message_id,
+        senderDisplay,
+        subjectSnippet,
       })
 
-      try {
-        const gmailLabelMap = await ensureDynamicLabels(accessToken, typedLabels)
-        const targetGmailLabelId = gmailLabelMap[resolvedLabel.id]
-        if (targetGmailLabelId) {
-          await applyDynamicLabel(accessToken, job.gmail_message_id, targetGmailLabelId, Object.values(gmailLabelMap))
-        }
-      } catch (labelError) {
-        console.error('Label application failed (will reconcile):', (labelError as Error).message)
-      }
+      // Track bypass metric (prefilter = no LLM, cost 0)
+      await recordMetrics(supabase, 0, false)
 
-      await supabase
-        .from('user_pipeline_health')
-        .update({ last_classified_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-        .eq('user_id', job.user_id)
+      // Gmail label application — outside transaction, with retry (B8.2)
+      try {
+        await withRetry(async () => {
+          const gmailLabelMap = await ensureDynamicLabels(accessToken, typedLabels)
+          const targetGmailLabelId = gmailLabelMap[resolvedLabel.id]
+          if (targetGmailLabelId) {
+            await applyDynamicLabel(accessToken, job.gmail_message_id, targetGmailLabelId, Object.values(gmailLabelMap))
+          }
+        }, { maxAttempts: 3, baseDelayMs: 1000, label: `applyLabel:${job.gmail_message_id}` })
+      } catch (labelError) {
+        ClassificationLogger.log({
+          event: 'label_application_failed',
+          email_id: job.gmail_message_id,
+          label_name: resolvedLabel.name,
+          error: (labelError as Error).message,
+        })
+      }
 
       await completeJob(supabase, job.id)
 
@@ -345,56 +394,64 @@ export async function classificationLoop(supabase: any): Promise<void> {
 
     const processingTimeMs = Date.now() - startTime
 
-    // Save classification result (append-only — ADR-003)
-    await supabase.from('email_classifications').insert({
-      user_id: job.user_id,
-      gmail_message_id: job.gmail_message_id,
-      classification_result: deriveLegacyResult(resolvedLabel.position),
-      label_id: resolvedLabel.id,
-      confidence_score: confidence,
+    // Atomic save: classification + pipeline health in one transaction (B8.1)
+    await saveClassificationResult(supabase, {
+      userId: job.user_id,
+      gmailMessageId: job.gmail_message_id,
+      classificationResult: deriveLegacyResult(resolvedLabel.position),
+      labelId: resolvedLabel.id,
+      confidenceScore: confidence,
       summary,
       source,
-      processing_time_ms: processingTimeMs,
-      idempotency_key: job.gmail_message_id,
-      sender_display: senderDisplay,
-      subject_snippet: subjectSnippet,
+      processingTimeMs,
+      idempotencyKey: job.gmail_message_id,
+      senderDisplay,
+      subjectSnippet,
     })
 
-    // Log LLM usage for cost tracking
+    // Log LLM usage for cost tracking (best-effort, outside transaction)
     if (source === 'llm') {
       const inputTokens = llmUsage?.inputTokens ?? 0
       const outputTokens = llmUsage?.outputTokens ?? 0
       const costUsd = llmUsage?.costUsd ?? 0.001
-      await supabase.from('llm_usage_logs').insert({
-        user_id: job.user_id,
-        gmail_message_id: job.gmail_message_id,
-        model: llmUsage?.model ?? 'gpt-4o-mini',
-        input_tokens: inputTokens,
-        output_tokens: outputTokens,
-        cost_usd: costUsd,
-        latency_ms: processingTimeMs,
-        classification_result: finalResult,
-        label_name: resolvedLabel.name,
-      })
-      console.log(`[COST] LLM: ${inputTokens}+${outputTokens} tokens, $${costUsd.toFixed(6)} (${finalResult} → ${resolvedLabel.name})`)
-    }
-
-    // Apply Gmail label (dynamic user labels)
-    try {
-      const gmailLabelMap = await ensureDynamicLabels(accessToken, typedLabels)
-      const targetGmailLabelId = gmailLabelMap[resolvedLabel.id]
-      if (targetGmailLabelId) {
-        await applyDynamicLabel(accessToken, job.gmail_message_id, targetGmailLabelId, Object.values(gmailLabelMap))
+      try {
+        await supabase.from('llm_usage_logs').insert({
+          user_id: job.user_id,
+          gmail_message_id: job.gmail_message_id,
+          model: llmUsage?.model ?? 'gpt-4o-mini',
+          input_tokens: inputTokens,
+          output_tokens: outputTokens,
+          cost_usd: costUsd,
+          latency_ms: processingTimeMs,
+          classification_result: finalResult,
+          label_name: resolvedLabel.name,
+        })
+      } catch (err) {
+        console.warn('[COST] llm_usage_logs insert failed:', (err as Error).message)
       }
-    } catch (labelError) {
-      console.error('Label application failed (will reconcile):', (labelError as Error).message)
+      console.log(`[COST] LLM: ${inputTokens}+${outputTokens} tokens, $${costUsd.toFixed(6)} (${finalResult} → ${resolvedLabel.name})`)
+    } else {
+      // Fingerprint-only classification: track bypass metric (no LLM, cost 0)
+      await recordMetrics(supabase, 0, false)
     }
 
-    // Update pipeline health
-    await supabase
-      .from('user_pipeline_health')
-      .update({ last_classified_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-      .eq('user_id', job.user_id)
+    // Gmail label application — outside transaction, with retry (B8.2)
+    try {
+      await withRetry(async () => {
+        const gmailLabelMap = await ensureDynamicLabels(accessToken, typedLabels)
+        const targetGmailLabelId = gmailLabelMap[resolvedLabel.id]
+        if (targetGmailLabelId) {
+          await applyDynamicLabel(accessToken, job.gmail_message_id, targetGmailLabelId, Object.values(gmailLabelMap))
+        }
+      }, { maxAttempts: 3, baseDelayMs: 1000, label: `applyLabel:${job.gmail_message_id}` })
+    } catch (labelError) {
+      ClassificationLogger.log({
+        event: 'label_application_failed',
+        email_id: job.gmail_message_id,
+        label_name: resolvedLabel.name,
+        error: (labelError as Error).message,
+      })
+    }
 
     await completeJob(supabase, job.id)
 

@@ -293,10 +293,17 @@ export async function fetchEmailBody(
 ): Promise<{ bodyPreview: string; bodyTail: string }> {
   const response = await gmailFetch(
     accessToken,
-    `/messages/${messageId}?format=full&fields=payload`,
+    `/messages/${messageId}?format=full&fields=payload,sizeEstimate`,
   )
 
   const data = await response.json()
+
+  // B8.5: skip body extraction for oversized emails (>5MB raw)
+  if (data.sizeEstimate && data.sizeEstimate > 5_000_000) {
+    console.warn(`[BODY] Skipping body for ${messageId}: sizeEstimate=${data.sizeEstimate} exceeds 5MB limit`)
+    return { bodyPreview: '', bodyTail: '' }
+  }
+
   const bodyText = extractBodyText(data.payload)
 
   return {
@@ -389,8 +396,16 @@ function extractBodyText(payload: any): string {
   return ''
 }
 
+// B8.5: Max base64 data to decode — we only use 550 chars of body text,
+// so decoding more than ~2KB is wasteful and >5MB risks OOM
+const MAX_BASE64_DECODE_LENGTH = 8_000 // ~6KB decoded, plenty for 500+50 chars
+
 function decodeBase64Url(encoded: string): string {
-  const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/')
+  // Truncate oversized base64 before decoding to prevent OOM (B8.5)
+  const truncated = encoded.length > MAX_BASE64_DECODE_LENGTH
+    ? encoded.slice(0, MAX_BASE64_DECODE_LENGTH)
+    : encoded
+  const base64 = truncated.replace(/-/g, '+').replace(/_/g, '/')
   return Buffer.from(base64, 'base64').toString('utf-8')
 }
 
@@ -808,23 +823,40 @@ export async function ensureDynamicLabels(
       continue
     }
 
-    // Create the label in Gmail
+    // Create the label in Gmail (race-safe — B8.3)
     const gmailColor = colorMap[ul.color] ?? { textColor: '#0b4f30', backgroundColor: '#b9e4d0' }
-    const createResponse = await gmailFetch(accessToken, '/labels', {
-      method: 'POST',
-      body: JSON.stringify({
-        name: gmailName,
-        labelListVisibility: 'labelShow',
-        messageListVisibility: 'show',
-        color: gmailColor,
-      }),
-    })
+    try {
+      const createResponse = await gmailFetch(accessToken, '/labels', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: gmailName,
+          labelListVisibility: 'labelShow',
+          messageListVisibility: 'show',
+          color: gmailColor,
+        }),
+      })
 
-    const created = await createResponse.json()
-    result[ul.id] = created.id
+      const created = await createResponse.json()
+      result[ul.id] = created.id
 
-    // Add to cache so subsequent iterations find it
-    existingLabels.push({ id: created.id, name: gmailName })
+      // Add to cache so subsequent iterations find it
+      existingLabels.push({ id: created.id, name: gmailName })
+    } catch {
+      // Label may have been created by a concurrent classification (race condition)
+      // Re-fetch labels to find it
+      const retryListResponse = await gmailFetch(accessToken, '/labels')
+      const retryListData = await retryListResponse.json()
+      const retryLabels: Array<{ id: string; name: string }> = retryListData.labels ?? []
+      const concurrentlyCreated = retryLabels.find((l) => l.name === gmailName)
+
+      if (concurrentlyCreated) {
+        result[ul.id] = concurrentlyCreated.id
+        existingLabels.push({ id: concurrentlyCreated.id, name: gmailName })
+      } else {
+        // Genuinely failed — re-throw
+        throw new Error(`Failed to create Gmail label "${gmailName}" and it doesn't exist`)
+      }
+    }
   }
 
   return result

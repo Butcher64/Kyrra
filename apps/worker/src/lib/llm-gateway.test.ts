@@ -33,6 +33,8 @@ function makeSupabaseMock(circuitData: any = null) {
       }
       return { select: selectFn, upsert: upsertFn }
     }),
+    // recordMetrics now uses RPC instead of direct upsert
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
     _upsertFn: upsertFn,
     _singleFn: singleFn,
   }
@@ -72,33 +74,24 @@ describe('isCircuitOpen', () => {
     expect(await isCircuitOpen(supabase)).toBe(false)
   })
 
-  it('returns true when bypass_rate > 0.70', async () => {
-    const supabase = makeSupabaseMock({ bypass_rate: 0.85, total_cost_eur: 10 })
-    expect(await isCircuitOpen(supabase)).toBe(true)
-  })
-
-  it('returns true when total_cost_eur > 500', async () => {
+  // Circuit breaker is cost-only (bypass_rate removed — high bypass is normal/desirable)
+  it('returns true when total_cost_eur > 200', async () => {
     const supabase = makeSupabaseMock({ bypass_rate: 0.10, total_cost_eur: 600 })
     expect(await isCircuitOpen(supabase)).toBe(true)
   })
 
-  it('returns true when both thresholds exceeded', async () => {
-    const supabase = makeSupabaseMock({ bypass_rate: 0.90, total_cost_eur: 800 })
-    expect(await isCircuitOpen(supabase)).toBe(true)
-  })
-
-  it('returns false when both metrics below thresholds', async () => {
-    const supabase = makeSupabaseMock({ bypass_rate: 0.50, total_cost_eur: 100 })
+  it('returns false when total_cost_eur is exactly 200 (not >)', async () => {
+    const supabase = makeSupabaseMock({ bypass_rate: 0, total_cost_eur: 200 })
     expect(await isCircuitOpen(supabase)).toBe(false)
   })
 
-  it('returns false when bypass_rate is exactly 0.70 (not >)', async () => {
-    const supabase = makeSupabaseMock({ bypass_rate: 0.70, total_cost_eur: 0 })
+  it('returns false when cost is low regardless of bypass_rate', async () => {
+    const supabase = makeSupabaseMock({ bypass_rate: 0.95, total_cost_eur: 10 })
     expect(await isCircuitOpen(supabase)).toBe(false)
   })
 
-  it('returns false when total_cost_eur is exactly 500 (not >)', async () => {
-    const supabase = makeSupabaseMock({ bypass_rate: 0, total_cost_eur: 500 })
+  it('returns false when cost is below threshold', async () => {
+    const supabase = makeSupabaseMock({ bypass_rate: 0.30, total_cost_eur: 100 })
     expect(await isCircuitOpen(supabase)).toBe(false)
   })
 
@@ -111,8 +104,8 @@ describe('isCircuitOpen', () => {
 // ── classifyWithLLM ──
 
 describe('classifyWithLLM — circuit breaker', () => {
-  it('returns null when circuit breaker is open', async () => {
-    const supabase = makeSupabaseMock({ bypass_rate: 0.90, total_cost_eur: 0 })
+  it('returns null when circuit breaker is open (cost > 200€)', async () => {
+    const supabase = makeSupabaseMock({ bypass_rate: 0.10, total_cost_eur: 500 })
     const result = await classifyWithLLM(makeEmail(), supabase)
     expect(result).toBeNull()
     // fetch should never be called
@@ -202,17 +195,13 @@ describe('classifyWithLLM — successful classification', () => {
 
     await classifyWithLLM(makeEmail(), supabase)
 
-    // The second call to .from() should be for upsert (metrics recording)
-    const fromCalls = supabase.from.mock.calls
-    const metricsCallIndex = fromCalls.findIndex(
-      (call: string[], i: number) => call[0] === 'llm_metrics_hourly' && i > 0,
-    )
-    expect(metricsCallIndex).toBeGreaterThan(0)
-    expect(supabase._upsertFn).toHaveBeenCalled()
-    const upsertArgs = supabase._upsertFn.mock.calls[0]
-    expect(upsertArgs[0]).toHaveProperty('total_cost_eur', 0.001)
-    expect(upsertArgs[0]).toHaveProperty('hour_bucket')
-    expect(upsertArgs[1]).toEqual({ onConflict: 'hour_bucket' })
+    // recordMetrics now uses RPC instead of supabase.from().upsert()
+    expect(supabase.rpc).toHaveBeenCalledWith('record_llm_metric', expect.objectContaining({
+      p_cost_eur: expect.any(Number),
+      p_was_llm: true,
+    }))
+    const rpcCall = (supabase.rpc as any).mock.calls.find((c: any) => c[0] === 'record_llm_metric')
+    expect(rpcCall[1].p_cost_eur).toBeGreaterThan(0)
   })
 
   it('truncates summary to 200 characters', async () => {

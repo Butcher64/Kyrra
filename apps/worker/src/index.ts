@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { validateEnv } from './lib/env'
 import { classificationLoop } from './classification'
 import { reconciliationLoop, watchRenewalLoop } from './reconciliation'
 import { onboardingScanLoop, inboxScanLoop } from './onboarding'
@@ -35,6 +36,9 @@ async function resilientLoop(
 
 async function main() {
   console.log('Kyrra worker starting...')
+
+  // B9.5: Validate all required env vars before doing anything
+  validateEnv()
 
   const supabase = createClient(
     process.env.SUPABASE_URL!,

@@ -3,12 +3,13 @@ import type { ClassificationResult } from '@kyrra/shared'
 /**
  * LLM Gateway — Handles ambiguous email classification via GPT-4o-mini
  * Circuit breaker: Supabase-backed (llm_metrics_hourly), survives restarts
- * Timeout: 14 seconds (6s margin before Railway SIGKILL at 20s)
+ * Timeout: 10 seconds (10s margin before Railway SIGKILL at 20s) — B9.3
  *
  * Source: [architecture.md — ADR-004, LLM Gateway]
  */
 
-const LLM_TIMEOUT_MS = 14_000
+// B9.3: Reduced from 14s to 10s — leaves 10s margin before Railway SIGKILL at 20s
+const LLM_TIMEOUT_MS = 10_000
 
 export interface LLMClassificationResult {
   result: ClassificationResult
@@ -40,27 +41,25 @@ export async function isCircuitOpen(supabase: any): Promise<boolean> {
 
   if (!data) return false
 
-  return (data.bypass_rate ?? 0) > 0.70 || (data.total_cost_eur ?? 0) > 500
+  // Circuit breaker: cost-based only. bypass_rate removed — high bypass is normal/desirable
+  // (prefilter+fingerprint handle 60-80% without LLM). Cost guard protects against runaway spending.
+  return (data.total_cost_eur ?? 0) > 200
 }
 
 /**
- * Record LLM metrics for circuit breaker state
+ * Record LLM metrics for circuit breaker state via atomic RPC.
+ * Increments cost + tracks bypass_rate (was broken: replaced instead of incrementing,
+ * bypass_rate never calculated — circuit breaker was partially dead).
  */
-async function recordMetrics(
+export async function recordMetrics(
   supabase: any,
   costEur: number,
   wasLlm: boolean,
 ): Promise<void> {
-  const hourBucket = new Date()
-  hourBucket.setMinutes(0, 0, 0)
-
-  await supabase
-    .from('llm_metrics_hourly')
-    .upsert({
-      hour_bucket: hourBucket.toISOString(),
-      total_cost_eur: costEur,
-      // bypass_rate and users_count updated by aggregation
-    }, { onConflict: 'hour_bucket' })
+  await supabase.rpc('record_llm_metric', {
+    p_cost_eur: costEur,
+    p_was_llm: wasLlm,
+  })
 }
 
 /**
@@ -221,7 +220,7 @@ ${email.tail}
     }
   } catch (error) {
     if ((error as Error).name === 'AbortError') {
-      console.error('LLM timeout (>14s) — routing to rules fallback')
+      console.error('LLM timeout (>10s) — routing to rules fallback')
     } else {
       console.error('LLM classification error:', error)
     }

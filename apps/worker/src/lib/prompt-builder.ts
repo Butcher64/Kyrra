@@ -19,6 +19,11 @@ export function buildSystemPrompt(
   labels: UserLabel[],
   profile: UserProfile,
 ): string {
+  // B8.4: fail fast if no labels — LLM cannot classify without options
+  if (!labels || labels.length === 0) {
+    throw new Error('buildSystemPrompt: labels array is empty — cannot build classification prompt')
+  }
+
   const labelInstructions = labels
     .sort((a, b) => a.position - b.position)
     .map((label, i) => `${i + 1}. "${label.name}": ${label.prompt}`)

@@ -19,6 +19,10 @@ import { ClassificationLogger } from './lib/classification-logger'
  * Reclassification loop — processes pending reclassification requests
  * Polls reclassification_requests table for pending items
  */
+// B9.2: Rate limiting for Gmail API protection
+const INTER_REQUEST_DELAY_MS = 500
+const RATE_LIMIT_COOLDOWN_MS = 30_000
+
 export async function reclassificationLoop(supabase: any): Promise<void> {
   // Claim next pending request
   const { data: request } = await supabase
@@ -95,6 +99,15 @@ export async function reclassificationLoop(supabase: any): Promise<void> {
       .update({ status: 'failed', processed_at: new Date().toISOString() })
       .eq('id', request.id)
 
+    // B9.2: if Gmail rate limited, cool down before next iteration
+    if ((error as Error).message?.includes('429')) {
+      console.warn(`[RECLASS] Gmail 429 rate limit — cooling down ${RATE_LIMIT_COOLDOWN_MS / 1000}s`)
+      await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_COOLDOWN_MS))
+    }
+
     console.error('Reclassification error:', (error as Error).message)
   }
+
+  // B9.2: brief delay between consecutive reclassifications to avoid burst
+  await new Promise((resolve) => setTimeout(resolve, INTER_REQUEST_DELAY_MS))
 }

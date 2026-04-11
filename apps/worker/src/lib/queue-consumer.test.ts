@@ -3,9 +3,9 @@ import { claimNextJob, completeJob, failJob } from './queue-consumer'
 
 /**
  * Create a mock Supabase client that tracks chained method calls.
- * `returnData` is what .single() resolves to (for claimNextJob).
+ * Supports both `.rpc()` (claimNextJob) and `.from().update()` (completeJob/failJob).
  */
-function createMockSupabase(returnData: any = null) {
+function createMockSupabase(rpcReturnData: any = null) {
   const updateValues: Record<string, any>[] = []
   const eqFilters: Array<[string, any]> = []
 
@@ -21,11 +21,16 @@ function createMockSupabase(returnData: any = null) {
     order: vi.fn(() => chain),
     limit: vi.fn(() => chain),
     select: vi.fn(() => chain),
-    single: vi.fn(() => Promise.resolve({ data: returnData })),
+    single: vi.fn(() => Promise.resolve({ data: null })),
   }
 
   return {
     from: vi.fn(() => chain),
+    // claimNextJob uses RPC since it was migrated to claim_next_queue_item()
+    rpc: vi.fn(() => Promise.resolve({
+      data: rpcReturnData ? [rpcReturnData] : [],
+      error: null,
+    })),
     _chain: chain,
     _updateValues: updateValues,
     _eqFilters: eqFilters,
@@ -50,43 +55,33 @@ describe('claimNextJob', () => {
     expect(result).toBeNull()
   })
 
-  it('updates status to processing', async () => {
+  it('calls claim_next_queue_item RPC', async () => {
     const supabase = createMockSupabase({ id: 'job-1' })
 
     await claimNextJob(supabase)
 
-    expect(supabase._chain.update).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'processing' }),
-    )
+    expect(supabase.rpc).toHaveBeenCalledWith('claim_next_queue_item')
   })
 
-  it('sets claimed_at timestamp', async () => {
-    const supabase = createMockSupabase({ id: 'job-1' })
-
-    await claimNextJob(supabase)
-
-    const updateArg = supabase._chain.update.mock.calls[0]![0]
-    expect(updateArg.claimed_at).toBeDefined()
-    // Should be a valid ISO string
-    expect(new Date(updateArg.claimed_at).toISOString()).toBe(updateArg.claimed_at)
-  })
-
-  it('filters by status=pending and orders by created_at', async () => {
+  it('returns null on RPC error', async () => {
     const supabase = createMockSupabase(null)
+    supabase.rpc = vi.fn(() => Promise.resolve({ data: null, error: { message: 'db timeout' } }))
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-    await claimNextJob(supabase)
+    const result = await claimNextJob(supabase)
 
-    expect(supabase._chain.eq).toHaveBeenCalledWith('status', 'pending')
-    expect(supabase._chain.order).toHaveBeenCalledWith('created_at', { ascending: true })
-    expect(supabase._chain.limit).toHaveBeenCalledWith(1)
+    expect(result).toBeNull()
+    consoleSpy.mockRestore()
   })
 
-  it('queries from email_queue_items table', async () => {
+  it('returns first item from RPC result array', async () => {
+    const job1 = { id: 'job-1' }
+    const job2 = { id: 'job-2' }
     const supabase = createMockSupabase(null)
+    supabase.rpc = vi.fn(() => Promise.resolve({ data: [job1, job2], error: null }))
 
-    await claimNextJob(supabase)
-
-    expect(supabase.from).toHaveBeenCalledWith('email_queue_items')
+    const result = await claimNextJob(supabase)
+    expect(result).toEqual(job1)
   })
 })
 
@@ -103,13 +98,14 @@ describe('completeJob', () => {
     )
   })
 
-  it('sets processed_at timestamp', async () => {
+  it('sets processed_at as valid ISO timestamp', async () => {
     const supabase = createMockSupabase()
 
     await completeJob(supabase, 'job-42')
 
     const updateArg = supabase._chain.update.mock.calls[0]![0]
-    expect(updateArg.processed_at).toBeDefined()
+    expect(typeof updateArg.processed_at).toBe('string')
+    expect(new Date(updateArg.processed_at).toISOString()).toBe(updateArg.processed_at)
   })
 
   it('filters by job id', async () => {

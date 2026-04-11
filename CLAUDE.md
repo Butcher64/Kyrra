@@ -1,8 +1,8 @@
 # CLAUDE.md - Kyrra Project Memory
 
 > **Auto-update** : Mettre a jour ce fichier apres chaque decision majeure.
-> **Derniere MAJ** : 2026-04-02
-> **Phase actuelle** : Beta Ready — 33/33 stories done, MVP-0 100%, merge + deploy pending
+> **Derniere MAJ** : 2026-04-11
+> **Phase actuelle** : Stabilization Sprint — Backend pipeline fixes (B8-B10, 13 stories)
 
 ---
 
@@ -45,10 +45,14 @@ Les epics-beta.md sont desynchronises du code reel. A NE PLUS REPRODUIRE.
 - [x] Check Implementation Readiness (complete — READY, 0 critical, 0 major, 2 minor, 2026-03-20)
 
 ### Phase 4 — Implementation (en cours)
-- [x] Beta Epics B0-B6 definis (2026-03-21)
-- [ ] **RECONCILIATION NECESSAIRE** : aligner epics-beta.md avec le code reel
-- [ ] Sprint planning pour les 7 bugs connus
-- [ ] Reprendre le cycle BMAD normal
+- [x] Beta Epics B0-B7 complete (33/33 stories, 2026-04-02)
+- [x] feat/dynamic-labels merge dans master (PR #2, 2026-04-02)
+- [x] Reconciliation BMAD completee (2026-04-01)
+- [x] **Audit complet projet** (2026-04-11) — 4 agents paralleles, 27 issues backend identifiees
+- [ ] **Sprint Stabilization B8-B10** (13 stories) — en cours
+  - B8: Pipeline Critical Fixes (5 stories) — transactions, label retry, race conditions
+  - B9: Pipeline Robustness (5 stories) — timeouts, rate limiting, circuit breaker
+  - B10: Test Infrastructure (3 stories) — classification, prefilter, prompt-builder tests
 
 ---
 
@@ -116,14 +120,27 @@ Les epics-beta.md sont desynchronises du code reel. A NE PLUS REPRODUIRE.
 - `packages/shared/src/types/user-label.ts` — UserLabel, DEFAULT_LABELS, LEGACY_RESULT_TO_DEFAULT_LABEL
 - `supabase/migrations/023_create_user_labels.sql` + `024_add_user_profile_fields.sql`
 
-### Bugs connus (a fixer prochaine session)
+### Bugs connus (resolus dans Beta Sprint)
 
-1. **Dashboard "bloques aujourd'hui" toujours 0** — le compteur filtre par `classification_result = 'BLOQUE'` mais les labels dynamiques mettent toujours `A_VOIR` en legacy. Fix : compter par label_id + position.
-2. **Tests classification.ts casses** — les mocks referencent les anciens imports (fetchEmail, ensureLabels). A reecrire.
-3. **Navigation lente (2s)** — pas de loading.tsx dans les routes dashboard. Ajouter des loading states + transitions.
-4. **Pas de feedback au clic navigation** — Next.js App Router n'a pas de loading indicator par defaut.
-5. **Page scan temps reel manquante** — l'utilisateur devrait voir les emails se trier un par un pendant l'inbox scan, pas juste un spinner.
-6. **saveLabelsConfig non-atomique** — delete + insert sans transaction. Si l'insert fail, les labels sont perdus.
+1. ~~Dashboard "bloques aujourd'hui" toujours 0~~ → B2.4 done
+2. ~~Tests classification.ts casses~~ → B5.3 done (a re-verifier dans B10.1)
+3. ~~Navigation lente (2s)~~ → B2.5 done
+4. ~~Pas de feedback au clic navigation~~ → B2.5 done
+5. ~~Page scan temps reel manquante~~ → B2.6 done
+6. ~~saveLabelsConfig non-atomique~~ → B1.8 done (migration 026)
+
+### Bugs identifies par l'audit 2026-04-11 (Sprint Stabilization B8-B10)
+
+1. **Classification save non-atomique** — 3 inserts sans transaction (classification + llm_usage + pipeline_health) → B8.1
+2. **Label application silencieuse** — try/catch log "will reconcile" mais reconciliation ne rattrape pas → B8.2
+3. **Race condition ensureDynamicLabels** — cache local, pas de protection concurrence → B8.3
+4. **buildSystemPrompt sans validation** — labels vide = prompt LLM invalide → B8.4
+5. **Email body taille non limitee** — format=full charge tout en memoire → B8.5
+6. **Pas de timeout RPC Supabase** — loop peut hang indefiniment → B9.1
+7. **Reclassification sans rate limit** — bulk = rate limit Gmail API → B9.2
+8. **LLM timeout trop serre** — 14s avec SIGKILL a 20s = 6s marge → B9.3
+9. **Circuit breaker trop permissif** — 70% bypass, 500EUR/h → B9.4
+10. **Pas de validation env vars au startup** — erreurs tardives → B9.5
 
 ---
 
@@ -153,6 +170,7 @@ Les epics-beta.md sont desynchronises du code reel. A NE PLUS REPRODUIRE.
 | 2026-04-01 | **Pre-filtrage rapide** | Metadata-first, lazy body, domaines connus → 80% des emails sans body fetch |
 | 2026-04-01 | **Fix pipeline critiques** | Parsing From, DKIM allowlist, whitelist 100→unlimited, transactionnel→A_VOIR |
 | 2026-04-01 | **Plan modele custom Hugging Face** | Fine-tuning moyen-long terme quand assez de feedback data |
+| 2026-04-11 | **Audit complet + Sprint Stabilization** | 27 issues backend, 13 stories (B8-B10), focus pipeline fiabilite |
 
 ---
 
@@ -164,6 +182,7 @@ Les epics-beta.md sont desynchronises du code reel. A NE PLUS REPRODUIRE.
 | Plan implementation labels | `docs/superpowers/plans/2026-04-01-dynamic-labels-onboarding.md` |
 | Epics beta | `planning-artifacts/epics-beta.md` |
 | Brainstorm beta readiness | `planning-artifacts/brainstorm-beta-readiness-2026-03-21.md` |
+| Epics stabilization | `planning-artifacts/epics-stabilization.md` |
 
 ---
 

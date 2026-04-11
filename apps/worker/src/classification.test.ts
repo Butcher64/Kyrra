@@ -14,6 +14,7 @@ vi.mock('./lib/fingerprinting', () => ({
 
 vi.mock('./lib/llm-gateway', () => ({
   classifyWithLLM: vi.fn(),
+  recordMetrics: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('./lib/pii-stripper', () => ({
@@ -111,6 +112,7 @@ function createMockSupabase(mockReturns: Record<string, any> = {}) {
     'usage_counters.select.maybeSingle': { data: null },
     'user_labels.select': { data: MOCK_USER_LABELS },
     'rpc.increment_usage_counter': { data: 1 },
+    'rpc.record_llm_metric': { data: null },
     ...mockReturns,
   }
 
@@ -404,11 +406,12 @@ describe('classificationLoop', () => {
 
     expect(fetchEmailBody).not.toHaveBeenCalled()
     expect(fingerprintEmail).not.toHaveBeenCalled()
-    expect(supabase.insert).toHaveBeenCalled()
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.source).toBe('prefilter')
-    expect(insertCall.label_id).toBe('lbl-prosp') // BLOQUE → Prospection (first candidate, position 5)
-    expect(insertCall.classification_result).toBe('BLOQUE')
+    // B8.1: classification saved via atomic RPC instead of direct insert
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_source: 'prefilter',
+      p_label_id: 'lbl-prosp', // BLOQUE → Prospection (first candidate, position 5)
+      p_classification_result: 'BLOQUE',
+    }))
     expect(completeJob).toHaveBeenCalled()
   })
 
@@ -431,10 +434,11 @@ describe('classificationLoop', () => {
     await classificationLoop(supabase)
 
     expect(classifyWithLLM).not.toHaveBeenCalled()
-    expect(supabase.insert).toHaveBeenCalled()
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('BLOQUE')
-    expect(insertCall.label_id).toBe('lbl-prosp') // BLOQUE → Prospection (first candidate)
+    // B8.1: classification saved via atomic RPC instead of direct insert
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'BLOQUE',
+      p_label_id: 'lbl-prosp', // BLOQUE → Prospection (first candidate)
+    }))
     expect(completeJob).toHaveBeenCalled()
   })
 
@@ -480,10 +484,13 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('FILTRE')
-    expect(insertCall.label_id).toBe('lbl-news') // FILTRE → Newsletter (position 3)
-    expect(insertCall.confidence_score).toBeCloseTo(0.68) // 0.85 * 0.8
+    // B8.1: RPC params instead of direct insert
+    const rpcCalls = (supabase.rpc as Mock).mock.calls.filter((c: any) => c[0] === 'save_classification_result')
+    expect(rpcCalls.length).toBe(1)
+    const params = rpcCalls[0][1]
+    expect(params.p_classification_result).toBe('FILTRE')
+    expect(params.p_label_id).toBe('lbl-news') // FILTRE → Newsletter (position 3)
+    expect(params.p_confidence_score).toBeCloseTo(0.68) // 0.85 * 0.8
   })
 
   // 11. No fingerprint → LLM succeeds
@@ -503,10 +510,12 @@ describe('classificationLoop', () => {
 
     expect(classifyWithLLM).toHaveBeenCalled()
     expect(fetchEmailBody).toHaveBeenCalled()
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('A_VOIR')
-    expect(insertCall.label_id).toBe('lbl-important')
-    expect(insertCall.source).toBe('llm')
+    // B8.1: check RPC params
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'A_VOIR',
+      p_label_id: 'lbl-important',
+      p_source: 'llm',
+    }))
   })
 
   // 12. No fingerprint → LLM fails → A_VOIR fallback
@@ -521,11 +530,13 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('A_VOIR')
-    expect(insertCall.label_id).toBe('lbl-important')
-    expect(insertCall.confidence_score).toBe(0.3)
-    expect(insertCall.summary).toBe('Unable to classify — manual review recommended')
+    // B8.1: check RPC params
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'A_VOIR',
+      p_label_id: 'lbl-important',
+      p_confidence_score: 0.3,
+      p_summary: 'Unable to classify — manual review recommended',
+    }))
   })
 
   // 13. Domain whitelist: BLOQUE → A_VOIR downgrade
@@ -544,9 +555,11 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('A_VOIR')
-    expect(insertCall.label_id).toBe('lbl-important')
+    // B8.1: check RPC params
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'A_VOIR',
+      p_label_id: 'lbl-important',
+    }))
   })
 
   // 14. Strict mode: confidence < 0.8 → promote to A_VOIR
@@ -564,9 +577,10 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('A_VOIR')
-    expect(insertCall.label_id).toBe('lbl-important')
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'A_VOIR',
+      p_label_id: 'lbl-important',
+    }))
   })
 
   // 15. Normal mode: confidence < 0.6 → promote to A_VOIR
@@ -585,8 +599,9 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('A_VOIR')
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'A_VOIR',
+    }))
   })
 
   // 16. Permissive mode: confidence < 0.4 → promote to A_VOIR
@@ -604,8 +619,9 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('A_VOIR')
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'A_VOIR',
+    }))
   })
 
   // 16b. Permissive mode: confidence >= 0.4 → keep FILTRE
@@ -623,8 +639,9 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('FILTRE')
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'FILTRE',
+    }))
   })
 
   // 17. Classification saved with correct fields
@@ -642,22 +659,20 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall).toEqual(
-      expect.objectContaining({
-        user_id: 'user-123',
-        gmail_message_id: 'msg-abc',
-        classification_result: 'FILTRE',
-        label_id: 'lbl-news',
-        confidence_score: 0.88,
-        summary: 'SaaS sales pitch',
-        source: 'llm',
-        idempotency_key: 'msg-abc',
-        sender_display: expect.any(String),
-        subject_snippet: expect.any(String),
-      }),
-    )
-    expect(insertCall.processing_time_ms).toEqual(expect.any(Number))
+    // B8.1: classification saved via atomic RPC instead of direct insert
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_user_id: 'user-123',
+      p_gmail_message_id: 'msg-abc',
+      p_classification_result: 'FILTRE',
+      p_label_id: 'lbl-news',
+      p_confidence_score: 0.88,
+      p_summary: 'SaaS sales pitch',
+      p_source: 'llm',
+      p_idempotency_key: 'msg-abc',
+      p_sender_display: expect.any(String),
+      p_subject_snippet: expect.any(String),
+      p_processing_time_ms: expect.any(Number),
+    }))
   })
 
   // 18. Gmail dynamic label applied after classification
@@ -702,7 +717,8 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    expect(supabase.insert).toHaveBeenCalled()
+    // B8.1: classification saved via atomic RPC
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.any(Object))
     expect(completeJob).toHaveBeenCalledWith(supabase, 'job-001')
     expect(failJob).not.toHaveBeenCalled()
     consoleSpy.mockRestore()
@@ -795,8 +811,9 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('FILTRE')
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'FILTRE',
+    }))
   })
 
   // 24. A_VOIR never overridden by confidence threshold
@@ -814,12 +831,14 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('A_VOIR')
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'A_VOIR',
+    }))
   })
 
   // 25. Pipeline health updated after classification
-  it('should update user_pipeline_health after successful classification', async () => {
+  // B8.1: pipeline_health is now updated atomically inside the RPC
+  it('should save classification atomically via RPC (includes pipeline_health)', async () => {
     const supabase = createMockSupabase({
       'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
       'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
@@ -833,10 +852,12 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    expect(supabase.from).toHaveBeenCalledWith('user_pipeline_health')
-    expect(supabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({ last_classified_at: expect.any(String) }),
-    )
+    // RPC wraps both classification insert + pipeline health update
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_user_id: 'user-123',
+      p_classification_result: 'FILTRE',
+    }))
+    expect(completeJob).toHaveBeenCalled()
   })
 
   // 26. ClassificationLogger.log called with label_name
@@ -882,8 +903,36 @@ describe('classificationLoop', () => {
     vi.useRealTimers()
     await classificationLoop(supabase)
 
-    const insertCall = (supabase.insert as Mock).mock.calls[0][0]
-    expect(insertCall.classification_result).toBe('FILTRE')
+    // B8.1: check RPC params instead of direct insert
+    expect(supabase.rpc).toHaveBeenCalledWith('save_classification_result', expect.objectContaining({
+      p_classification_result: 'FILTRE',
+    }))
+  })
+
+  // B8.1: RPC failure → failJob (not completeJob)
+  it('should failJob when save_classification_result RPC fails', async () => {
+    const supabase = createMockSupabase({
+      'user_integrations.select.single': { data: { id: 'int-1', user_id: 'user-123' } },
+      'user_settings.select.maybeSingle': { data: SETTINGS_CEO_NORMAL },
+      'rpc.save_classification_result': { data: null, error: { message: 'unique_violation' } },
+    })
+    setupHappyPath(supabase)
+    ;(fingerprintEmail as Mock).mockReturnValue({
+      classified: true, result: 'FILTRE', confidence: 0.90, reason: 'Pattern',
+    })
+    ;(applyClassificationSafetyRules as Mock).mockReturnValue('FILTRE')
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.useRealTimers()
+    await classificationLoop(supabase)
+
+    expect(failJob).toHaveBeenCalledWith(
+      supabase, 'job-001',
+      expect.stringContaining('save_classification_result RPC failed'),
+      0,
+    )
+    expect(completeJob).not.toHaveBeenCalled()
+    consoleSpy.mockRestore()
   })
 
   // 28. Generic error → failJob

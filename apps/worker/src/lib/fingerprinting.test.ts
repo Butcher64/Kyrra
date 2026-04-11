@@ -105,10 +105,11 @@ describe('fingerprintEmail — Layer 2: Domain reputation', () => {
     expect(result!.result).toBe('BLOQUE')
   })
 
+  // B10.1: sendgrid.net is now allowlisted (B1.6) — use a non-allowlisted domain
   it('detects DKIM domain mismatch as FILTRE', () => {
     const email = makeEmail({
       from: 'hello@startup.com',
-      headers: { 'dkim-signature': 'v=1; a=rsa-sha256; d=sendgrid.net; s=sel;' },
+      headers: { 'dkim-signature': 'v=1; a=rsa-sha256; d=suspiciousbulk.net; s=sel;' },
     })
     const result = fingerprintEmail(email)
     expect(result).not.toBeNull()

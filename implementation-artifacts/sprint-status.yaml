@@ -1,4 +1,5 @@
 # generated: 2026-04-01
+# last_updated: 2026-04-11
 # project: Kyrra
 # project_key: NOKEY
 # tracking_system: file-system
@@ -7,6 +8,10 @@
 # RECONCILIATION 2026-04-01:
 # Stories B1.4-B1.9, B2.4-B2.6, B5.3 added to cover work done outside BMAD
 # and known bugs. Epics B1, B2, B5 reopened to in-progress.
+#
+# STABILIZATION SPRINT 2026-04-11:
+# Post-audit complet. Epics B8-B10 added for backend pipeline stabilization.
+# Focus: critical fixes, robustness, test infrastructure.
 #
 # STATUS DEFINITIONS:
 # ==================
@@ -35,6 +40,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-01
+last_updated: 2026-04-11
 project: Kyrra
 project_key: NOKEY
 tracking_system: file-system
@@ -42,7 +48,36 @@ story_location: ./implementation-artifacts
 
 development_status:
   # ══════════════════════════════════════════
-  # BETA SPRINTS (ACTIVE)
+  # STABILIZATION SPRINT (ACTIVE)
+  # ══════════════════════════════════════════
+
+  # ── Epic B8: Pipeline Critical Fixes ──
+  epic-b8: in-progress
+  b8-1-transaction-wrapping-classification-save: review
+  b8-2-fix-label-application-retry: review
+  b8-3-fix-race-condition-ensure-dynamic-labels: review
+  b8-4-validate-build-system-prompt-empty-labels: review
+  b8-5-add-email-body-size-guard: review
+  epic-b8-retrospective: optional
+
+  # ── Epic B9: Pipeline Robustness ──
+  epic-b9: in-progress
+  b9-1-add-supabase-rpc-timeouts: review
+  b9-2-rate-limit-reclassification-requests: review
+  b9-3-reduce-llm-timeout-margin: review
+  b9-4-lower-circuit-breaker-threshold: review
+  b9-5-startup-environment-validation: review
+  epic-b9-retrospective: optional
+
+  # ── Epic B10: Test Infrastructure ──
+  epic-b10: in-progress
+  b10-1-rewrite-classification-pipeline-tests: review
+  b10-2-add-prefilter-label-resolver-tests: review
+  b10-3-add-prompt-builder-tests: review
+  epic-b10-retrospective: optional
+
+  # ══════════════════════════════════════════
+  # BETA SPRINTS (COMPLETED)
   # ══════════════════════════════════════════
 
   # ── Epic B0: Auth & Security Fixes ──
@@ -58,10 +93,10 @@ development_status:
   b1-1-whitelist-check-in-classification: done
   b1-2-dynamic-user-settings-in-classification: done
   b1-3-fix-idempotency-sanitize-llm-usage-counter: done
-  b1-4-dynamic-labels-system: done-unreviewed        # feat/dynamic-labels, 2026-04-01
-  b1-5-prefilter-metadata-first-pipeline: done-unreviewed  # 2026-04-01
-  b1-6-fix-pipeline-parsing-dkim-whitelist: done-unreviewed # 2026-04-01
-  b1-7-user-profiling-onboarding: done-unreviewed     # feat/dynamic-labels, 2026-04-01
+  b1-4-dynamic-labels-system: done-unreviewed
+  b1-5-prefilter-metadata-first-pipeline: done-unreviewed
+  b1-6-fix-pipeline-parsing-dkim-whitelist: done-unreviewed
+  b1-7-user-profiling-onboarding: done-unreviewed
   b1-8-fix-save-labels-config-atomic: done
   b1-9-fix-classification-result-legacy: done
   epic-b1-retrospective: optional
@@ -109,22 +144,3 @@ development_status:
   b7-2-auto-whitelist-reclassification: done
   b7-3-degraded-mode-notification: done
   epic-b7-retrospective: optional
-
-  # ══════════════════════════════════════════
-  # MERGE GATE — CLEARED
-  # ══════════════════════════════════════════
-  # feat/dynamic-labels → master
-  # All dependencies done. Ready for merge + deploy.
-  # Epics B0-B7: 33/33 stories done.
-
-  # ══════════════════════════════════════════
-  # ORIGINAL SCAFFOLD EPICS (reference only)
-  # ══════════════════════════════════════════
-  epic-0: scaffold-done
-  epic-1: scaffold-done
-  epic-2: scaffold-done
-  epic-3: scaffold-done
-  epic-4: scaffold-done
-  epic-5: scaffold-done
-  epic-6: scaffold-done
-  epic-7: scaffold-done

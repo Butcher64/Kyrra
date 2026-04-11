@@ -27,9 +27,8 @@ const KNOWN_NOISE_DOMAINS = new Set([
   'quora.com',
   'medium.com',
   'substack.com',
-  // Email sending platforms (transactional/marketing)
+  // Email sending platforms (marketing-only — transactional senders like sendgrid in TRANSACTIONAL_NOREPLY_DOMAINS)
   'mailchimp.com',
-  'sendgrid.net',
   'hubspotmail.net',
   'constant-contact.com',
   'brevo.com',
@@ -38,10 +37,10 @@ const KNOWN_NOISE_DOMAINS = new Set([
   'intercom-mail.com',
   'mandrillapp.com',
   'mailgun.org',
-  'postmarkapp.com',
   'sparkpostmail.com',
   'cmail19.com',
   'cmail20.com',
+  // NOTE: postmarkapp.com removed — it's in TRANSACTIONAL_NOREPLY_DOMAINS (billing/auth emails)
 ])
 
 // Known prospecting tool sending infrastructure → BLOQUE
