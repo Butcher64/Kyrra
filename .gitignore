@@ -54,5 +54,8 @@ notion_export/
 # Supabase combined migrations (individual files are tracked)
 supabase/all-migrations.sql
 
+# Supabase CLI runtime state
+supabase/.temp/
+
 # Claude settings with local permissions
 .claude/settings.local.json

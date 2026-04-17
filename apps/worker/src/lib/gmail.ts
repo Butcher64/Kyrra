@@ -418,6 +418,70 @@ function stripHtmlTags(html: string): string {
     .trim()
 }
 
+// ── Gmail label color palette ──
+
+/**
+ * Gmail API only accepts specific predefined color pairs for labels.
+ * Using any other hex color results in:
+ *   "Label color #xxxxx is not on the allowed color palette"
+ *
+ * This is the complete list of allowed (backgroundColor, textColor) pairs.
+ * Source: https://developers.google.com/gmail/api/reference/rest/v1/users.labels
+ */
+const GMAIL_LABEL_COLORS: Array<{ backgroundColor: string; textColor: string }> = [
+  { backgroundColor: '#16a765', textColor: '#094228' },
+  { backgroundColor: '#43d692', textColor: '#094228' },
+  { backgroundColor: '#4a86e8', textColor: '#094228' },
+  { backgroundColor: '#a479e2', textColor: '#094228' },
+  { backgroundColor: '#f691b2', textColor: '#094228' },
+  { backgroundColor: '#f6c5be', textColor: '#094228' },
+  { backgroundColor: '#fad165', textColor: '#094228' },
+  { backgroundColor: '#fb4c2f', textColor: '#ffffff' },
+  { backgroundColor: '#fbe983', textColor: '#094228' },
+  { backgroundColor: '#b6cff5', textColor: '#094228' },
+  { backgroundColor: '#98d7e4', textColor: '#094228' },
+  { backgroundColor: '#e3d7ff', textColor: '#094228' },
+  { backgroundColor: '#ffdeb5', textColor: '#094228' },
+  { backgroundColor: '#cfe2f3', textColor: '#094228' },
+  { backgroundColor: '#b9e4d0', textColor: '#0d3472' },
+  { backgroundColor: '#c2c2c2', textColor: '#094228' },
+]
+
+/**
+ * Parse a hex color string (#RRGGBB) into [R, G, B] components (0-255)
+ */
+function hexToRgb(hex: string): [number, number, number] {
+  const cleaned = hex.replace('#', '')
+  const r = parseInt(cleaned.slice(0, 2), 16)
+  const g = parseInt(cleaned.slice(2, 4), 16)
+  const b = parseInt(cleaned.slice(4, 6), 16)
+  return [r, g, b]
+}
+
+/**
+ * Find the nearest Gmail-allowed label color pair for an arbitrary hex color.
+ * Compares against backgroundColor of each palette entry using Euclidean distance in RGB space.
+ * The user's custom color in user_labels.color is NOT modified — this mapping is only
+ * used when calling the Gmail API to create/update labels.
+ */
+export function nearestGmailColor(hex: string): { backgroundColor: string; textColor: string } {
+  const [r, g, b] = hexToRgb(hex)
+
+  let bestMatch = GMAIL_LABEL_COLORS[0]!
+  let bestDistance = Infinity
+
+  for (const entry of GMAIL_LABEL_COLORS) {
+    const [er, eg, eb] = hexToRgb(entry.backgroundColor)
+    const distance = (r - er) ** 2 + (g - eg) ** 2 + (b - eb) ** 2
+    if (distance < bestDistance) {
+      bestDistance = distance
+      bestMatch = entry
+    }
+  }
+
+  return bestMatch
+}
+
 // ── Label management (Story 2.6) ──
 
 /**
@@ -434,15 +498,15 @@ export async function ensureLabels(
   const kyrraLabels: Record<string, { name: string; color: { textColor: string; backgroundColor: string } }> = {
     'A_VOIR': {
       name: 'Kyrra/À voir',
-      color: { textColor: '#0b4f30', backgroundColor: '#b9e4d0' },     // Green
+      color: nearestGmailColor('#2e7d32'),     // Green → nearest Gmail green
     },
     'FILTRE': {
       name: 'Kyrra/Filtré',
-      color: { textColor: '#662e37', backgroundColor: '#fbc8d9' },     // Pink
+      color: nearestGmailColor('#c62828'),     // Red-ish → nearest Gmail pink/red
     },
     'BLOQUE': {
       name: 'Kyrra/Bloqué',
-      color: { textColor: '#711a36', backgroundColor: '#f7a7c0' },     // Red
+      color: nearestGmailColor('#6a1b9a'),     // Purple → nearest Gmail red
     },
   }
 
@@ -520,6 +584,21 @@ export async function removeAllKyrraLabels(
 }
 
 // ── Watch management (Story 2.5, 2.7) ──
+
+/**
+ * Fetch the user's current Gmail historyId without requiring Pub/Sub.
+ * Used to bootstrap reconciliation when GMAIL_PUBSUB_TOPIC is not configured.
+ */
+export async function getProfile(
+  accessToken: string,
+): Promise<{ historyId: string; emailAddress: string }> {
+  const response = await gmailFetch(accessToken, '/profile')
+  const data = await response.json()
+  return {
+    historyId: data.historyId,
+    emailAddress: data.emailAddress,
+  }
+}
 
 /**
  * Create a Gmail Pub/Sub watch for real-time email notifications
@@ -647,18 +726,58 @@ export async function listInboxMessageIds(
 // ── Sent messages (onboarding whitelist scan — Story 1.3) ──
 
 /**
+ * Count sent messages (cheap — IDs only, no headers fetched)
+ * Pages through all message IDs to return an exact count.
+ * Used to set total_sent BEFORE the scan starts so the progress bar is meaningful.
+ */
+export async function countSentMessages(
+  accessToken: string,
+  afterDate: Date,
+): Promise<number> {
+  const afterEpoch = Math.floor(afterDate.getTime() / 1000)
+  let pageToken: string | undefined
+  let total = 0
+
+  do {
+    const params = new URLSearchParams({
+      q: `in:sent after:${afterEpoch}`,
+      maxResults: '500',
+      fields: 'messages(id),nextPageToken',
+    })
+    if (pageToken) params.set('pageToken', pageToken)
+
+    const response = await gmailFetch(accessToken, `/messages?${params}`)
+    const data = await response.json()
+
+    const ids: string[] = (data.messages ?? []).map((m: { id: string }) => m.id)
+    total += ids.length
+
+    if (ids.length === 0) break
+    pageToken = data.nextPageToken
+  } while (pageToken)
+
+  return total
+}
+
+/**
  * List sent messages for whitelist generation (onboarding scan)
  * Fetches sent emails from the last 6 months
  * Rate limited: yields batches with configurable delay
+ *
+ * onProgress is called every ~50 emails with the cumulative count
+ * of emails processed, so the frontend can show incremental progress.
  */
 export async function listSentMessages(
   accessToken: string,
   afterDate: Date,
   onBatch: (messages: Array<{ to?: string; cc?: string; bcc?: string }>) => Promise<void>,
+  onProgress?: (emailsProcessed: number) => Promise<void>,
 ): Promise<number> {
   const afterEpoch = Math.floor(afterDate.getTime() / 1000)
   let pageToken: string | undefined
   let totalProcessed = 0
+  // Track when we last reported progress to avoid hammering the DB
+  let lastProgressReport = 0
 
   do {
     const params = new URLSearchParams({
@@ -696,10 +815,23 @@ export async function listSentMessages(
       if (batch.length % 20 === 0) {
         await new Promise((resolve) => setTimeout(resolve, 1000))
       }
+
+      // Incremental progress: report every 50 emails (don't hammer the DB)
+      const currentTotal = totalProcessed + batch.length
+      if (onProgress && currentTotal - lastProgressReport >= 50) {
+        await onProgress(currentTotal)
+        lastProgressReport = currentTotal
+      }
     }
 
     await onBatch(batch)
     totalProcessed += batch.length
+
+    // End-of-page progress update (catches remainder that wasn't a multiple of 50)
+    if (onProgress && totalProcessed > lastProgressReport) {
+      await onProgress(totalProcessed)
+      lastProgressReport = totalProcessed
+    }
 
     pageToken = listData.nextPageToken
   } while (pageToken)
@@ -791,16 +923,6 @@ export async function ensureDynamicLabels(
   accessToken: string,
   userLabels: Array<{ id: string; name: string; color: string; gmail_label_id: string | null }>,
 ): Promise<Record<string, string>> {
-  const colorMap: Record<string, { textColor: string; backgroundColor: string }> = {
-    '#2e7d32': { textColor: '#0b4f30', backgroundColor: '#b9e4d0' },
-    '#1565c0': { textColor: '#04502e', backgroundColor: '#a0dab3' },
-    '#00838f': { textColor: '#094228', backgroundColor: '#b3efd3' },
-    '#e65100': { textColor: '#662e37', backgroundColor: '#fbc8d9' },
-    '#f57f17': { textColor: '#684e07', backgroundColor: '#fdedc1' },
-    '#c62828': { textColor: '#711a36', backgroundColor: '#f7a7c0' },
-    '#6a1b9a': { textColor: '#41236d', backgroundColor: '#d3bfdb' },
-  }
-
   const result: Record<string, string> = {}
 
   // Fetch existing Gmail labels once upfront (avoid N calls)
@@ -823,8 +945,9 @@ export async function ensureDynamicLabels(
       continue
     }
 
-    // Create the label in Gmail (race-safe — B8.3)
-    const gmailColor = colorMap[ul.color] ?? { textColor: '#0b4f30', backgroundColor: '#b9e4d0' }
+    // Map user's custom color to the nearest valid Gmail palette color
+    // User's color in DB stays as-is — only the Gmail API call uses palette colors
+    const gmailColor = nearestGmailColor(ul.color)
     try {
       const createResponse = await gmailFetch(accessToken, '/labels', {
         method: 'POST',

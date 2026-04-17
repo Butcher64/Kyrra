@@ -10,6 +10,7 @@ import {
   getValidAccessToken,
   renewWatch,
   getHistory,
+  getProfile,
   ensureLabels,
   GmailAuthError,
   type GmailHistoryRecord,
@@ -100,17 +101,37 @@ export async function reconciliationLoop(supabase: any): Promise<void> {
   let lastSuccessfulPoll = Date.now()
 
   try {
-    // Get all active integrations with watch history IDs
+    // Get all active Gmail integrations (polling mode bootstraps watch_history_id on demand)
     const { data: integrations } = await supabase
       .from('user_integrations')
       .select('*')
       .eq('provider', 'gmail')
       .eq('status', 'active')
-      .not('watch_history_id', 'is', null)
 
     if (integrations && integrations.length > 0) {
       for (const integration of integrations) {
         try {
+          // Polling mode bootstrap: if watch_history_id is missing, fetch it
+          // so the next cycle has a starting point for getHistory.
+          if (!integration.watch_history_id) {
+            const accessToken = await getValidAccessToken(supabase, integration)
+            if (!accessToken) continue
+            const { historyId } = await getProfile(accessToken)
+            await supabase
+              .from('user_integrations')
+              .update({
+                watch_history_id: historyId,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', integration.id)
+            integration.watch_history_id = historyId
+            ClassificationLogger.log({
+              event: 'history_bootstrapped',
+              user_id: integration.user_id,
+              history_id: historyId,
+            })
+            continue // Next cycle will reconcile from this point
+          }
           await reconcileUser(supabase, integration)
         } catch (error) {
           if (error instanceof GmailAuthError) {
@@ -161,8 +182,7 @@ async function reconcileUser(
   const historyRecords = await getHistory(accessToken, integration.watch_history_id)
 
   if (historyRecords === null) {
-    // History ID too old (>30 days) — need full re-sync
-    // For MVP-0, just update the history ID via a fresh watch
+    // History ID too old (>30 days) — need full re-sync via fresh history bootstrap
     if (PUBSUB_TOPIC) {
       const watchResponse = await renewWatch(accessToken, PUBSUB_TOPIC)
       await supabase
@@ -170,6 +190,16 @@ async function reconcileUser(
         .update({
           watch_history_id: watchResponse.historyId,
           watch_expiry: new Date(Number(watchResponse.expiration)).toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', integration.id)
+    } else {
+      // Polling mode: bootstrap a fresh historyId via users.getProfile
+      const { historyId } = await getProfile(accessToken)
+      await supabase
+        .from('user_integrations')
+        .update({
+          watch_history_id: historyId,
           updated_at: new Date().toISOString(),
         })
         .eq('id', integration.id)

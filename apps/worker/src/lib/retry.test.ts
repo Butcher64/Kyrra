@@ -48,9 +48,11 @@ describe('withRetry', () => {
       .mockRejectedValueOnce(new Error('err-3'))
 
     const promise = withRetry(fn, { maxAttempts: 3, baseDelayMs: 50 })
+    // Attach rejection handler BEFORE advancing timers to avoid unhandled
+    // rejection when the final attempt throws synchronously from mock.
+    const assertion = expect(promise).rejects.toThrow('err-3')
     await vi.advanceTimersByTimeAsync(500)
-
-    await expect(promise).rejects.toThrow('err-3')
+    await assertion
     expect(fn).toHaveBeenCalledTimes(3)
   })
 

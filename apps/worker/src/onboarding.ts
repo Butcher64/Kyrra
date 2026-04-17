@@ -1,5 +1,5 @@
-import { extractRecipients, buildWhitelistEntries, type ScanProgress } from './lib/whitelist-scan'
-import { getValidAccessToken, listSentMessages, createWatch, listInboxMessageIds, listUserGmailLabels, GmailAuthError } from './lib/gmail'
+import { extractRecipients, buildWhitelistEntries } from './lib/whitelist-scan'
+import { getValidAccessToken, countSentMessages, listSentMessages, createWatch, getProfile, listInboxMessageIds, listUserGmailLabels, GmailAuthError } from './lib/gmail'
 import { sendViaPostmark } from './recap'
 import {
   generateOnboardingEmailHtml,
@@ -74,31 +74,39 @@ export async function onboardingScanLoop(supabase: any): Promise<void> {
     const sixMonthsAgo = new Date()
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
 
-    const progress: ScanProgress = {
-      total_sent: 0,
-      emails_processed: 0,
-      contacts_found: 0,
-      prospecting_found: 0,
-    }
+    // Phase 1: Count total sent emails BEFORE processing (cheap — IDs only)
+    // This lets the frontend show a meaningful progress % from the start
+    const totalSentCount = await countSentMessages(accessToken, sixMonthsAgo)
+    console.log(`Onboarding scan for ${scan.user_id}: counted ${totalSentCount} sent emails`)
+
+    // Set total_sent upfront so the progress bar has a denominator immediately
+    await supabase
+      .from('onboarding_scans')
+      .update({
+        total_sent: totalSentCount,
+        emails_processed: 0,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', scan.id)
 
     const allRecipients: string[] = []
 
+    // Phase 2: Process sent emails with incremental progress updates
     const totalProcessed = await listSentMessages(
       accessToken,
       sixMonthsAgo,
       async (batch) => {
+        // Extract recipients from this page's batch
         const recipients = extractRecipients(batch)
         allRecipients.push(...recipients)
-
-        progress.emails_processed += batch.length
-        progress.total_sent += batch.length
-
-        // Update progress in real-time (for /onboarding-progress page polling)
+      },
+      // onProgress callback — called every ~50 emails by listSentMessages
+      // Updates emails_processed incrementally so the frontend progress bar moves smoothly
+      async (emailsProcessed: number) => {
         await supabase
           .from('onboarding_scans')
           .update({
-            emails_processed: progress.emails_processed,
-            total_sent: progress.total_sent,
+            emails_processed: emailsProcessed,
             contacts_found: new Set(allRecipients).size,
             updated_at: new Date().toISOString(),
           })
@@ -117,14 +125,15 @@ export async function onboardingScanLoop(supabase: any): Promise<void> {
         .upsert(whitelistEntries, { onConflict: 'user_id,address_hash' })
     }
 
-    progress.contacts_found = uniqueRecipients.length
-
-    // Update final progress
+    // Update final progress — set emails_processed to actual total for consistency
     await supabase
       .from('onboarding_scans')
       .update({
         status: 'completed',
-        ...progress,
+        total_sent: totalSentCount,
+        emails_processed: totalProcessed,
+        contacts_found: uniqueRecipients.length,
+        prospecting_found: 0,
         completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -166,7 +175,21 @@ export async function onboardingScanLoop(supabase: any): Promise<void> {
         console.error('Gmail Watch creation failed:', (watchError as Error).message)
       }
     } else {
-      console.log('GMAIL_PUBSUB_TOPIC not configured — skipping watch (polling mode)')
+      // Polling mode: bootstrap watch_history_id via users.getProfile so
+      // reconciliationLoop can pick up new emails without Pub/Sub.
+      try {
+        const { historyId } = await getProfile(accessToken)
+        await supabase
+          .from('user_integrations')
+          .update({
+            watch_history_id: historyId,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', integration.id)
+        console.log(`Polling mode: historyId=${historyId} bootstrapped for user ${scan.user_id}`)
+      } catch (profileError) {
+        console.error('getProfile bootstrap failed:', (profileError as Error).message)
+      }
     }
 
     // Scan Gmail labels for onboarding label proposal
