@@ -663,9 +663,11 @@ export async function getHistory(
     do {
       const params = new URLSearchParams({
         startHistoryId,
-        historyTypes: 'messageAdded,labelAdded,labelRemoved',
         maxResults: '100',
       })
+      params.append('historyTypes', 'messageAdded')
+      params.append('historyTypes', 'labelAdded')
+      params.append('historyTypes', 'labelRemoved')
       if (pageToken) params.set('pageToken', pageToken)
 
       const response = await gmailFetch(accessToken, `/history?${params}`)
