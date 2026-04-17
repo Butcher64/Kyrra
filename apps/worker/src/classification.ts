@@ -11,6 +11,10 @@ import { checkWhitelist } from './lib/whitelist-check'
 import { buildSystemPrompt, type UserProfile } from './lib/prompt-builder'
 import { resolveLabel, resolveLabelByName, deriveLegacyResult } from './lib/label-resolver'
 import { withRetry } from './lib/retry'
+import { withTimeout, TimeoutError } from './lib/timeout'
+
+const RPC_TIMEOUT_MS = 10_000        // B9.1: 10s for critical RPCs (save_classification_result)
+const RPC_TIMEOUT_FAST_MS = 5_000    // B9.1: 5s for best-effort RPCs (counters, metrics)
 
 /**
  * Save classification result atomically via RPC (B8.1)
@@ -34,19 +38,25 @@ export async function saveClassificationResult(
     subjectSnippet: string
   },
 ): Promise<void> {
-  const { error } = await supabase.rpc('save_classification_result', {
-    p_user_id: params.userId,
-    p_gmail_message_id: params.gmailMessageId,
-    p_classification_result: params.classificationResult,
-    p_label_id: params.labelId,
-    p_confidence_score: params.confidenceScore,
-    p_summary: params.summary,
-    p_source: params.source,
-    p_processing_time_ms: params.processingTimeMs,
-    p_idempotency_key: params.idempotencyKey,
-    p_sender_display: params.senderDisplay,
-    p_subject_snippet: params.subjectSnippet,
-  })
+  const { error } = await withTimeout<{ data: any; error: any }>(
+    Promise.resolve(
+      supabase.rpc('save_classification_result', {
+        p_user_id: params.userId,
+        p_gmail_message_id: params.gmailMessageId,
+        p_classification_result: params.classificationResult,
+        p_label_id: params.labelId,
+        p_confidence_score: params.confidenceScore,
+        p_summary: params.summary,
+        p_source: params.source,
+        p_processing_time_ms: params.processingTimeMs,
+        p_idempotency_key: params.idempotencyKey,
+        p_sender_display: params.senderDisplay,
+        p_subject_snippet: params.subjectSnippet,
+      }),
+    ),
+    RPC_TIMEOUT_MS,
+    'save_classification_result',
+  )
 
   if (error) {
     throw new Error(`save_classification_result RPC failed: ${error.message}`)
@@ -289,10 +299,25 @@ export async function classificationLoop(supabase: any): Promise<void> {
         return
       }
 
-      await supabase.rpc('increment_usage_counter', {
-        p_user_id: job.user_id,
-        p_date: todayDate,
-      })
+      try {
+        await withTimeout<unknown>(
+          Promise.resolve(
+            supabase.rpc('increment_usage_counter', {
+              p_user_id: job.user_id,
+              p_date: todayDate,
+            }),
+          ),
+          RPC_TIMEOUT_FAST_MS,
+          'increment_usage_counter',
+        )
+      } catch (err) {
+        // Best-effort: counter bump must not block classification
+        if (err instanceof TimeoutError) {
+          console.warn('[classification] increment_usage_counter timed out — continuing')
+        } else {
+          throw err
+        }
+      }
     }
 
     // ── Step 7: Fingerprinting (headers only — no body needed) ──
@@ -415,17 +440,23 @@ export async function classificationLoop(supabase: any): Promise<void> {
       const outputTokens = llmUsage?.outputTokens ?? 0
       const costUsd = llmUsage?.costUsd ?? 0.001
       try {
-        await supabase.from('llm_usage_logs').insert({
-          user_id: job.user_id,
-          gmail_message_id: job.gmail_message_id,
-          model: llmUsage?.model ?? 'gpt-4o-mini',
-          input_tokens: inputTokens,
-          output_tokens: outputTokens,
-          cost_usd: costUsd,
-          latency_ms: processingTimeMs,
-          classification_result: finalResult,
-          label_name: resolvedLabel.name,
-        })
+        await withTimeout<unknown>(
+          Promise.resolve(
+            supabase.from('llm_usage_logs').insert({
+              user_id: job.user_id,
+              gmail_message_id: job.gmail_message_id,
+              model: llmUsage?.model ?? 'gpt-4o-mini',
+              input_tokens: inputTokens,
+              output_tokens: outputTokens,
+              cost_usd: costUsd,
+              latency_ms: processingTimeMs,
+              classification_result: finalResult,
+              label_name: resolvedLabel.name,
+            }),
+          ),
+          RPC_TIMEOUT_FAST_MS,
+          'llm_usage_logs.insert',
+        )
       } catch (err) {
         console.warn('[COST] llm_usage_logs insert failed:', (err as Error).message)
       }

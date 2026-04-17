@@ -1,4 +1,5 @@
 import type { ClassificationResult } from '@kyrra/shared'
+import { withTimeout, TimeoutError } from './timeout'
 
 /**
  * LLM Gateway — Handles ambiguous email classification via GPT-4o-mini
@@ -56,10 +57,25 @@ export async function recordMetrics(
   costEur: number,
   wasLlm: boolean,
 ): Promise<void> {
-  await supabase.rpc('record_llm_metric', {
-    p_cost_eur: costEur,
-    p_was_llm: wasLlm,
-  })
+  try {
+    await withTimeout<unknown>(
+      Promise.resolve(
+        supabase.rpc('record_llm_metric', {
+          p_cost_eur: costEur,
+          p_was_llm: wasLlm,
+        }),
+      ),
+      5_000,
+      'record_llm_metric',
+    )
+  } catch (err) {
+    // Best-effort: metric write must not block the classification path
+    if (err instanceof TimeoutError) {
+      console.warn('[llm-gateway] record_llm_metric timed out — continuing')
+    } else {
+      throw err
+    }
+  }
 }
 
 /**
