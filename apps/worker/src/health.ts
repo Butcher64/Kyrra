@@ -6,7 +6,9 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 
-const HEALTH_PORT = parseInt(process.env.HEALTH_PORT ?? '8089', 10)
+// Railway auto-injects PORT at runtime for publicly-exposed services.
+// Fall back to HEALTH_PORT (legacy) and finally 8089 (local dev default).
+const HEALTH_PORT = parseInt(process.env.PORT ?? process.env.HEALTH_PORT ?? '8089', 10)
 
 let workerStartedAt: Date | null = null
 
