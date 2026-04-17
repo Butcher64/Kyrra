@@ -20,11 +20,13 @@ function makeEmail(overrides: Partial<EmailContent> = {}): EmailContent {
 }
 
 function makeSupabaseMock(circuitData: any = null) {
+  // Chain shape: .from(table).select(cols).eq(col, val).maybeSingle()
+  // Matches isCircuitOpen() after the B9.4 follow-up that added the
+  // hour_bucket filter (review Q5 fix).
   const upsertFn = vi.fn().mockResolvedValue({ error: null })
-  const singleFn = vi.fn().mockResolvedValue({ data: circuitData })
-  const limitFn = vi.fn().mockReturnValue({ single: singleFn })
-  const orderFn = vi.fn().mockReturnValue({ limit: limitFn })
-  const selectFn = vi.fn().mockReturnValue({ order: orderFn })
+  const maybeSingleFn = vi.fn().mockResolvedValue({ data: circuitData })
+  const eqFn = vi.fn().mockReturnValue({ maybeSingle: maybeSingleFn })
+  const selectFn = vi.fn().mockReturnValue({ eq: eqFn })
 
   return {
     from: vi.fn().mockImplementation((table: string) => {
@@ -36,7 +38,7 @@ function makeSupabaseMock(circuitData: any = null) {
     // recordMetrics now uses RPC instead of direct upsert
     rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
     _upsertFn: upsertFn,
-    _singleFn: singleFn,
+    _maybeSingleFn: maybeSingleFn,
   }
 }
 
