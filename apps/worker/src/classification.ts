@@ -11,7 +11,7 @@ import { checkWhitelist } from './lib/whitelist-check'
 import { buildSystemPrompt, type UserProfile } from './lib/prompt-builder'
 import { resolveLabel, resolveLabelByName, deriveLegacyResult } from './lib/label-resolver'
 import { withRetry } from './lib/retry'
-import { withTimeout, TimeoutError } from './lib/timeout'
+import { withTimeout } from './lib/timeout'
 
 const RPC_TIMEOUT_MS = 10_000        // B9.1: 10s for critical RPCs (save_classification_result)
 const RPC_TIMEOUT_FAST_MS = 5_000    // B9.1: 5s for best-effort RPCs (counters, metrics)
@@ -299,25 +299,22 @@ export async function classificationLoop(supabase: any): Promise<void> {
         return
       }
 
-      try {
-        await withTimeout<unknown>(
-          Promise.resolve(
-            supabase.rpc('increment_usage_counter', {
-              p_user_id: job.user_id,
-              p_date: todayDate,
-            }),
-          ),
-          RPC_TIMEOUT_FAST_MS,
-          'increment_usage_counter',
-        )
-      } catch (err) {
-        // Best-effort: counter bump must not block classification
-        if (err instanceof TimeoutError) {
-          console.warn('[classification] increment_usage_counter timed out — continuing')
-        } else {
-          throw err
-        }
-      }
+      // B9.1 follow-up (review Q2): DO NOT swallow the timeout here. If this
+      // RPC hangs and we continue, the user can silently exceed their daily
+      // quota (counter never advances). Letting the error propagate relies on
+      // B8.1 idempotency: the job retries, save_classification_result is a
+      // no-op on the same classification_id, and the counter eventually bumps
+      // on a healthy connection.
+      await withTimeout<unknown>(
+        Promise.resolve(
+          supabase.rpc('increment_usage_counter', {
+            p_user_id: job.user_id,
+            p_date: todayDate,
+          }),
+        ),
+        RPC_TIMEOUT_FAST_MS,
+        'increment_usage_counter',
+      )
     }
 
     // ── Step 7: Fingerprinting (headers only — no body needed) ──

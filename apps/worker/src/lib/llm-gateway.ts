@@ -44,12 +44,19 @@ const CIRCUIT_ERROR_RATE_THRESHOLD = 0.30
 const CIRCUIT_MIN_SAMPLE = 10
 
 export async function isCircuitOpen(supabase: any): Promise<boolean> {
+  // B9.4 follow-up (review Q5): filter on the CURRENT hour bucket, not the
+  // most-recent row. Without this, the breaker can stay open for an entire
+  // hour because it keeps reading last hour's errored counters even though
+  // this hour has zero calls.
+  const currentHourBucket = new Date(
+    Math.floor(Date.now() / 3_600_000) * 3_600_000,
+  ).toISOString()
+
   const { data } = await supabase
     .from('llm_metrics_hourly')
     .select('total_cost_eur, llm_calls, llm_errors')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
+    .eq('hour_bucket', currentHourBucket)
+    .maybeSingle()
 
   if (!data) return false
 

@@ -290,44 +290,64 @@ export async function fetchEmailMetadata(
 export async function fetchEmailBody(
   accessToken: string,
   messageId: string,
-): Promise<{ bodyPreview: string; bodyTail: string }> {
+): Promise<{ bodyPreview: string; bodyTail: string; oversize?: boolean }> {
   const MAX_BODY_BYTES = 5_000_000 // 5MB cap
+
+  // B8.5 follow-up (review Q2): Gmail serves bodies over HTTP/2 with chunked
+  // transfer encoding in practice, so `content-length` is usually absent and
+  // the original guard almost never fired — we'd already buffered the full
+  // payload via .json() before `sizeEstimate` could reject it.
+  //
+  // Fix: do a cheap metadata probe FIRST (format=minimal returns only the
+  // sizeEstimate for the message, no body). One extra API call per LLM-bound
+  // email is a small price for a deterministic OOM guard.
+  const sizeProbe = await gmailFetch(
+    accessToken,
+    `/messages/${messageId}?format=minimal&fields=sizeEstimate`,
+  )
+  const sizeData = await sizeProbe.json()
+  const sizeEstimate = Number(sizeData.sizeEstimate ?? 0)
+
+  if (sizeEstimate > MAX_BODY_BYTES) {
+    // B8.5 follow-up (review Q5): return an explicit oversize marker so the
+    // classifier can log and the operator can monitor. Body itself stays
+    // empty — the spec's "truncation" doesn't apply once we refuse to load
+    // the payload, and a partial base64 slice would be garbage anyway.
+    console.warn(
+      `[BODY] Oversize email ${messageId}: sizeEstimate=${sizeEstimate} exceeds ${MAX_BODY_BYTES}B — skipping body fetch`,
+    )
+    return { bodyPreview: '', bodyTail: '', oversize: true }
+  }
 
   const response = await gmailFetch(
     accessToken,
     `/messages/${messageId}?format=full&fields=payload,sizeEstimate`,
   )
 
-  // B8.5: reject oversized responses BEFORE buffering them into memory.
-  // Relying on `data.sizeEstimate` after .json() means we already loaded
-  // the whole payload -> potential OOM on 100MB emails.
+  // Defense in depth: if the metadata probe lied (rare — concurrent edits,
+  // thread updates), still refuse to parse once we can see the real size.
+  // We at least paid for an HTTP response but we avoid JSON.parse on a
+  // 100MB blob.
   const contentLength = Number(response.headers.get('content-length') ?? 0)
   if (contentLength > MAX_BODY_BYTES) {
-    console.warn(`[BODY] Skipping body for ${messageId}: content-length=${contentLength} exceeds ${MAX_BODY_BYTES}B limit`)
-    // Drain the body so the socket can be released, but cap the bytes we read
+    console.warn(
+      `[BODY] Oversize email ${messageId} (post-fetch): content-length=${contentLength} exceeds ${MAX_BODY_BYTES}B`,
+    )
     try {
-      const reader = response.body?.getReader()
-      if (reader) {
-        let bytesRead = 0
-        while (bytesRead < MAX_BODY_BYTES) {
-          const { done, value } = await reader.read()
-          if (done) break
-          bytesRead += value.byteLength
-        }
-        await reader.cancel()
-      }
+      await response.body?.cancel()
     } catch {
-      /* best-effort drain */
+      /* best-effort */
     }
-    return { bodyPreview: '', bodyTail: '' }
+    return { bodyPreview: '', bodyTail: '', oversize: true }
   }
 
   const data = await response.json()
 
-  // Secondary guard: trust Gmail's sizeEstimate if content-length was missing/chunked
   if (data.sizeEstimate && data.sizeEstimate > MAX_BODY_BYTES) {
-    console.warn(`[BODY] Skipping body for ${messageId}: sizeEstimate=${data.sizeEstimate} exceeds ${MAX_BODY_BYTES}B limit`)
-    return { bodyPreview: '', bodyTail: '' }
+    console.warn(
+      `[BODY] Oversize email ${messageId} (post-fetch): sizeEstimate=${data.sizeEstimate} exceeds ${MAX_BODY_BYTES}B`,
+    )
+    return { bodyPreview: '', bodyTail: '', oversize: true }
   }
 
   const bodyText = extractBodyText(data.payload)
