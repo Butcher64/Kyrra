@@ -40,14 +40,22 @@ export async function saveLabelsConfig(
     return { success: false, error: 'Failed to save label configuration' }
   }
 
-  // Mark onboarding as labels_configured (non-blocking — labels are already saved)
+  // Mark onboarding as labels_configured — inbox scan depends on this flag
   const { error: onboardingError } = await supabase
     .from('onboarding_scans')
     .update({ labels_configured: true, updated_at: new Date().toISOString() })
     .eq('user_id', user.id)
 
   if (onboardingError) {
-    console.error('Failed to mark labels configured:', onboardingError)
+    console.error(
+      'Failed to set labels_configured on onboarding_scans:',
+      JSON.stringify(onboardingError, null, 2),
+      '| user_id:', user.id,
+    )
+    return {
+      success: false,
+      error: 'Labels saved but failed to mark configuration complete. Please try again.',
+    }
   }
 
   return { success: true }

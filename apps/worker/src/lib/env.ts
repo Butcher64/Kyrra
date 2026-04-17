@@ -24,7 +24,7 @@ const ENV_VARS: EnvVar[] = [
   { name: 'GOOGLE_CLIENT_ID', required: true },
   { name: 'GOOGLE_CLIENT_SECRET', required: true },
   { name: 'OPENAI_API_KEY', required: true },
-  { name: 'POSTMARK_SERVER_TOKEN', required: true },
+  { name: 'POSTMARK_SERVER_TOKEN', required: false },
   // Optional
   { name: 'GMAIL_PUBSUB_TOPIC', required: false },
   { name: 'ADMIN_ALERT_EMAILS', required: false },

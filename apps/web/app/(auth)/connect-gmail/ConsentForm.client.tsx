@@ -70,24 +70,34 @@ export function ConsentForm() {
   const [error, setError] = useState<string | null>(null)
 
   function handleConnect() {
-    if (!classifyConsent) return
+    console.log('[CONSENT] handleConnect called', { classifyConsent, recapConsent, isPending })
+    if (!classifyConsent) {
+      console.log('[CONSENT] Blocked — classifyConsent is false')
+      return
+    }
 
     startTransition(async () => {
       setError(null)
       try {
+        console.log('[CONSENT] Calling saveConsent...')
         const result = await saveConsent({
           consent_given: true,
           recap_consent: recapConsent,
         })
 
+        console.log('[CONSENT] saveConsent returned:', JSON.stringify(result))
+
         if (result.error) {
+          console.error('[CONSENT] saveConsent error:', result.error)
           setError('Erreur lors de la sauvegarde du consentement. Veuillez reessayer.')
           return
         }
 
         // Consent saved — proceed to Gmail OAuth
+        console.log('[CONSENT] Redirecting to /auth/callback/google')
         window.location.href = '/auth/callback/google'
-      } catch {
+      } catch (err) {
+        console.error('[CONSENT] Network error:', err)
         setError('Erreur réseau. Veuillez réessayer.')
       }
     })
