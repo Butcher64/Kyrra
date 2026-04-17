@@ -34,6 +34,7 @@ const ALLOWED_FIELDS = new Set([
   'tokens_created',
   'reason',
   'error',
+  'history_id',
 ])
 
 export class ClassificationLoggerViolation extends Error {

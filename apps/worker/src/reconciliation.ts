@@ -100,13 +100,17 @@ export async function reconciliationLoop(supabase: any): Promise<void> {
 
   let lastSuccessfulPoll = Date.now()
 
+  console.log('[reconciliation] loop iteration starting')
+
   try {
     // Get all active Gmail integrations (polling mode bootstraps watch_history_id on demand)
-    const { data: integrations } = await supabase
+    const { data: integrations, error: selectError } = await supabase
       .from('user_integrations')
       .select('*')
       .eq('provider', 'gmail')
       .eq('status', 'active')
+
+    console.log(`[reconciliation] fetched ${integrations?.length ?? 0} active integrations (error: ${selectError?.message ?? 'none'})`)
 
     if (integrations && integrations.length > 0) {
       for (const integration of integrations) {
@@ -114,16 +118,27 @@ export async function reconciliationLoop(supabase: any): Promise<void> {
           // Polling mode bootstrap: if watch_history_id is missing, fetch it
           // so the next cycle has a starting point for getHistory.
           if (!integration.watch_history_id) {
+            console.log(`[reconciliation] bootstrap needed for user ${integration.user_id}`)
             const accessToken = await getValidAccessToken(supabase, integration)
-            if (!accessToken) continue
+            if (!accessToken) {
+              console.log(`[reconciliation] bootstrap: no access token for user ${integration.user_id} (skipping)`)
+              continue
+            }
+            console.log(`[reconciliation] bootstrap: got access token for user ${integration.user_id}, calling getProfile`)
             const { historyId } = await getProfile(accessToken)
-            await supabase
+            console.log(`[reconciliation] bootstrap: got historyId=${historyId} for user ${integration.user_id}`)
+            const { error: updErr } = await supabase
               .from('user_integrations')
               .update({
                 watch_history_id: historyId,
                 updated_at: new Date().toISOString(),
               })
               .eq('id', integration.id)
+            if (updErr) {
+              console.error(`[reconciliation] bootstrap update failed for user ${integration.user_id}:`, updErr.message)
+            } else {
+              console.log(`[reconciliation] bootstrap: persisted historyId for user ${integration.user_id}`)
+            }
             integration.watch_history_id = historyId
             ClassificationLogger.log({
               event: 'history_bootstrapped',
@@ -148,8 +163,8 @@ export async function reconciliationLoop(supabase: any): Promise<void> {
     }
 
     lastSuccessfulPoll = Date.now()
-  } catch {
-    // Supabase might be down — will retry
+  } catch (outerErr) {
+    console.error('[reconciliation] outer catch:', (outerErr as Error).message)
   }
 
   // Determine interval based on recovery state
