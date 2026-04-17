@@ -31,20 +31,38 @@ export interface EmailContent {
 
 /**
  * Check if circuit breaker is open (LLM should be bypassed)
+ *
+ * B9.4: opens on EITHER signal:
+ *   1. Runaway cost:   total_cost_eur > 200€ this hour
+ *   2. Degraded LLM:   error rate > 30% over >=10 LLM calls this hour
+ *
+ * Error rate guards against a broken upstream (OpenAI 5xx, schema changes,
+ * timeouts) still being hammered hundreds of times per hour.
  */
+const CIRCUIT_COST_LIMIT_EUR = 200
+const CIRCUIT_ERROR_RATE_THRESHOLD = 0.30
+const CIRCUIT_MIN_SAMPLE = 10
+
 export async function isCircuitOpen(supabase: any): Promise<boolean> {
   const { data } = await supabase
     .from('llm_metrics_hourly')
-    .select('bypass_rate, total_cost_eur')
+    .select('total_cost_eur, llm_calls, llm_errors')
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
 
   if (!data) return false
 
-  // Circuit breaker: cost-based only. bypass_rate removed — high bypass is normal/desirable
-  // (prefilter+fingerprint handle 60-80% without LLM). Cost guard protects against runaway spending.
-  return (data.total_cost_eur ?? 0) > 200
+  if ((data.total_cost_eur ?? 0) > CIRCUIT_COST_LIMIT_EUR) return true
+
+  const llmCalls = data.llm_calls ?? 0
+  const llmErrors = data.llm_errors ?? 0
+  if (llmCalls >= CIRCUIT_MIN_SAMPLE) {
+    const errorRate = llmErrors / llmCalls
+    if (errorRate > CIRCUIT_ERROR_RATE_THRESHOLD) return true
+  }
+
+  return false
 }
 
 /**
@@ -56,6 +74,7 @@ export async function recordMetrics(
   supabase: any,
   costEur: number,
   wasLlm: boolean,
+  wasError: boolean = false,
 ): Promise<void> {
   try {
     await withTimeout<unknown>(
@@ -63,6 +82,7 @@ export async function recordMetrics(
         supabase.rpc('record_llm_metric', {
           p_cost_eur: costEur,
           p_was_llm: wasLlm,
+          p_was_error: wasError,
         }),
       ),
       5_000,
@@ -185,6 +205,7 @@ ${email.tail}
 
     if (!response.ok) {
       console.error('LLM API error:', response.status)
+      await recordMetrics(supabase, 0, true, true) // B9.4: LLM attempt, counted as error
       return null // → rules fallback
     }
 
@@ -192,9 +213,19 @@ ${email.tail}
     const content = data.choices?.[0]?.message?.content
     const usage = data.usage
 
-    if (!content) return null
+    if (!content) {
+      await recordMetrics(supabase, 0, true, true)
+      return null
+    }
 
-    const parsed = JSON.parse(content)
+    let parsed: any
+    try {
+      parsed = JSON.parse(content)
+    } catch {
+      console.error('LLM returned non-JSON content')
+      await recordMetrics(supabase, 0, true, true)
+      return null
+    }
 
     // Handle both response formats:
     // - Dynamic mode: { "label": "..." } (custom labels)
@@ -204,6 +235,7 @@ ${email.tail}
 
     if (!labelName && !legacyResult) {
       console.error('LLM returned neither label nor category')
+      await recordMetrics(supabase, 0, true, true)
       return null // → rules fallback
     }
 
@@ -215,6 +247,7 @@ ${email.tail}
 
     if (typeof parsed.confidence !== 'number' || parsed.confidence < 0 || parsed.confidence > 1) {
       console.error('LLM returned invalid confidence:', parsed.confidence)
+      await recordMetrics(supabase, 0, true, true)
       return null
     }
 
@@ -239,6 +272,12 @@ ${email.tail}
       console.error('LLM timeout (>10s) — routing to rules fallback')
     } else {
       console.error('LLM classification error:', error)
+    }
+    // B9.4: attempted-LLM + failed → counts against error-rate circuit breaker
+    try {
+      await recordMetrics(supabase, 0, true, true)
+    } catch {
+      /* metrics best-effort */
     }
     return null // → rules fallback
   }
