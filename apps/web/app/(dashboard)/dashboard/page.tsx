@@ -46,8 +46,13 @@ export default async function DashboardPage() {
   let weeklyByDay: number[] = [0, 0, 0, 0, 0, 0, 0]
   let weekBlocked = 0
 
-  // B2.4 fix: count "blocked" by label position (>= 5 = Prospection/Spam), not classification_result
-  const blockedLabelIds = userLabels.filter(l => l.position >= 5).map(l => l.id)
+  // "Blocked" = the Kyrra-default Prospection + Spam buckets. Match by
+  // is_default + canonical name so Gmail user labels never get counted as
+  // blocked even if they were saved at position >= 5 historically.
+  const BLOCKED_DEFAULT_NAMES = new Set(['Prospection', 'Spam'])
+  const blockedLabelIds = userLabels
+    .filter(l => l.is_default && BLOCKED_DEFAULT_NAMES.has(l.name))
+    .map(l => l.id)
 
   try {
     const now = new Date()

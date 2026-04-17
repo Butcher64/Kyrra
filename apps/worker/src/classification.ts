@@ -191,7 +191,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
       await saveClassificationResult(supabase, {
         userId: job.user_id,
         gmailMessageId: job.gmail_message_id,
-        classificationResult: deriveLegacyResult(resolvedLabel.position),
+        classificationResult: deriveLegacyResult(resolvedLabel),
         labelId: resolvedLabel.id,
         confidenceScore: pfConfidence,
         summary: prefilterResult.reason,
@@ -379,7 +379,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
     if (whitelistMatch === 'domain' && (resolvedLabel.name === 'Prospection' || resolvedLabel.name === 'Spam')) {
       const sortedByPosition = [...typedLabels].sort((a, b) => a.position - b.position)
       resolvedLabel = sortedByPosition[0]!
-      finalResult = deriveLegacyResult(resolvedLabel.position)
+      finalResult = deriveLegacyResult(resolvedLabel)
     }
 
     // Mode-specific confidence thresholds (B1.2)
@@ -389,7 +389,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
       : 0.6
     if (resolvedLabel.id !== firstLabel.id && confidence < aVoirThreshold) {
       resolvedLabel = firstLabel
-      finalResult = deriveLegacyResult(resolvedLabel.position)
+      finalResult = deriveLegacyResult(resolvedLabel)
     }
 
     const processingTimeMs = Date.now() - startTime
@@ -398,7 +398,7 @@ export async function classificationLoop(supabase: any): Promise<void> {
     await saveClassificationResult(supabase, {
       userId: job.user_id,
       gmailMessageId: job.gmail_message_id,
-      classificationResult: deriveLegacyResult(resolvedLabel.position),
+      classificationResult: deriveLegacyResult(resolvedLabel),
       labelId: resolvedLabel.id,
       confidenceScore: confidence,
       summary,

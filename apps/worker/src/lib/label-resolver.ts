@@ -2,16 +2,39 @@ import type { UserLabel } from '@kyrra/shared'
 import { LEGACY_RESULT_TO_DEFAULT_LABEL } from '@kyrra/shared'
 import type { ClassificationResult } from '@kyrra/shared'
 
+const DEFAULT_NAME_TO_LEGACY: Record<string, ClassificationResult> = {
+  'Important': 'A_VOIR',
+  'Transactionnel': 'A_VOIR',
+  'Notifications': 'A_VOIR',
+  'Newsletter': 'FILTRE',
+  'Prospection utile': 'FILTRE',
+  'Prospection': 'BLOQUE',
+  'Spam': 'BLOQUE',
+}
+
 /**
- * Derive the legacy classification_result from a label's position.
- * Ensures the DB enum value is always consistent with the dynamic label.
- *   position 0-2 → A_VOIR (visible to user)
- *   position 3-4 → FILTRE (filtered but accessible)
- *   position 5+  → BLOQUE (blocked)
+ * Derive the legacy classification_result from a label.
+ * For Kyrra default labels, maps by the canonical name (stable across reorders).
+ * For custom user labels, falls back to the position-based mapping
+ * (position 0-2 → A_VOIR, 3-4 → FILTRE, 5+ → BLOQUE).
  */
-export function deriveLegacyResult(position: number): ClassificationResult {
-  if (position <= 2) return 'A_VOIR'
-  if (position <= 4) return 'FILTRE'
+export function deriveLegacyResult(
+  labelOrPosition: UserLabel | number,
+): ClassificationResult {
+  if (typeof labelOrPosition === 'number') {
+    const p = labelOrPosition
+    if (p <= 2) return 'A_VOIR'
+    if (p <= 4) return 'FILTRE'
+    return 'BLOQUE'
+  }
+  const label = labelOrPosition
+  if (label.is_default) {
+    const mapped = DEFAULT_NAME_TO_LEGACY[label.name]
+    if (mapped) return mapped
+  }
+  const p = label.position
+  if (p <= 2) return 'A_VOIR'
+  if (p <= 4) return 'FILTRE'
   return 'BLOQUE'
 }
 

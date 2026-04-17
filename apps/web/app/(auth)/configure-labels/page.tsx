@@ -55,58 +55,52 @@ export default function ConfigureLabelsPage() {
       try {
         const { gmailLabels } = await getOnboardingLabelsData()
 
-        // Track which default labels have been matched
-        const matchedDefaults = new Set<number>()
-        const merged: LabelItem[] = []
-
-        // Process Gmail labels
+        // Kyrra defaults ALWAYS come first (positions 0..N-1) so downstream
+        // logic keyed on position (dashboard, label-resolver) stays correct.
+        // Gmail user labels are appended after the defaults.
+        const matchedGmailByDefaultIdx = new Map<number, { id: string; name: string }>()
         for (const gl of gmailLabels) {
           const matchIdx = matchGmailToDefault(gl.name)
-          const defaultLabel = matchIdx >= 0 ? DEFAULT_LABELS[matchIdx] : undefined
-          if (matchIdx >= 0 && defaultLabel && !matchedDefaults.has(matchIdx)) {
-            // Matched: use Gmail name but Kyrra's prompt
-            matchedDefaults.add(matchIdx)
-            merged.push({
-              name: gl.name,
-              description: defaultLabel.description,
-              prompt: defaultLabel.prompt,
-              color: defaultLabel.color,
-              gmail_label_id: gl.id,
-              gmail_label_name: gl.name,
-              is_default: true,
-              examples: [],
-            })
-          } else {
-            // Unmatched Gmail label: show with empty description
-            merged.push({
-              name: gl.name,
-              description: '',
-              prompt: '',
-              color: gl.color?.backgroundColor || '#455a64',
-              gmail_label_id: gl.id,
-              gmail_label_name: gl.name,
-              is_default: false,
-              examples: [],
-            })
+          if (matchIdx >= 0 && !matchedGmailByDefaultIdx.has(matchIdx)) {
+            matchedGmailByDefaultIdx.set(matchIdx, { id: gl.id, name: gl.name })
           }
         }
 
-        // Add remaining Kyrra defaults that weren't matched
+        const merged: LabelItem[] = []
+
+        // 1) Kyrra defaults first, preserving DEFAULT_LABELS order
         for (let i = 0; i < DEFAULT_LABELS.length; i++) {
-          if (!matchedDefaults.has(i)) {
-            const d = DEFAULT_LABELS[i]
-            if (!d) continue
-            merged.push({
-              name: d.name,
-              description: d.description,
-              prompt: d.prompt,
-              color: d.color,
-              gmail_label_id: null,
-              gmail_label_name: null,
-              is_default: d.is_default,
-              examples: [],
-            })
-          }
+          const d = DEFAULT_LABELS[i]
+          if (!d) continue
+          const match = matchedGmailByDefaultIdx.get(i)
+          merged.push({
+            name: match?.name ?? d.name,
+            description: d.description,
+            prompt: d.prompt,
+            color: d.color,
+            gmail_label_id: match?.id ?? null,
+            gmail_label_name: match?.name ?? null,
+            is_default: true,
+            examples: [],
+          })
+        }
+
+        // 2) Unmatched Gmail labels appended at the end
+        const matchedGmailIds = new Set(
+          Array.from(matchedGmailByDefaultIdx.values()).map((m) => m.id),
+        )
+        for (const gl of gmailLabels) {
+          if (matchedGmailIds.has(gl.id)) continue
+          merged.push({
+            name: gl.name,
+            description: '',
+            prompt: '',
+            color: gl.color?.backgroundColor || '#455a64',
+            gmail_label_id: gl.id,
+            gmail_label_name: gl.name,
+            is_default: false,
+            examples: [],
+          })
         }
 
         setLabels(merged)
